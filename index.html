@@ -4,46 +4,78 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Procedure Established by Law | PEBL Tracker</title>
+    
     <style>
-        /* CSS: Legal & Professional Design */
+        /* --- DESIGN & FONTS --- */
         body { font-family: "Georgia", serif; background: #f8f9fa; margin: 0; padding: 40px 20px; color: #333; }
-        .container { max-width: 900px; margin: 0 auto; }
+        .container { max-width: 950px; margin: 0 auto; }
         
-        /* Typography */
-        header { text-align: center; margin-bottom: 50px; border-bottom: 2px solid #2c3e50; padding-bottom: 30px; }
+        /* HEADER */
+        header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #2c3e50; padding-bottom: 30px; }
         h1 { margin: 0; color: #2c3e50; font-size: 2.5rem; letter-spacing: -1px; }
         p.subtitle { color: #555; font-size: 1.1rem; margin-top: 10px; font-style: italic; font-family: sans-serif; }
 
-        /* Map Section */
-        .map-container { background: white; padding: 15px; border: 1px solid #ddd; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 40px; }
-        
-        /* Filter Tag */
-        #active-filter { display: none; background: #2c3e50; color: #fff; padding: 8px 16px; border-radius: 4px; margin-bottom: 20px; display: inline-block; font-family: sans-serif; font-size: 0.9rem; cursor: pointer; }
-        #active-filter:hover { background: #1a252f; }
-        #active-filter::after { content: " ✕"; }
+        /* MAP CONTAINER */
+        .map-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 650px; /* Controls Map Size */
+            margin: 0 auto 30px auto;
+        }
 
-        /* Case Cards */
-        .case-grid { display: grid; grid-template-columns: 1fr; gap: 20px; } /* Single column for detailed reading */
+        /* SVG STYLING */
+        svg { width: 100%; height: auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
         
-        .card { background: white; padding: 25px; border: 1px solid #e0e0e0; border-left: 5px solid #2c3e50; transition: transform 0.2s; font-family: sans-serif; }
-        .card:hover { border-left-color: #c0392b; /* Turns red on hover to signify critique */ box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
-        
-        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-        .card h3 { margin: 0; font-size: 1.3rem; color: #000; }
-        .court-badge { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #7f8c8d; font-weight: bold; }
-        
-        .citation { color: #7f8c8d; font-size: 0.9rem; margin-bottom: 15px; display: block; font-family: serif; }
-        
-        .tags { margin-bottom: 15px; }
-        .tag { display: inline-block; background: #ecf0f1; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; color: #2c3e50; font-weight: 600; margin-right: 5px; }
-        /* Style for critical tags */
-        .tag-tier-low { background: #fadbd8; color: #c0392b; } /* Red for activism */
-        
-        .summary { font-size: 1rem; line-height: 1.6; color: #444; margin-bottom: 20px; }
-        .read-btn { display: inline-block; text-decoration: none; color: #2c3e50; font-weight: bold; border-bottom: 2px solid #2c3e50; font-size: 0.9rem; }
-        .read-btn:hover { color: #c0392b; border-color: #c0392b; }
-        
-        #loading { text-align: center; margin-top: 50px; color: #888; font-family: sans-serif; }
+        /* State Styling */
+        path { 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            fill: #6f9c76; /* Default Green */
+        }
+        path:hover { 
+            fill: #2c3e50 !important; /* Dark Blue on Hover */
+            stroke: #fff;
+            stroke-width: 2;
+        }
+        /* Hide the little city dots in the SVG */
+        circle { display: none; }
+
+        /* SUPREME COURT BUTTON (Floating) */
+        .sc-btn {
+            display: block;
+            width: 220px;
+            margin: 0 auto 40px auto;
+            background: #c0392b;
+            color: white;
+            text-align: center;
+            padding: 12px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-family: sans-serif;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .sc-btn:hover { transform: scale(1.05); background: #a93226; }
+
+        /* FILTER TAG */
+        #filter-display { text-align: center; margin-bottom: 20px; min-height: 30px; }
+        .filter-tag { display: inline-block; background: #2c3e50; color: white; padding: 5px 15px; border-radius: 20px; font-family: sans-serif; font-size: 0.9rem; cursor: pointer; }
+        .filter-tag:hover { background: #c0392b; }
+
+        /* CARDS */
+        .case-grid { display: grid; gap: 20px; }
+        .card { background: white; padding: 25px; border: 1px solid #e0e0e0; border-left: 5px solid #2c3e50; font-family: sans-serif; }
+        .card h3 { margin: 0 0 5px 0; color: #2c3e50; }
+        .court-label { float: right; font-size: 0.8rem; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
+        .citation { font-family: serif; color: #666; font-style: italic; display: block; margin-bottom: 15px; }
+        .summary { line-height: 1.6; color: #444; margin-bottom: 15px; }
+        .tag { background: #ecf0f1; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; color: #555; }
+        .read-btn { text-decoration: none; color: #2980b9; font-weight: bold; border-bottom: 2px solid transparent; }
+        .read-btn:hover { border-bottom-color: #2980b9; }
+
+        #loading { text-align: center; color: #888; font-family: sans-serif; margin-top: 30px; }
     </style>
 </head>
 <body>
@@ -51,121 +83,134 @@
 <div class="container">
     <header>
         <h1>Procedure Established by Law</h1>
-        <p class="subtitle">
-            Tracking the Reading of Unenumerated Rights into Article 21
-        </p>
+        <p class="subtitle">An audit of Article 21 jurisprudence.</p>
     </header>
 
-    <!-- Map Section -->
-    <div class="map-container">
-        <!-- PASTE YOUR DATAWRAPPER EMBED CODE BELOW THIS LINE -->
-        <iframe title="[ Insert title here ]" aria-label="Choropleth map" id="datawrapper-chart-bLDJS" src="https://datawrapper.dwcdn.net/bLDJS/1/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="400" data-external="1"></iframe><script type="text/javascript">window.addEventListener("message",function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r,i=0;r=e[i];i++)if(r.contentWindow===a.source){var d=a.data["datawrapper-height"][t]+"px";r.style.height=d}}});</script>
-        <!-- END DATAWRAPPER CODE -->
+    <!-- 1. THE MAP -->
+    <div class="map-wrapper" id="map-container">
+        <!-- SVG will be injected here by JavaScript -->
+    </div>
+    
+    <!-- 2. SUPREME COURT BUTTON -->
+    <div class="sc-btn" onclick="filterByState('Pan-India')">
+        ★ Supreme Court Cases
     </div>
 
-    <!-- Active Filter Display -->
-    <div id="filter-container" style="text-align: center;">
-        <span id="active-filter" onclick="clearFilter()">Showing: All</span>
-    </div>
+    <!-- 3. FILTER STATUS -->
+    <div id="filter-display"></div>
 
-    <div id="loading">Connecting to Database...</div>
+    <!-- 4. CASE LIST -->
+    <div id="loading">Loading Database...</div>
     <div class="case-grid" id="case-list"></div>
 </div>
 
 <script>
-    // --- CONFIGURATION: EDIT THESE TWO LINES ---
-    const SHEET_ID = '1k3O3nEbs24UXsoAsrNPmaZfBvpAJCmaEzypuQTD-yuY'; // 1. Paste Sheet ID inside quotes
-    const SHEET_NAME = 'Sheet1'; // 2. Check your tab name in Google Sheets
-    // -------------------------------------------
+    // --- CONFIGURATION ---
+    const SHEET_ID = '1k3O3nEbs24UXsoAsrNPmaZfBvpAJCmaEzypuQTD-yuY'; // <--- PASTE ID HERE
+    const SHEET_NAME = 'Sheet1';
+    // ---------------------
 
     let allCases = [];
 
-    // Fetch Data
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}`;
-
-    fetch(url)
-        .then(res => res.text())
-        .then(text => {
-            const jsonText = text.substring(47).slice(0, -2);
-            const json = JSON.parse(jsonText);
+    // --- STEP A: LOAD THE MAP ---
+    fetch('india.svg')
+        .then(response => response.text())
+        .then(svgData => {
+            const mapContainer = document.getElementById('map-container');
+            mapContainer.innerHTML = svgData;
             
-            allCases = json.table.rows.map(row => {
-                const c = row.c;
-                // Safely handle empty cells
-                return {
-                    name: c[0]?.v || "Unknown Case",
-                    citation: c[1]?.v || "",
-                    court: c[2]?.v || "",
-                    state: c[3]?.v || "Pan-India",
-                    right: c[4]?.v || "Unenumerated",
-                    summary: c[5]?.v || "No analysis provided.",
-                    link: c[6]?.v || "#"
-                };
+            // Add click listeners to every state path
+            const paths = mapContainer.querySelectorAll('path');
+            paths.forEach(path => {
+                path.addEventListener('click', function() {
+                    // This SVG has the name built in! (e.g., name="Kerala")
+                    const stateName = this.getAttribute('name');
+                    if(stateName) {
+                        handleMapClick(stateName);
+                    }
+                });
             });
+        })
+        .catch(err => console.error("Error loading map:", err));
+
+
+    // --- STEP B: LOAD DATA FROM GOOGLE SHEETS ---
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
+    
+    fetch(url)
+        .then(r => r.text())
+        .then(csvText => {
+            const rows = csvToArray(csvText);
+            allCases = rows.slice(1).map(row => ({
+                name: clean(row[0]),
+                citation: clean(row[1]),
+                court: clean(row[2]),
+                state: clean(row[3]) || "Pan-India",
+                right: clean(row[4]),
+                summary: clean(row[5]),
+                link: clean(row[6]) || "#"
+            })).filter(c => c.name && c.name !== "Case Name");
 
             document.getElementById('loading').style.display = 'none';
-            renderCases(allCases);
-            
-            if(window.location.hash) {
-                filterByState(window.location.hash.substring(1));
-            }
+            renderCases(allCases); // Show all initially
         });
+
+    // --- HELPER FUNCTIONS ---
+
+    function handleMapClick(stateName) {
+        document.getElementById('filter-display').innerHTML = 
+            `<span class="filter-tag" onclick="resetFilter()">Showing: ${stateName} ✕</span>`;
+        filterByState(stateName);
+        
+        // Scroll down slightly to show results
+        document.getElementById('filter-display').scrollIntoView({behavior: "smooth"});
+    }
+
+    function filterByState(stateName) {
+        // Filter logic: Match state name exactly
+        const filtered = allCases.filter(c => c.state === stateName);
+        renderCases(filtered);
+    }
+
+    function resetFilter() {
+        document.getElementById('filter-display').innerHTML = '';
+        renderCases(allCases);
+    }
 
     function renderCases(cases) {
         const list = document.getElementById('case-list');
         list.innerHTML = '';
-        
         if(cases.length === 0) {
-            list.innerHTML = '<p style="text-align:center; font-family:sans-serif;">No cases found for this selection.</p>';
+            list.innerHTML = '<p style="text-align:center">No cases found for this jurisdiction.</p>';
             return;
         }
-
+        
         cases.forEach(item => {
-           // IGNORE HEADER ROW
-if (item.name === "Case Name") return;
-            // Check if it's "judicial activism" (Tier 3) to color it red - Logic to add later
-            const card = `
+            list.innerHTML += `
                 <div class="card">
-                    <div class="card-header">
-                        <h3>${item.name}</h3>
-                        <span class="court-badge">${item.court}</span>
-                    </div>
+                    <span class="court-label">${item.court}</span>
+                    <h3>${item.name}</h3>
                     <span class="citation">${item.citation}</span>
-                    <div class="tags">
-                        <span class="tag">${item.right}</span>
-                        <span class="tag">${item.state}</span>
-                    </div>
+                    <span class="tag">${item.right}</span>
                     <p class="summary">${item.summary}</p>
-                    <a href="${item.link}" target="_blank" class="read-btn">Read Judgement →</a>
-                </div>
-            `;
-            list.innerHTML += card;
+                    <a href="${item.link}" target="_blank" class="read-btn">Read Analysis →</a>
+                </div>`;
         });
     }
 
-    function filterByState(stateName) {
-        // Decode URI component handles spaces (e.g. "Tamil%20Nadu" -> "Tamil Nadu")
-        const cleanName = decodeURIComponent(stateName);
-        const filterBtn = document.getElementById('active-filter');
-        filterBtn.style.display = 'inline-block';
-        filterBtn.innerText = `Jurisdiction: ${cleanName} ✕`;
-
-        const filtered = allCases.filter(c => c.state === cleanName);
-        renderCases(filtered);
+    // CSV Parsing Utilities
+    function clean(text) { return text ? text.replace(/^"|"$/g, '').replace(/""/g, '"') : ""; }
+    function csvToArray(str) {
+        const rows = []; let currentRow = []; let currentCell = ""; let inQuotes = false;
+        for (let i = 0; i < str.length; i++) {
+            const char = str[i];
+            if (char === '"') { inQuotes = !inQuotes; }
+            else if (char === ',' && !inQuotes) { currentRow.push(currentCell); currentCell = ""; }
+            else if (char === '\n' && !inQuotes) { currentRow.push(currentCell); rows.push(currentRow); currentRow = []; currentCell = ""; }
+            else { currentCell += char; }
+        }
+        return rows;
     }
-
-    function clearFilter() {
-        document.getElementById('active-filter').style.display = 'none';
-        renderCases(allCases);
-        history.pushState("", document.title, window.location.pathname);
-    }
-
-    window.addEventListener('hashchange', () => {
-        const state = window.location.hash.substring(1);
-        if (state) filterByState(state);
-        else clearFilter();
-    });
-
 </script>
 
 </body>
