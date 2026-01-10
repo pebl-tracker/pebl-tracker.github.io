@@ -30,7 +30,6 @@
         path { 
             cursor: pointer; 
             transition: all 0.2s; 
-            fill: #6f9c76; /* Default Green */
         }
         path:hover { 
             fill: #2c3e50 !important; /* Dark Blue on Hover */
@@ -153,6 +152,9 @@
 
             document.getElementById('loading').style.display = 'none';
             renderCases(allCases); // Show all initially
+            
+            // <-- PASTE THE NEW LINE HERE -->
+            generateHeatmap(allCases);
         });
 
     // --- HELPER FUNCTIONS ---
@@ -210,6 +212,43 @@
             else { currentCell += char; }
         }
         return rows;
+    }
+// --- NEW: HEATMAP FUNCTION ---
+    function generateHeatmap(cases) {
+        // 1. Count cases per state
+        const counts = {};
+        let maxCount = 0;
+
+        cases.forEach(c => {
+            // Normalize state names to handle slight spelling differences if any
+            const s = c.state ? c.state.trim() : "";
+            if(s && s !== "Pan-India") {
+                counts[s] = (counts[s] || 0) + 1;
+                if(counts[s] > maxCount) maxCount = counts[s];
+            }
+        });
+
+        // 2. Apply colors to SVG paths
+        const paths = document.querySelectorAll('path');
+        paths.forEach(p => {
+            const stateName = p.getAttribute('name');
+            const count = counts[stateName] || 0;
+
+            if (count > 0) {
+                // Calculate opacity: 
+                // We start at 0.3 (lightest) and go to 1.0 (darkest) based on count
+                const intensity = 0.3 + (0.7 * (count / maxCount));
+                
+                // Set color to your Brand Blue (#2c3e50) with calculated opacity
+                p.style.fill = `rgba(44, 62, 80, ${intensity})`;
+                
+                // Optional: Add a simple tooltip when hovering
+                p.setAttribute('title', `${stateName}: ${count} Cases`);
+            } else {
+                // No cases = Light Gray
+                p.style.fill = '#e0e0e0'; 
+            }
+        });
     }
 </script>
 
