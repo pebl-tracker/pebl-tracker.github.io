@@ -213,14 +213,13 @@
         }
         return rows;
     }
-// --- NEW: HEATMAP FUNCTION ---
+// --- UPDATED HEATMAP & TOOLTIP FUNCTION ---
     function generateHeatmap(cases) {
         // 1. Count cases per state
         const counts = {};
         let maxCount = 0;
 
         cases.forEach(c => {
-            // Normalize state names to handle slight spelling differences if any
             const s = c.state ? c.state.trim() : "";
             if(s && s !== "Pan-India") {
                 counts[s] = (counts[s] || 0) + 1;
@@ -228,22 +227,33 @@
             }
         });
 
-        // 2. Apply colors to SVG paths
+        // 2. Apply colors and Add Tooltips
         const paths = document.querySelectorAll('path');
         paths.forEach(p => {
             const stateName = p.getAttribute('name');
             const count = counts[stateName] || 0;
 
+            // --- THE TOOLTIP FIX ---
+            // This sets the hover text for the browser
+            const label = `${stateName}: ${count} Case${count !== 1 ? 's' : ''}`;
+            
+            // We try two methods to ensure the tooltip shows up in all browsers:
+            p.setAttribute('title', label); // Method A (Standard)
+            
+            // Method B (SVG Title element - more robust)
+            let titleEl = p.querySelector('title');
+            if (!titleEl) {
+                titleEl = document.createElementNS("http://www.w3.org/2000/svg", "title");
+                p.appendChild(titleEl);
+            }
+            titleEl.textContent = label;
+            // -----------------------
+
             if (count > 0) {
-                // Calculate opacity: 
-                // We start at 0.3 (lightest) and go to 1.0 (darkest) based on count
+                // Darken color based on activity
+                // Base opacity 0.3 + up to 0.7 based on intensity
                 const intensity = 0.3 + (0.7 * (count / maxCount));
-                
-                // Set color to your Brand Blue (#2c3e50) with calculated opacity
                 p.style.fill = `rgba(44, 62, 80, ${intensity})`;
-                
-                // Optional: Add a simple tooltip when hovering
-                p.setAttribute('title', `${stateName}: ${count} Cases`);
             } else {
                 // No cases = Light Gray
                 p.style.fill = '#e0e0e0'; 
