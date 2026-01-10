@@ -122,6 +122,8 @@
         }
 
         cases.forEach(item => {
+           // IGNORE HEADER ROW
+if (item.name === "Case Name") return;
             // Check if it's "judicial activism" (Tier 3) to color it red - Logic to add later
             const card = `
                 <div class="card">
