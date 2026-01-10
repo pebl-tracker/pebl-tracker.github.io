@@ -82,7 +82,7 @@
 <div class="container">
     <header>
         <h1>Procedure Established by Law</h1>
-        <p class="subtitle">Tracking the Reading of Unenumerated Rights into Article 21.</p>
+        <p class="subtitle">Tracking the Reading of Unenumerated Rights into Article 21</p>
     </header>
 
     <!-- 1. THE MAP -->
@@ -215,50 +215,50 @@
     }
 // --- UPDATED HEATMAP & TOOLTIP FUNCTION ---
     function generateHeatmap(cases) {
-        // 1. Count cases per state
+        // 1. Count cases per state (Including Supreme Court/Pan-India)
         const counts = {};
         let maxCount = 0;
 
         cases.forEach(c => {
             const s = c.state ? c.state.trim() : "";
-            if(s && s !== "Pan-India") {
+            if(s) {
                 counts[s] = (counts[s] || 0) + 1;
-                if(counts[s] > maxCount) maxCount = counts[s];
+                // Only use state counts for the max intensity (ignore SC for heatmap scaling)
+                if(s !== "Pan-India" && counts[s] > maxCount) maxCount = counts[s];
             }
         });
 
-        // 2. Apply colors and Add Tooltips
+        // 2. Update Map Colors & Tooltips
         const paths = document.querySelectorAll('path');
         paths.forEach(p => {
             const stateName = p.getAttribute('name');
             const count = counts[stateName] || 0;
-
-            // --- THE TOOLTIP FIX ---
-            // This sets the hover text for the browser
             const label = `${stateName}: ${count} Case${count !== 1 ? 's' : ''}`;
             
-            // We try two methods to ensure the tooltip shows up in all browsers:
-            p.setAttribute('title', label); // Method A (Standard)
-            
-            // Method B (SVG Title element - more robust)
+            // Set Tooltip
             let titleEl = p.querySelector('title');
             if (!titleEl) {
                 titleEl = document.createElementNS("http://www.w3.org/2000/svg", "title");
                 p.appendChild(titleEl);
             }
             titleEl.textContent = label;
-            // -----------------------
+            p.setAttribute('title', label); 
 
+            // Set Color
             if (count > 0) {
-                // Darken color based on activity
-                // Base opacity 0.3 + up to 0.7 based on intensity
                 const intensity = 0.3 + (0.7 * (count / maxCount));
                 p.style.fill = `rgba(44, 62, 80, ${intensity})`;
             } else {
-                // No cases = Light Gray
                 p.style.fill = '#e0e0e0'; 
             }
         });
+
+        // 3. Update Supreme Court Button Tooltip
+        const scBtn = document.querySelector('.sc-btn');
+        const scCount = counts['Pan-India'] || 0; // Ensure this matches your Sheet spelling exactly
+        const scLabel = `Supreme Court: ${scCount} Case${scCount !== 1 ? 's' : ''}`;
+        
+        scBtn.setAttribute('title', scLabel); // Standard Browser Tooltip
     }
 </script>
 
