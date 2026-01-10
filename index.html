@@ -203,14 +203,35 @@
     // CSV Parsing Utilities
     function clean(text) { return text ? text.replace(/^"|"$/g, '').replace(/""/g, '"') : ""; }
     function csvToArray(str) {
-        const rows = []; let currentRow = []; let currentCell = ""; let inQuotes = false;
+        const rows = []; 
+        let currentRow = []; 
+        let currentCell = ""; 
+        let inQuotes = false;
+        
         for (let i = 0; i < str.length; i++) {
             const char = str[i];
-            if (char === '"') { inQuotes = !inQuotes; }
-            else if (char === ',' && !inQuotes) { currentRow.push(currentCell); currentCell = ""; }
-            else if (char === '\n' && !inQuotes) { currentRow.push(currentCell); rows.push(currentRow); currentRow = []; currentCell = ""; }
-            else { currentCell += char; }
+            if (char === '"') { 
+                inQuotes = !inQuotes; 
+            } else if (char === ',' && !inQuotes) { 
+                currentRow.push(currentCell); 
+                currentCell = ""; 
+            } else if (char === '\n' && !inQuotes) { 
+                currentRow.push(currentCell); 
+                rows.push(currentRow); 
+                currentRow = []; 
+                currentCell = ""; 
+            } else { 
+                currentCell += char; 
+            }
         }
+        
+        // --- THE FIX: Capture the last row ---
+        if (currentCell || currentRow.length > 0) {
+            currentRow.push(currentCell);
+            rows.push(currentRow);
+        }
+        // -------------------------------------
+        
         return rows;
     }
 // --- UPDATED HEATMAP & TOOLTIP FUNCTION ---
