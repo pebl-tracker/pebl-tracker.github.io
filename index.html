@@ -6,6 +6,7 @@
     <!-- SEO Meta Tags -->
     <meta name="description" content="An audit of Article 21 jurisprudence. Tracking the shift from Constitutional Interpretation to Judicial Legislation.">
     <meta name="keywords" content="Article 21, India, Constitution, Supreme Court, PEBL, Unenumerated Rights">
+    <meta name="author" content="Abhinav Somani">
     <title>Procedure Established by Law | PEBL Tracker</title>
     
     <!-- Load PapaParse -->
@@ -13,13 +14,28 @@
 
     <style>
         /* --- CORE STYLES --- */
-        :root { --primary: #2c3e50; --accent: #c0392b; --bg: #f8f9fa; }
-        body { font-family: "Georgia", serif; background: var(--bg); margin: 0; padding: 0; color: #333; }
-        .container { max-width: 950px; margin: 0 auto; padding: 40px 20px; }
+        :root { 
+            --primary: #2c3e50; 
+            --accent: #c0392b; 
+            --bg: #f8f9fa; 
+            --text: #333;
+            --light-gray: #ecf0f1;
+        }
+        
+        * { box-sizing: border-box; }
+        body { 
+            font-family: "Georgia", serif; 
+            background: var(--bg); 
+            margin: 0; 
+            padding: 0; 
+            color: var(--text); 
+            line-height: 1.6;
+        }
+        .container { max-width: 950px; margin: 0 auto; padding: 20px; }
         
         /* --- HEADER --- */
         header { 
-            margin-bottom: 20px; 
+            margin-bottom: 30px; 
             border-bottom: 2px solid var(--primary); 
             padding-bottom: 10px; 
             position: relative; 
@@ -27,87 +43,113 @@
         header a { text-decoration: none; color: inherit; }
         
         .header-content { text-align: center; padding-bottom: 20px; }
-        h1 { margin: 0; color: var(--primary); font-size: 2.5rem; letter-spacing: -1px; }
-        p.subtitle { color: #555; font-size: 1.1rem; margin-top: 10px; margin-bottom: 0; font-style: italic; font-family: sans-serif; }
+        h1 { margin: 0; color: var(--primary); font-size: clamp(1.5rem, 5vw, 2.5rem); letter-spacing: -1px; }
+        p.subtitle { color: #555; font-size: 1rem; margin-top: 10px; margin-bottom: 0; font-style: italic; font-family: sans-serif; }
 
-        /* Curator Tag */
         .curator-tag {
-            position: absolute; bottom: 0; right: 0;
-            font-family: sans-serif; font-size: 0.85rem; color: #7f8c8d;
+            position: absolute; bottom: 5px; right: 0;
+            font-family: sans-serif; font-size: 0.75rem; color: #7f8c8d;
             background: var(--bg); padding-left: 10px; font-weight: bold;
+            text-transform: uppercase; letter-spacing: 1px;
         }
 
         /* --- TABS --- */
         .tab-nav {
-            display: flex; justify-content: center; gap: 20px; margin-bottom: 30px;
+            display: flex; justify-content: center; gap: 10px; margin-bottom: 30px;
             font-family: sans-serif;
         }
         .tab-btn {
-            background: none; border: none; font-size: 1rem; color: #666;
-            padding: 10px 20px; cursor: pointer; border-bottom: 3px solid transparent;
+            background: none; border: none; font-size: 0.9rem; color: #666;
+            padding: 10px 15px; cursor: pointer; border-bottom: 3px solid transparent;
             font-weight: bold; transition: all 0.2s;
         }
         .tab-btn:hover { color: var(--primary); }
         .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
 
         /* --- MAP SECTION --- */
-        .map-wrapper { position: relative; width: 100%; max-width: 650px; margin: 0 auto 30px auto; }
-        svg { width: 100%; height: auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
-        path { cursor: pointer; transition: all 0.2s; fill: #6f9c76; stroke: #ffffff; stroke-width: 0.5; }
-        path:hover { fill: var(--primary) !important; stroke: #fff; stroke-width: 2; }
-        circle { display: none; }
+        .map-wrapper { position: relative; width: 100%; max-width: 600px; margin: 0 auto 20px auto; }
+        svg { width: 100%; height: auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05)); }
+        path { cursor: pointer; transition: fill 0.3s ease, stroke 0.2s; fill: #e0e0e0; stroke: #ffffff; stroke-width: 0.5; }
+        path:hover { fill: var(--accent) !important; stroke: #fff; stroke-width: 1.5; }
 
         .sc-btn {
-            display: block; width: 220px; margin: 0 auto 40px auto;
+            display: block; width: fit-content; min-width: 200px; margin: 0 auto 40px auto;
             background: var(--accent); color: white; text-align: center;
-            padding: 12px 20px; border-radius: 50px; text-decoration: none;
+            padding: 12px 25px; border-radius: 50px; text-decoration: none;
             font-family: sans-serif; font-weight: bold; cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(192, 57, 43, 0.2); transition: transform 0.2s, background 0.2s;
         }
-        .sc-btn:hover { transform: scale(1.05); background: #a93226; }
+        .sc-btn:hover { transform: translateY(-2px); background: #a93226; }
 
         /* --- CONTROLS --- */
         .controls-bar {
-            display: flex; gap: 10px; margin-bottom: 30px;
+            display: flex; gap: 10px; margin-bottom: 20px;
             background: white; padding: 15px; border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-family: sans-serif; flex-wrap: wrap;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); font-family: sans-serif; flex-wrap: wrap;
         }
-        #search-input { flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; min-width: 200px; }
-        .filter-select { padding: 10px; border: 1px solid #ddd; border-radius: 4px; min-width: 140px; cursor: pointer; background: white; }
+        #search-input { flex-grow: 2; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; min-width: 200px; }
+        .filter-select { flex-grow: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px; min-width: 150px; cursor: pointer; background: white; }
 
-        #filter-display { text-align: center; margin-bottom: 20px; min-height: 30px; }
-        .filter-tag { display: inline-block; background: var(--primary); color: white; padding: 5px 15px; border-radius: 20px; font-family: sans-serif; font-size: 0.9rem; cursor: pointer; }
+        #filter-display { text-align: center; margin-bottom: 20px; min-height: 35px; }
+        .filter-tag { 
+            display: inline-block; background: var(--primary); color: white; 
+            padding: 6px 15px; border-radius: 20px; font-family: sans-serif; 
+            font-size: 0.85rem; cursor: pointer; transition: background 0.2s;
+        }
         .filter-tag:hover { background: var(--accent); }
 
         /* --- CARDS --- */
         .case-grid { display: grid; gap: 20px; }
-        .card { background: white; padding: 25px; border: 1px solid #e0e0e0; border-left: 5px solid var(--primary); font-family: sans-serif; transition: transform 0.2s; }
-        .card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .card-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
-        .card h3 { margin: 0; color: var(--primary); font-size: 1.4rem; }
-        .court-label { font-size: 0.8rem; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; display: block; margin-bottom: 5px;}
-        .citation { font-family: serif; color: #666; font-style: italic; display: block; margin-bottom: 15px; }
-        .tag { background: #ecf0f1; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; color: #555; display: inline-block; margin-right: 5px; margin-bottom: 10px;}
-        .summary-preview { color: #555; line-height: 1.5; margin-bottom: 15px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-        .action-link { color: var(--primary); font-weight: bold; text-decoration: none; border-bottom: 2px solid var(--primary); cursor: pointer; }
+        .card { 
+            background: white; padding: 25px; border: 1px solid #e0e0e0; 
+            border-left: 5px solid var(--primary); font-family: sans-serif; 
+            transition: transform 0.2s, box-shadow 0.2s; 
+        }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 5px; }
+        .card h3 { margin: 0; color: var(--primary); font-size: 1.25rem; line-height: 1.3; }
+        .court-label { font-size: 0.7rem; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; white-space: nowrap; }
+        .citation { font-family: serif; color: #7f8c8d; font-style: italic; display: block; margin-bottom: 15px; font-size: 0.95rem; }
+        
+        .tag-container { margin-bottom: 15px; }
+        .tag { 
+            background: var(--light-gray); padding: 4px 10px; border-radius: 4px; 
+            font-size: 0.75rem; font-weight: bold; color: #555; 
+            display: inline-block; margin-right: 5px; margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        
+        .summary-preview { color: #555; line-height: 1.6; margin-bottom: 15px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.95rem; }
+        .action-link { color: var(--primary); font-weight: bold; text-decoration: none; border-bottom: 2px solid var(--primary); cursor: pointer; font-size: 0.9rem; }
         .action-link:hover { color: var(--accent); border-color: var(--accent); }
 
         /* --- DETAILS VIEW & ABOUT --- */
-        #details-view, #about-view { display: none; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        #details-view, #about-view { display: none; background: white; padding: clamp(20px, 5vw, 40px); border-radius: 8px; box-shadow: 0 5px 25px rgba(0,0,0,0.1); }
         
-        /* About Page specific styles */
         .about-text { font-size: 1.1rem; line-height: 1.8; color: #333; }
         .about-text h2 { color: var(--primary); border-bottom: 1px solid #eee; padding-bottom: 10px; margin-top: 30px; }
-        .about-text p { margin-bottom: 20px; }
+        
+        .back-btn { display: inline-block; margin-bottom: 25px; cursor: pointer; color: #666; font-family: sans-serif; font-weight: bold; }
+        .back-btn:hover { color: var(--primary); }
+        
+        .details-meta { border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 25px; }
+        .details-body { font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap; font-family: "Georgia", serif; }
+        .external-btn { 
+            display: inline-block; margin-top: 30px; background: var(--primary); 
+            color: white; padding: 12px 25px; text-decoration: none; 
+            border-radius: 4px; font-family: sans-serif; font-weight: bold;
+        }
+        .external-btn:hover { background: #1a252f; }
 
-        .back-btn { display: inline-block; margin-bottom: 20px; cursor: pointer; color: #666; font-family: sans-serif; }
-        .back-btn:hover { color: var(--primary); text-decoration: underline; }
-        .details-meta { border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 20px; }
-        .details-body { font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap; }
-        .external-btn { display: inline-block; margin-top: 30px; background: var(--primary); color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-family: sans-serif; }
-
-        #loading { text-align: center; color: #888; font-family: sans-serif; margin-top: 30px; }
-        .hidden { display: none !important; }
+        #loading { text-align: center; color: #888; font-family: sans-serif; padding: 50px; font-style: italic; }
+        
+        @media (max-width: 600px) {
+            .header-content { padding-bottom: 30px; }
+            .curator-tag { position: relative; text-align: center; width: 100%; padding: 10px 0; }
+            .controls-bar { flex-direction: column; }
+            .card-header { flex-direction: column; }
+            .court-label { margin-top: 5px; }
+        }
     </style>
 </head>
 <body>
@@ -116,67 +158,63 @@
     <header>
         <div class="header-content">
             <a href="."><h1>Procedure Established by Law</h1></a>
-            <p class="subtitle">Tracking the Reading of Unenumerated Rights into Article 21</p>
+            <p class="subtitle">A Doctrinal Audit of Article 21 Jurisprudence</p>
         </div>
         <div class="curator-tag">Curator: Abhinav Somani</div>
     </header>
 
     <!-- TABS -->
     <nav class="tab-nav">
-        <button id="btn-tracker" class="tab-btn active" onclick="switchTab('tracker')">Tracker</button>
-        <button id="btn-about" class="tab-btn" onclick="switchTab('about')">About</button>
+        <button id="btn-tracker" class="tab-btn active" onclick="switchTab('tracker')">TRACKER</button>
+        <button id="btn-about" class="tab-btn" onclick="switchTab('about')">ABOUT</button>
     </nav>
 
-    <!-- TAB 1: TRACKER (Main App) -->
+    <!-- TAB 1: TRACKER -->
     <div id="tab-tracker" class="tab-content">
         <div class="map-wrapper" id="map-container"></div>
-        <div class="sc-btn" onclick="handleMapClick('Pan-India')">★ Supreme Court</div>
+        <div class="sc-btn" onclick="handleMapClick('Pan-India')">★ Supreme Court (Pan-India)</div>
 
         <div class="controls-bar">
-            <input type="text" id="search-input" placeholder="Search cases..." onkeyup="handleSearch()">
+            <input type="text" id="search-input" placeholder="Search by case name or keyword..." onkeyup="handleSearch()">
+            <select id="right-filter" class="filter-select" onchange="handleSearch()">
+                <option value="">All Rights</option>
+            </select>
             <select id="sort-order" class="filter-select" onchange="handleSearch()">
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
             </select>
-            <select id="right-filter" class="filter-select" onchange="handleSearch()">
-                <option value="">All Rights</option>
-            </select>
         </div>
 
         <div id="filter-display"></div>
-        <div id="loading">Loading Database...</div>
+        <div id="loading">Initializing Doctrinal Database...</div>
         <div class="case-grid" id="case-list"></div>
     </div>
 
-    <!-- TAB 2: ABOUT (Static Content) -->
+    <!-- TAB 2: ABOUT -->
     <div id="tab-about" class="tab-content" style="display: none;">
         <div class="about-text">
             <h2>About the Project</h2>
-            <p><strong>Procedure Established by Law</strong> is a digital archive auditing the expansion of Article 21 of the Constitution of India. It specifically tracks the reading of unenumerated rights into the Right to Life and Personal Liberty by the Constitutional Courts.</p>
+            <p><strong>Procedure Established by Law (PEBL)</strong> is a digital archive auditing the expansion of Article 21 of the Constitution of India. It tracks the judicial reading of unenumerated rights into the "Right to Life and Personal Liberty."</p>
             
-            <p>The Constituent Assembly explicitly rejected the "Due Process" clause in favor of "Procedure Established by Law" to limit judicial discretion. However, since the landmark ruling in <em>Maneka Gandhi v. Union of India</em> (1978), the Supreme Court has effectively read substantive due process back into the text, creating a vast reservoir of new rights.</p>
-            
-            <p>This tracker serves as a doctrinal audit of this shift, categorizing cases not just by the right expanded, but by the jurisdictional reach of the Court involved.</p>
-
-            <h2>Methodology</h2>
-            <p>Data is curated from public judgments available on Indian Kanoon and the Supreme Court of India archives. The classification focuses on the primary ratio of the judgment that explicitly recognizes a new facet of Article 21.</p>
+            <h2>About the Curator</h2>
+            <p>Abhinav is 3rd Year B.A., LL.B. (Hons.) Student at the National Law School of India University, Bengaluru. He is deeply interested in Constitutional Interpretation, particularly vis-à-vis Rights Provisions.</p>
         </div>
     </div>
 
-    <!-- DETAILS VIEW (Overlay) -->
+    <!-- DETAILS VIEW -->
     <div id="details-view">
-        <div class="back-btn" onclick="closeDetails()">← Back to Tracker</div>
+        <div class="back-btn" onclick="closeDetails()">← BACK TO TRACKER</div>
         <div class="details-meta">
-            <h2 id="detail-title" style="margin-top:0; color: var(--primary);">Case Name</h2>
-            <div style="color: #666; font-family: serif; font-style: italic;" id="detail-citation">Citation</div>
-            <div style="margin-top: 10px;">
+            <h2 id="detail-title" style="margin-top:0; color: var(--primary); font-size: 2rem;">Case Name</h2>
+            <div id="detail-citation" class="citation" style="font-size: 1.2rem;">Citation</div>
+            <div style="margin-top: 15px;" id="detail-tags-box">
                 <span class="tag" id="detail-court">Court</span>
                 <span id="detail-rights-container"></span>
-                <span class="tag" id="detail-date" style="background:#eee;">Date</span>
+                <span class="tag" id="detail-date" style="background:#ddd;">Date</span>
             </div>
         </div>
         <div class="details-body" id="detail-summary"></div>
-        <a href="#" target="_blank" class="external-btn" id="detail-link">Read Full Judgement →</a>
+        <a href="#" target="_blank" class="external-btn" id="detail-link">Read Full Judgment on Indian Kanoon →</a>
     </div>
 </div>
 
@@ -184,69 +222,67 @@
     // --- CONFIGURATION ---
     const SHEET_ID = '1k3O3nEbs24UXsoAsrNPmaZfBvpAJCmaEzypuQTD-yuY';
     const SHEET_NAME = 'Sheet1';
-    // ---------------------
+    const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
 
     let allCases = [];
     let currentFilterState = null;
 
-    // --- TAB LOGIC ---
-    function switchTab(tabId) {
-        // Hide all tab contents
-        document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-        // Deactivate all buttons
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-        
-        // Show selected tab and activate button
-        document.getElementById('tab-' + tabId).style.display = 'block';
-        document.getElementById('btn-' + tabId).classList.add('active');
+    // --- INITIALIZATION ---
+    window.addEventListener('DOMContentLoaded', () => {
+        loadMap();
+        fetchData();
+    });
 
-        // Hide details view if open
-        if(document.getElementById('details-view').style.display === 'block') {
-            closeDetails();
-        }
+    function loadMap() {
+        fetch('india.svg')
+            .then(response => response.text())
+            .then(svgData => {
+                const container = document.getElementById('map-container');
+                container.innerHTML = svgData;
+                setupMapInteractions();
+            })
+            .catch(err => {
+                console.error("Map Error:", err);
+                document.getElementById('map-container').innerHTML = "<p style='text-align:center; color:#888;'>Interactive map unavailable.</p>";
+            });
     }
 
-    // --- INITIALIZATION ---
-    fetch('india.svg')
-        .then(response => response.text())
-        .then(svgData => {
-            const mapContainer = document.getElementById('map-container');
-            mapContainer.innerHTML = svgData;
-            const paths = mapContainer.querySelectorAll('path');
-            paths.forEach(path => {
-                path.addEventListener('click', function() {
-                    const stateName = this.getAttribute('name');
-                    if(stateName) handleMapClick(stateName);
-                });
+    function setupMapInteractions() {
+        const paths = document.querySelectorAll('#map-container path');
+        paths.forEach(path => {
+            path.addEventListener('click', function() {
+                const stateName = this.getAttribute('name');
+                if(stateName) handleMapClick(stateName);
             });
         });
+    }
 
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
-    
-    fetch(url)
-        .then(r => r.text())
-        .then(csvText => {
-            const parsed = Papa.parse(csvText, { header: false, skipEmptyLines: true });
-            const rows = parsed.data;
-            
-            allCases = rows.slice(1).map(row => ({
-                name: (row[0] || "").trim(),
-                citation: (row[1] || "").trim(),
-                court: (row[2] || "").trim(),
-                state: (row[3] || "Pan-India").trim(),
-                rights: (row[4] || "").split(',').map(r => r.trim()).filter(r => r),
-                summary: (row[5] || "").trim(),
-                link: (row[6] || "#").trim(),
-                date: (row[7] || "").trim()
-            })).filter(c => c.name && c.name !== "Case Name");
+    function fetchData() {
+        fetch(CSV_URL)
+            .then(r => r.text())
+            .then(csvText => {
+                const parsed = Papa.parse(csvText, { header: false, skipEmptyLines: true });
+                const rows = parsed.data;
+                
+                allCases = rows.slice(1).map(row => ({
+                    name: (row[0] || "").trim(),
+                    citation: (row[1] || "").trim(),
+                    court: (row[2] || "").trim(),
+                    state: (row[3] || "Pan-India").trim(),
+                    rights: (row[4] || "").split(',').map(r => r.trim()).filter(r => r),
+                    summary: (row[5] || "").trim(),
+                    link: (row[6] || "#").trim(),
+                    date: (row[7] || "").trim()
+                })).filter(c => c.name && c.name !== "Case Name");
 
-            document.getElementById('loading').style.display = 'none';
-            populateDropdown();
-            generateHeatmap(allCases);
-            checkUrlParams();
-        });
+                document.getElementById('loading').style.display = 'none';
+                populateDropdown();
+                generateHeatmap();
+                checkUrlParams();
+            });
+    }
 
-    // --- SEARCH & FILTER ---
+    // --- CORE LOGIC ---
     function handleSearch() {
         const query = document.getElementById('search-input').value.toLowerCase();
         const rightFilter = document.getElementById('right-filter').value;
@@ -272,24 +308,15 @@
     function renderCases(cases) {
         const list = document.getElementById('case-list');
         list.innerHTML = '';
+        
         if(cases.length === 0) {
-            list.innerHTML = '<p style="text-align:center">No cases found matching criteria.</p>';
+            list.innerHTML = '<div style="text-align:center; padding: 40px; color: #888;">No cases found matching these criteria.</div>';
             return;
         }
         
         cases.forEach(item => {
             const urlSafeName = encodeURIComponent(item.name);
-            let displayDate = item.date;
-            if (item.date && item.date.length > 5) {
-                try {
-                    const d = parseIndianDate(item.date);
-                    if (!isNaN(d.getTime()) && d.getFullYear() > 1971) {
-                        displayDate = d.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
-                    }
-                } catch(e) {}
-            }
-
-            const tagsHtml = item.rights.map(r => `<span class="tag">${r}</span>`).join(' ');
+            const tagsHtml = item.rights.map(r => `<span class="tag">${r}</span>`).join('');
 
             list.innerHTML += `
                 <div class="card">
@@ -297,23 +324,18 @@
                         <h3>${item.name}</h3>
                         <span class="court-label">${item.court}</span>
                     </div>
-                    <div style="font-size:0.85rem; color:#888; margin-bottom:8px;">${displayDate || ""}</div>
                     <span class="citation">${item.citation}</span>
-                    <div>${tagsHtml}</div>
+                    <div class="tag-container">${tagsHtml}</div>
                     <div class="summary-preview">${item.summary}</div>
-                    <a class="action-link" onclick="openDetails('${urlSafeName}')">Read More →</a>
+                    <a class="action-link" onclick="openDetails('${urlSafeName}')">VIEW ANALYSIS →</a>
                 </div>`;
         });
     }
 
-    // --- UTILS ---
     function handleMapClick(stateName) {
-        // Ensure we are on the tracker tab
         switchTab('tracker');
-        
         currentFilterState = stateName;
-        document.getElementById('filter-display').innerHTML = `<span class="filter-tag" onclick="resetFilter()">Showing: ${stateName} ✕</span>`;
-        document.getElementById('search-input').value = "";
+        document.getElementById('filter-display').innerHTML = `<span class="filter-tag" onclick="resetFilter()">Jurisdiction: ${stateName} ✕</span>`;
         handleSearch();
         document.getElementById('search-input').scrollIntoView({behavior: "smooth", block: "start"});
     }
@@ -322,6 +344,54 @@
         currentFilterState = null;
         document.getElementById('filter-display').innerHTML = '';
         handleSearch();
+    }
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('details-view').style.display = 'none';
+        
+        document.getElementById('tab-' + tabId).style.display = 'block';
+        document.getElementById('btn-' + tabId).classList.add('active');
+    }
+
+    function openDetails(encodedName) {
+        const caseName = decodeURIComponent(encodedName);
+        const item = allCases.find(c => c.name === caseName);
+        if(!item) return;
+
+        const newUrl = window.location.pathname + '?case=' + encodedName;
+        window.history.pushState({path: newUrl}, '', newUrl);
+
+        document.getElementById('detail-title').innerText = item.name;
+        document.getElementById('detail-citation').innerText = item.citation;
+        document.getElementById('detail-court').innerText = item.court;
+        document.getElementById('detail-date').innerText = item.date || "Date Unknown";
+        document.getElementById('detail-summary').innerText = item.summary;
+        document.getElementById('detail-link').href = item.link;
+        
+        const rightsHtml = item.rights.map(r => `<span class="tag" style="background:var(--primary); color:white;">${r}</span>`).join('');
+        document.getElementById('detail-rights-container').innerHTML = rightsHtml;
+
+        document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+        document.getElementById('details-view').style.display = 'block';
+        window.scrollTo(0,0);
+    }
+
+    function closeDetails() {
+        window.history.pushState({}, document.title, window.location.pathname);
+        switchTab('tracker');
+    }
+
+    function parseIndianDate(dateStr) {
+        if (!dateStr) return new Date(0);
+        const parts = dateStr.split(/[-/.]/);
+        if (parts.length === 3) {
+            return new Date(parts[2], parts[1] - 1, parts[0]);
+        } else if (parts.length === 1 && parts[0].length === 4) {
+            return new Date(parts[0], 0, 1);
+        }
+        return new Date(dateStr);
     }
 
     function populateDropdown() {
@@ -337,88 +407,43 @@
         });
     }
 
-    function parseIndianDate(dateStr) {
-        if (!dateStr) return new Date(0); 
-        const parts = dateStr.split(/[-/.]/); 
-        if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]);
-        return new Date(dateStr); 
-    }
+    function generateHeatmap() {
+        const counts = {};
+        let maxCount = 0;
+        allCases.forEach(c => {
+            const s = c.state;
+            if(s && s !== "Pan-India") {
+                counts[s] = (counts[s] || 0) + 1;
+                if(counts[s] > maxCount) maxCount = counts[s];
+            }
+        });
 
-    function openDetails(encodedName) {
-        const caseName = decodeURIComponent(encodedName);
-        const item = allCases.find(c => c.name === caseName);
-        if(!item) return;
-
-        const newUrl = window.location.pathname + '?case=' + encodedName;
-        window.history.pushState({path: newUrl}, '', newUrl);
-
-        document.getElementById('detail-title').innerText = item.name;
-        document.getElementById('detail-citation').innerText = item.citation;
-        document.getElementById('detail-court').innerText = item.court;
-        
-        const rightsHtml = item.rights.map(r => `<span class="tag">${r}</span>`).join(' ');
-        document.getElementById('detail-rights-container').innerHTML = rightsHtml;
-
-        document.getElementById('detail-date').innerText = item.date || "Date N/A";
-        document.getElementById('detail-summary').innerText = item.summary;
-        document.getElementById('detail-link').href = item.link;
-
-        // Hide Tabs Content
-        document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-        document.getElementById('details-view').style.display = 'block';
-        window.scrollTo(0,0);
-    }
-
-    function closeDetails() {
-        window.history.pushState({}, document.title, window.location.pathname);
-        document.getElementById('details-view').style.display = 'none';
-        
-        // Return to Tracker Tab
-        switchTab('tracker');
+        document.querySelectorAll('#map-container path').forEach(p => {
+            const stateName = p.getAttribute('name');
+            const count = counts[stateName] || 0;
+            let t = p.querySelector('title');
+            if(!t) { t = document.createElementNS("http://www.w3.org/2000/svg", "title"); p.appendChild(t); }
+            t.textContent = `${stateName}: ${count} Case(s)`;
+            if (count > 0) {
+                const opacity = 0.2 + (0.8 * (count / maxCount));
+                p.style.fill = `rgba(44, 62, 80, ${opacity})`;
+            }
+        });
     }
 
     function checkUrlParams() {
         const urlParams = new URLSearchParams(window.location.search);
         const caseParam = urlParams.get('case');
         if(caseParam) openDetails(caseParam);
-        else handleSearch(); 
+        else handleSearch();
     }
 
-    function generateHeatmap(cases) {
-        const counts = {};
-        let maxCount = 0;
-        cases.forEach(c => {
-            const s = c.state ? c.state.trim() : "";
-            if(s) {
-                counts[s] = (counts[s] || 0) + 1;
-                if(s !== "Pan-India" && counts[s] > maxCount) maxCount = counts[s];
-            }
-        });
-
-        const paths = document.querySelectorAll('path');
-        paths.forEach(p => {
-            const stateName = p.getAttribute('name');
-            const count = counts[stateName] || 0;
-            const label = `${stateName}: ${count} Case${count !== 1 ? 's' : ''}`;
-            
-            let titleEl = p.querySelector('title');
-            if (!titleEl) {
-                titleEl = document.createElementNS("http://www.w3.org/2000/svg", "title");
-                p.appendChild(titleEl);
-            }
-            titleEl.textContent = label;
-            p.setAttribute('title', label); 
-
-            if (count > 0) {
-                const intensity = 0.3 + (0.7 * (count / maxCount));
-                p.style.fill = `rgba(44, 62, 80, ${intensity})`;
-            } else { p.style.fill = '#e0e0e0'; }
-        });
-
-        const scBtn = document.querySelector('.sc-btn');
-        const scCount = counts['Pan-India'] || 0;
-        scBtn.setAttribute('title', `Supreme Court: ${scCount} Case${scCount !== 1 ? 's' : ''}`);
-    }
+    window.onpopstate = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const caseParam = urlParams.get('case');
+        if(caseParam) openDetails(caseParam);
+        else closeDetails();
+    };
 </script>
 
 </body>
