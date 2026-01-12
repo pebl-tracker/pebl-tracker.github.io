@@ -8,7 +8,7 @@
     <meta name="keywords" content="Article 21, India, Constitution, Supreme Court, PEBL, Unenumerated Rights">
     <title>Procedure Established by Law | PEBL Tracker</title>
     
-    <!-- Load PapaParse (The Robust CSV Reader) -->
+    <!-- Load PapaParse (Crucial for reading long summaries correctly) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
     <style>
@@ -17,14 +17,20 @@
         body { font-family: "Georgia", serif; background: var(--bg); margin: 0; padding: 0; color: #333; }
         .container { max-width: 950px; margin: 0 auto; padding: 40px 20px; }
         
-        /* HEADER */
-        header { margin-bottom: 30px; border-bottom: 2px solid var(--primary); padding-bottom: 10px; position: relative; }
+        /* --- HEADER --- */
+        header { 
+            margin-bottom: 30px; 
+            border-bottom: 2px solid var(--primary); 
+            padding-bottom: 10px; 
+            position: relative; 
+        }
         header a { text-decoration: none; color: inherit; }
+        
         .header-content { text-align: center; padding-bottom: 20px; }
         h1 { margin: 0; color: var(--primary); font-size: 2.5rem; letter-spacing: -1px; }
         p.subtitle { color: #555; font-size: 1.1rem; margin-top: 10px; margin-bottom: 0; font-style: italic; font-family: sans-serif; }
-        
-        /* Curator Tag */
+
+        /* Curator Tag - Locked to bottom right of header */
         .curator-tag {
             position: absolute; bottom: 0; right: 0;
             font-family: sans-serif; font-size: 0.85rem; color: #7f8c8d;
@@ -164,7 +170,7 @@
     fetch(url)
         .then(r => r.text())
         .then(csvText => {
-            // USE PAPAPARSE TO HANDLE NEWLINES
+            // USE PAPAPARSE TO HANDLE NEWLINES CORRECTLY
             const parsed = Papa.parse(csvText, { header: false, skipEmptyLines: true });
             const rows = parsed.data;
             
@@ -174,7 +180,6 @@
                 citation: (row[1] || "").trim(),
                 court: (row[2] || "").trim(),
                 state: (row[3] || "Pan-India").trim(),
-                // Split rights by comma safely
                 rights: (row[4] || "").split(',').map(r => r.trim()).filter(r => r),
                 summary: (row[5] || "").trim(),
                 link: (row[6] || "#").trim(),
@@ -223,9 +228,17 @@
         
         cases.forEach(item => {
             const urlSafeName = encodeURIComponent(item.name);
-// Logic: Default to raw text. Only replace if we successfully parsed a valid date.
-            // DEBUG MODE: Just show exactly what is in the sheet
-            let displayDate = "📅 " + (item.date || "No Data");
+            
+            // DATE LOGIC: Fallback to raw text if formatting fails or date is old
+            let displayDate = item.date; 
+            if (item.date && item.date.length > 5) {
+                try {
+                    const d = parseIndianDate(item.date);
+                    if (!isNaN(d.getTime()) && d.getFullYear() > 1971) {
+                        displayDate = d.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
+                    }
+                } catch(e) {}
+            }
 
             const tagsHtml = item.rights.map(r => `<span class="tag">${r}</span>`).join(' ');
 
