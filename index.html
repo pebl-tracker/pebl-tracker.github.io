@@ -229,14 +229,27 @@
     function handleSearch() {
         const query = document.getElementById('search-input').value.toLowerCase();
         const rightFilter = document.getElementById('right-filter').value;
+        const sortOrder = document.getElementById('sort-order').value; // Get sort dropdown value
 
-        // Start with all cases OR currently filtered state cases
+        // 1. Filter Logic
         let baseList = currentFilterState ? allCases.filter(c => c.state === currentFilterState) : allCases;
 
-        const filtered = baseList.filter(c => {
+        let filtered = baseList.filter(c => {
             const matchesSearch = c.name.toLowerCase().includes(query) || c.summary.toLowerCase().includes(query);
             const matchesRight = rightFilter ? c.right === rightFilter : true;
             return matchesSearch && matchesRight;
+        });
+
+        // 2. Sort Logic (The new part)
+        filtered.sort((a, b) => {
+            const dateA = parseIndianDate(a.date);
+            const dateB = parseIndianDate(b.date);
+            
+            if (sortOrder === 'newest') {
+                return dateB - dateA;
+            } else {
+                return dateA - dateB;
+            }
         });
 
         renderCases(filtered);
@@ -372,6 +385,22 @@
         }
         if (currentCell || currentRow.length > 0) { currentRow.push(currentCell); rows.push(currentRow); }
         return rows;
+    }
+// --- DATE PARSER (DD-MM-YYYY) ---
+    function parseIndianDate(dateStr) {
+        if (!dateStr) return new Date(0); // If no date, treat as very old
+        
+        // Handle "DD-MM-YYYY" or "DD/MM/YYYY" or "DD.MM.YYYY"
+        const parts = dateStr.split(/[-/.]/); 
+        
+        if (parts.length === 3) {
+            // parts[0] = Day, parts[1] = Month, parts[2] = Year
+            // Note: Month is 0-indexed in JS (Jan = 0, Feb = 1)
+            return new Date(parts[2], parts[1] - 1, parts[0]);
+        }
+        
+        // Fallback for YYYY-MM-DD if Google formatted it automatically
+        return new Date(dateStr); 
     }
 </script>
 
