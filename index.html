@@ -30,40 +30,45 @@
             color: var(--text); 
             line-height: 1.6;
         }
-        .container { max-width: 950px; margin: 0 auto; padding: 0 20px 40px 20px; }
-        
-        /* --- HEADER (Blog Style) --- */
-        header { 
-            margin-bottom: 40px; 
-            text-align: center;
-        }
 
-        .banner-container {
+        /* --- FULL WIDTH BANNER --- */
+        .full-width-banner {
             width: 100%;
-            height: 160px; /* Letterbox height */
+            height: 220px; /* Adjusted for a cinematic wide look */
             overflow: hidden;
-            margin-bottom: 30px;
+            background: #f9f9f9;
             border-bottom: 1px solid #eee;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: #f9f9f9; /* Fallback color */
         }
 
         .banner-img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Crops image to fill the box */
-            object-position: center 35%;
-            opacity: 0.85;
-            filter: sepia(10%) contrast(105%);
+            object-fit: cover; /* Ensures it fills the width edge-to-edge */
+            object-position: center 40%; /* Focuses on the calligraphy */
+            opacity: 0.9;
+            filter: sepia(5%) contrast(102%);
         }
 
-        .header-content { padding: 0 20px; position: relative; }
+        /* --- MAIN LAYOUT --- */
+        .container { 
+            max-width: 950px; 
+            margin: 0 auto; 
+            padding: 0 20px 60px 20px; 
+        }
+        
+        header { 
+            margin-top: 40px;
+            margin-bottom: 50px; 
+            text-align: center;
+        }
+
         h1 { 
             margin: 0; 
             color: var(--primary); 
-            font-size: clamp(1.8rem, 5vw, 2.8rem); 
+            font-size: clamp(2rem, 6vw, 3rem); 
             letter-spacing: -1px; 
             font-weight: bold;
         }
@@ -71,122 +76,123 @@
         
         p.subtitle { 
             color: #666; 
-            font-size: 1.05rem; 
-            margin-top: 12px; 
-            margin-bottom: 25px; 
+            font-size: 1.1rem; 
+            margin-top: 15px; 
+            margin-bottom: 30px; 
             font-style: italic; 
-            font-family: "Georgia", serif; 
         }
 
         .curator-line {
             border-bottom: 1px solid var(--primary);
             display: flex;
             justify-content: flex-end;
-            padding-bottom: 5px;
-            margin-top: 10px;
+            padding-bottom: 8px;
         }
 
         .curator-tag {
             font-family: sans-serif; 
-            font-size: 0.7rem; 
+            font-size: 0.75rem; 
             color: #7f8c8d;
             font-weight: bold;
             text-transform: uppercase; 
-            letter-spacing: 1.5px;
+            letter-spacing: 2px;
         }
 
         /* --- TABS --- */
         .tab-nav {
-            display: flex; justify-content: center; gap: 30px; margin-bottom: 40px;
+            display: flex; justify-content: center; gap: 40px; margin-bottom: 40px;
             font-family: sans-serif; border-bottom: 1px solid #eee;
         }
         .tab-btn {
-            background: none; border: none; font-size: 0.85rem; color: #888;
-            padding: 10px 5px; cursor: pointer; border-bottom: 2px solid transparent;
-            font-weight: bold; transition: all 0.2s; letter-spacing: 1px;
+            background: none; border: none; font-size: 0.9rem; color: #999;
+            padding: 12px 5px; cursor: pointer; border-bottom: 2px solid transparent;
+            font-weight: bold; transition: all 0.2s; letter-spacing: 1.5px;
         }
         .tab-btn:hover { color: var(--primary); }
         .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
 
-        /* --- MAP SECTION --- */
-        .map-wrapper { position: relative; width: 100%; max-width: 550px; margin: 0 auto 20px auto; }
+        /* --- MAP & CONTROLS --- */
+        .map-wrapper { position: relative; width: 100%; max-width: 550px; margin: 0 auto 30px auto; }
         svg { width: 100%; height: auto; }
-        path { cursor: pointer; transition: fill 0.3s ease; fill: #e0e0e0; stroke: #ffffff; stroke-width: 0.6; }
+        path { cursor: pointer; transition: fill 0.3s ease; fill: #e8e8e8; stroke: #ffffff; stroke-width: 0.7; }
         path:hover { fill: var(--accent) !important; }
 
         .sc-btn {
-            display: block; width: fit-content; margin: 0 auto 40px auto;
+            display: block; width: fit-content; margin: 0 auto 50px auto;
             background: var(--accent); color: white; text-align: center;
-            padding: 10px 25px; border-radius: 50px; text-decoration: none;
+            padding: 12px 30px; border-radius: 50px; text-decoration: none;
             font-family: sans-serif; font-size: 0.9rem; font-weight: bold; cursor: pointer;
-            box-shadow: 0 4px 12px rgba(192, 57, 43, 0.15); transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(192, 57, 43, 0.2); transition: transform 0.2s;
         }
         .sc-btn:hover { transform: translateY(-2px); }
 
-        /* --- CONTROLS --- */
         .controls-bar {
-            display: flex; gap: 10px; margin-bottom: 20px;
-            background: #fcfcfc; padding: 15px; border: 1px solid #eee;
+            display: flex; gap: 12px; margin-bottom: 25px;
+            background: #fafafa; padding: 20px; border: 1px solid #eee;
             border-radius: 4px; font-family: sans-serif; flex-wrap: wrap;
         }
-        #search-input { flex-grow: 2; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.95rem; }
-        .filter-select { flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background: white; }
+        #search-input { flex-grow: 2; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; }
+        .filter-select { flex-grow: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer; }
 
-        #filter-display { text-align: center; margin-bottom: 20px; min-height: 35px; }
+        #filter-display { text-align: center; margin-bottom: 25px; min-height: 35px; }
         .filter-tag { 
             display: inline-block; background: var(--primary); color: white; 
-            padding: 5px 15px; border-radius: 20px; font-family: sans-serif; 
-            font-size: 0.8rem; cursor: pointer;
+            padding: 6px 18px; border-radius: 20px; font-family: sans-serif; 
+            font-size: 0.85rem; cursor: pointer;
         }
 
-        /* --- CARDS --- */
-        .case-grid { display: grid; gap: 25px; }
+        /* --- CASE CARDS --- */
+        .case-grid { display: grid; gap: 30px; }
         .card { 
-            background: var(--card-bg); padding: 30px; border: 1px solid #eee; 
-            border-left: 4px solid var(--primary); font-family: sans-serif; 
-            transition: box-shadow 0.2s; 
+            background: var(--card-bg); padding: 35px; border: 1px solid #eee; 
+            border-left: 5px solid var(--primary); font-family: sans-serif; 
+            transition: box-shadow 0.3s ease; 
         }
-        .card:hover { box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
-        .card h3 { margin: 0; color: var(--primary); font-size: 1.3rem; line-height: 1.3; flex: 1; }
-        .court-label { font-size: 0.7rem; color: #999; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; margin-left: 15px; }
-        .card-date { font-size: 0.8rem; color: #aaa; margin-bottom: 10px; font-weight: bold; }
-        .citation { font-family: "Georgia", serif; color: #7f8c8d; font-style: italic; display: block; margin-bottom: 15px; font-size: 0.95rem; }
+        .card:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.06); }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .card h3 { margin: 0; color: var(--primary); font-size: 1.4rem; line-height: 1.3; flex: 1; }
+        .court-label { font-size: 0.75rem; color: #999; text-transform: uppercase; letter-spacing: 1.2px; font-weight: bold; margin-left: 20px; }
+        .card-date { font-size: 0.85rem; color: #888; margin-bottom: 12px; font-weight: bold; }
+        .citation { font-family: "Georgia", serif; color: #7f8c8d; font-style: italic; display: block; margin-bottom: 18px; font-size: 1rem; }
         
         .tag { 
-            background: #eee; padding: 4px 10px; border-radius: 3px; 
-            font-size: 0.7rem; font-weight: bold; color: #666; 
-            display: inline-block; margin-right: 6px; margin-bottom: 6px;
+            background: #f0f0f0; padding: 5px 12px; border-radius: 3px; 
+            font-size: 0.75rem; font-weight: bold; color: #555; 
+            display: inline-block; margin-right: 8px; margin-bottom: 8px;
             text-transform: uppercase;
         }
         
-        .summary-preview { color: #555; line-height: 1.6; margin-bottom: 15px; font-size: 0.95rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-        .action-link { color: var(--primary); font-weight: bold; text-decoration: none; border-bottom: 1px solid var(--primary); cursor: pointer; font-size: 0.85rem; }
+        .summary-preview { color: #444; line-height: 1.7; margin-bottom: 20px; font-size: 1rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .action-link { color: var(--primary); font-weight: bold; text-decoration: none; border-bottom: 2px solid var(--primary); cursor: pointer; font-size: 0.9rem; }
+        .action-link:hover { color: var(--accent); border-color: var(--accent); }
 
         /* --- DETAILS VIEW --- */
-        #details-view { display: none; background: white; padding: 40px 0; }
-        .back-btn { display: inline-block; margin-bottom: 30px; cursor: pointer; color: #888; font-family: sans-serif; font-size: 0.8rem; font-weight: bold; letter-spacing: 1px; }
-        .details-meta { border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 30px; }
-        .details-body { font-size: 1.15rem; line-height: 1.8; white-space: pre-wrap; }
-        .external-btn { display: inline-block; margin-top: 40px; background: var(--primary); color: white; padding: 12px 25px; text-decoration: none; border-radius: 4px; font-family: sans-serif; font-weight: bold; }
+        #details-view { display: none; background: white; padding: 20px 0; }
+        .back-btn { display: inline-block; margin-bottom: 40px; cursor: pointer; color: #999; font-family: sans-serif; font-size: 0.85rem; font-weight: bold; letter-spacing: 1.5px; }
+        .back-btn:hover { color: var(--primary); }
+        .details-meta { border-bottom: 1px solid #eee; padding-bottom: 25px; margin-bottom: 35px; }
+        .details-body { font-size: 1.2rem; line-height: 1.9; white-space: pre-wrap; color: #222; }
+        .external-btn { display: inline-block; margin-top: 50px; background: var(--primary); color: white; padding: 14px 30px; text-decoration: none; border-radius: 4px; font-family: sans-serif; font-weight: bold; }
 
-        #loading { text-align: center; color: #999; padding: 50px; font-style: italic; }
+        #loading { text-align: center; color: #999; padding: 80px; font-style: italic; font-size: 1.2rem; }
         
         @media (max-width: 600px) {
-            .banner-container { height: 100px; }
+            .full-width-banner { height: 140px; }
             .card-header { flex-direction: column; }
-            .court-label { margin-left: 0; margin-top: 5px; }
+            .court-label { margin-left: 0; margin-top: 8px; }
+            .tab-nav { gap: 20px; }
         }
     </style>
 </head>
 <body>
 
+<!-- BANNER OUTSIDE CONTAINER FOR FULL WIDTH -->
+<div class="full-width-banner">
+    <img src="article21.png" alt="Article 21 Calligraphy" class="banner-img" onerror="this.parentElement.style.display='none'">
+</div>
+
 <div class="container">
     <header>
-        <div class="banner-container">
-            <!-- Ensure article21.png is uploaded to your GitHub repo -->
-            <img src="article21.png" alt="Article 21 Calligraphy" class="banner-img" onerror="this.style.display='none'">
-        </div>
         <div class="header-content">
             <a href="."><h1>Procedure Established by Law</h1></a>
             <p class="subtitle">A Doctrinal Audit of Article 21 Jurisprudence</p>
@@ -207,7 +213,7 @@
         <div class="sc-btn" onclick="handleMapClick('Pan-India')">★ Supreme Court (Pan-India)</div>
 
         <div class="controls-bar">
-            <input type="text" id="search-input" placeholder="Search cases..." onkeyup="handleSearch()">
+            <input type="text" id="search-input" placeholder="Search cases or keywords..." onkeyup="handleSearch()">
             <select id="right-filter" class="filter-select" onchange="handleSearch()">
                 <option value="">All Rights</option>
             </select>
@@ -218,17 +224,17 @@
         </div>
 
         <div id="filter-display"></div>
-        <div id="loading">Loading Database...</div>
+        <div id="loading">Consulting the Archives...</div>
         <div class="case-grid" id="case-list"></div>
     </div>
 
     <!-- ABOUT TAB -->
     <div id="tab-about" class="tab-content" style="display: none;">
-        <div style="max-width: 700px; margin: 0 auto;">
-            <h2 style="color: var(--primary); border-bottom: 1px solid #eee; padding-bottom: 10px;">About the Project</h2>
+        <div style="max-width: 750px; margin: 0 auto; font-size: 1.15rem; line-height: 1.8;">
+            <h2 style="color: var(--primary); border-bottom: 1px solid #eee; padding-bottom: 15px;">About the Project</h2>
             <p><strong>Procedure Established by Law (PEBL)</strong> is a digital archive auditing the expansion of Article 21 of the Constitution of India. It tracks the judicial reading of unenumerated rights into the "Right to Life and Personal Liberty."</p>
             
-            <h2 style="color: var(--primary); border-bottom: 1px solid #eee; padding-bottom: 10px; margin-top: 40px;">About the Curator</h2>
+            <h2 style="color: var(--primary); border-bottom: 1px solid #eee; padding-bottom: 15px; margin-top: 50px;">About the Curator</h2>
             <p>Abhinav is 3rd Year B.A., LL.B. (Hons.) Student at the National Law School of India University, Bengaluru. He is deeply interested in Constitutional Interpretation, particularly vis-à-vis Rights Provisions.</p>
         </div>
     </div>
@@ -237,16 +243,16 @@
     <div id="details-view">
         <div class="back-btn" onclick="closeDetails()">← BACK TO TRACKER</div>
         <div class="details-meta">
-            <h2 id="detail-title" style="margin-top:0; color: var(--primary); font-size: 2.2rem;">Case Name</h2>
-            <div id="detail-citation" class="citation" style="font-size: 1.2rem;">Citation</div>
-            <div style="margin-top: 20px;">
+            <h2 id="detail-title" style="margin-top:0; color: var(--primary); font-size: 2.5rem; line-height: 1.2;">Case Name</h2>
+            <div id="detail-citation" class="citation" style="font-size: 1.3rem; margin-top: 10px;">Citation</div>
+            <div style="margin-top: 25px;">
                 <span class="tag" id="detail-court">Court</span>
                 <span id="detail-rights-container"></span>
                 <span class="tag" id="detail-date" style="background:#ddd;">Date</span>
             </div>
         </div>
         <div class="details-body" id="detail-summary"></div>
-        <a href="#" target="_blank" class="external-btn" id="detail-link">Read Full Judgment →</a>
+        <a href="#" target="_blank" class="external-btn" id="detail-link">Read Full Judgment on Indian Kanoon →</a>
     </div>
 </div>
 
@@ -313,7 +319,7 @@
 
     function renderCases(cases) {
         const list = document.getElementById('case-list');
-        list.innerHTML = cases.length ? '' : '<p style="text-align:center; color:#999;">No cases found.</p>';
+        list.innerHTML = cases.length ? '' : '<p style="text-align:center; color:#999; padding: 50px;">No judgments found matching these criteria.</p>';
         cases.forEach(c => {
             const tags = c.rights.map(r => `<span class="tag">${r}</span>`).join('');
             let dDisp = c.date;
@@ -343,8 +349,9 @@
     function handleMapClick(n) {
         switchTab('tracker');
         currentFilterState = n;
-        document.getElementById('filter-display').innerHTML = `<span class="filter-tag" onclick="resetFilter()">${n} ✕</span>`;
+        document.getElementById('filter-display').innerHTML = `<span class="filter-tag" onclick="resetFilter()">Jurisdiction: ${n} ✕</span>`;
         handleSearch();
+        document.getElementById('search-input').scrollIntoView({behavior: "smooth", block: "start"});
     }
 
     function resetFilter() { currentFilterState = null; document.getElementById('filter-display').innerHTML = ''; handleSearch(); }
@@ -385,7 +392,7 @@
         allCases.forEach(c => { if(c.state && c.state !== "Pan-India") { counts[c.state] = (counts[c.state] || 0) + 1; if(counts[c.state] > max) max = counts[c.state]; }});
         document.querySelectorAll('#map-container path').forEach(p => {
             const n = p.getAttribute('name'); const count = counts[n] || 0;
-            if(count > 0) p.style.fill = `rgba(44, 62, 80, ${0.2 + (0.8 * (count / max))})`;
+            if(count > 0) p.style.fill = `rgba(44, 62, 80, ${0.15 + (0.85 * (count / max))})`;
         });
     }
 
