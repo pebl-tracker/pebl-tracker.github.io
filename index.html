@@ -6,75 +6,91 @@
     <title>Procedure Established by Law | PEBL Tracker</title>
     
     <style>
-        /* --- DESIGN & FONTS --- */
-        body { font-family: "Georgia", serif; background: #f8f9fa; margin: 0; padding: 40px 20px; color: #333; }
-        .container { max-width: 950px; margin: 0 auto; }
+        /* --- CORE STYLES --- */
+        :root { --primary: #2c3e50; --accent: #c0392b; --bg: #f8f9fa; }
+        body { font-family: "Georgia", serif; background: var(--bg); margin: 0; padding: 0; color: #333; }
+        .container { max-width: 950px; margin: 0 auto; padding: 40px 20px; }
         
         /* HEADER */
-        header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #2c3e50; padding-bottom: 30px; }
-        h1 { margin: 0; color: #2c3e50; font-size: 2.5rem; letter-spacing: -1px; }
+        header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary); padding-bottom: 30px; }
+        h1 { margin: 0; color: var(--primary); font-size: 2.5rem; letter-spacing: -1px; }
         p.subtitle { color: #555; font-size: 1.1rem; margin-top: 10px; font-style: italic; font-family: sans-serif; }
 
-        /* MAP CONTAINER */
+        /* --- NAVIGATION / SEARCH BAR --- */
+        .controls-bar {
+            display: flex; gap: 10px; margin-bottom: 30px;
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            font-family: sans-serif;
+        }
+        #search-input {
+            flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;
+        }
+        #right-filter {
+            padding: 10px; border: 1px solid #ddd; border-radius: 4px; min-width: 150px;
+        }
+
+        /* --- MAP SECTION --- */
         .map-wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 650px; /* Controls Map Size */
+            position: relative; width: 100%; max-width: 650px;
             margin: 0 auto 30px auto;
         }
-
-        /* SVG STYLING */
         svg { width: 100%; height: auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
-        
-        /* State Styling */
-        path { 
-            cursor: pointer; 
-            transition: all 0.2s; 
-        }
-        path:hover { 
-            fill: #2c3e50 !important; /* Dark Blue on Hover */
-            stroke: #fff;
-            stroke-width: 2;
-        }
-        /* Hide the little city dots in the SVG */
+        path { cursor: pointer; transition: all 0.2s; fill: #6f9c76; stroke: #ffffff; stroke-width: 0.5; }
+        path:hover { fill: var(--primary) !important; stroke: #fff; stroke-width: 2; }
         circle { display: none; }
 
-        /* SUPREME COURT BUTTON (Floating) */
+        /* SC BUTTON */
         .sc-btn {
-            display: block;
-            width: 220px;
-            margin: 0 auto 40px auto;
-            background: #c0392b;
-            color: white;
-            text-align: center;
-            padding: 12px 20px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-family: sans-serif;
-            font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            cursor: pointer;
-            transition: transform 0.2s;
+            display: block; width: 220px; margin: 0 auto 40px auto;
+            background: var(--accent); color: white; text-align: center;
+            padding: 12px 20px; border-radius: 50px; text-decoration: none;
+            font-family: sans-serif; font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: transform 0.2s;
         }
         .sc-btn:hover { transform: scale(1.05); background: #a93226; }
 
-        /* FILTER TAG */
+        /* FILTER TAGS */
         #filter-display { text-align: center; margin-bottom: 20px; min-height: 30px; }
-        .filter-tag { display: inline-block; background: #2c3e50; color: white; padding: 5px 15px; border-radius: 20px; font-family: sans-serif; font-size: 0.9rem; cursor: pointer; }
-        .filter-tag:hover { background: #c0392b; }
+        .filter-tag { 
+            display: inline-block; background: var(--primary); color: white; 
+            padding: 5px 15px; border-radius: 20px; font-family: sans-serif; 
+            font-size: 0.9rem; cursor: pointer; 
+        }
+        .filter-tag:hover { background: var(--accent); }
 
-        /* CARDS */
+        /* --- CARD GRID --- */
         .case-grid { display: grid; gap: 20px; }
-        .card { background: white; padding: 25px; border: 1px solid #e0e0e0; border-left: 5px solid #2c3e50; font-family: sans-serif; }
-        .card h3 { margin: 0 0 5px 0; color: #2c3e50; }
+        .card { 
+            background: white; padding: 25px; border: 1px solid #e0e0e0; 
+            border-left: 5px solid var(--primary); font-family: sans-serif; 
+            transition: transform 0.2s;
+        }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .card h3 { margin: 0 0 5px 0; color: var(--primary); font-size: 1.4rem;}
         .court-label { float: right; font-size: 0.8rem; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
         .citation { font-family: serif; color: #666; font-style: italic; display: block; margin-bottom: 15px; }
-        .summary { line-height: 1.6; color: #444; margin-bottom: 15px; }
-        .tag { background: #ecf0f1; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; color: #555; }
-        .read-btn { text-decoration: none; color: #2980b9; font-weight: bold; border-bottom: 2px solid transparent; }
-        .read-btn:hover { border-bottom-color: #2980b9; }
+        .tag { background: #ecf0f1; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; color: #555; display: inline-block; margin-bottom: 10px;}
+        .summary-preview { color: #555; line-height: 1.5; margin-bottom: 15px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        .action-link { 
+            color: var(--primary); font-weight: bold; text-decoration: none; 
+            border-bottom: 2px solid var(--primary); cursor: pointer;
+        }
+        .action-link:hover { color: var(--accent); border-color: var(--accent); }
+
+        /* --- DETAILS VIEW (Hidden by default) --- */
+        #details-view { display: none; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        .back-btn { display: inline-block; margin-bottom: 20px; cursor: pointer; color: #666; font-family: sans-serif; }
+        .back-btn:hover { color: var(--primary); text-decoration: underline; }
+        .details-meta { border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 20px; }
+        .details-body { font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap; /* Keeps paragraphs from sheet */ }
+        .external-btn { display: inline-block; margin-top: 30px; background: var(--primary); color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-family: sans-serif; }
 
         #loading { text-align: center; color: #888; font-family: sans-serif; margin-top: 30px; }
+        
+        /* Utility */
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -82,25 +98,49 @@
 <div class="container">
     <header>
         <h1>Procedure Established by Law</h1>
-        <p class="subtitle">Tracking the Reading of Unenumerated Rights into Article 21</p>
+        <p class="subtitle">An audit of Article 21 jurisprudence.</p>
     </header>
 
-    <!-- 1. THE MAP -->
-    <div class="map-wrapper" id="map-container">
-        <!-- SVG will be injected here by JavaScript -->
-    </div>
-    
-    <!-- 2. SUPREME COURT BUTTON -->
-    <div class="sc-btn" onclick="handleMapClick('Pan-India')">
-    ★ Supreme Court
+    <!-- === MAIN VIEW === -->
+    <div id="main-view">
+        <!-- 1. MAP -->
+        <div class="map-wrapper" id="map-container"></div>
+        <div class="sc-btn" onclick="handleMapClick('Pan-India')">★ Supreme Court</div>
+
+        <!-- 2. SEARCH & CONTROLS -->
+        <div class="controls-bar">
+            <input type="text" id="search-input" placeholder="Search cases (e.g. Maneka Gandhi)..." onkeyup="handleSearch()">
+            <select id="right-filter" onchange="handleSearch()">
+                <option value="">All Rights</option>
+                <!-- Options populated by JS -->
+            </select>
+        </div>
+
+        <!-- 3. FILTER STATUS -->
+        <div id="filter-display"></div>
+
+        <!-- 4. CASE LIST -->
+        <div id="loading">Loading Database...</div>
+        <div class="case-grid" id="case-list"></div>
     </div>
 
-    <!-- 3. FILTER STATUS -->
-    <div id="filter-display"></div>
+    <!-- === DETAILS VIEW (Initially Hidden) === -->
+    <div id="details-view">
+        <div class="back-btn" onclick="closeDetails()">← Back to Tracker</div>
+        <div class="details-meta">
+            <h2 id="detail-title" style="margin-top:0; color: var(--primary);">Case Name</h2>
+            <div style="color: #666; font-family: serif; font-style: italic;" id="detail-citation">Citation</div>
+            <div style="margin-top: 10px;">
+                <span class="tag" id="detail-court">Court</span>
+                <span class="tag" id="detail-right">Right</span>
+            </div>
+        </div>
+        <div class="details-body" id="detail-summary">
+            <!-- Full analysis goes here -->
+        </div>
+        <a href="#" target="_blank" class="external-btn" id="detail-link">Read Full Judgment on Indian Kanoon →</a>
+    </div>
 
-    <!-- 4. CASE LIST -->
-    <div id="loading">Loading Database...</div>
-    <div class="case-grid" id="case-list"></div>
 </div>
 
 <script>
@@ -110,30 +150,26 @@
     // ---------------------
 
     let allCases = [];
+    let currentFilterState = null;
 
-    // --- STEP A: LOAD THE MAP ---
+    // --- INITIALIZATION ---
+    
+    // 1. Load Map
     fetch('india.svg')
         .then(response => response.text())
         .then(svgData => {
             const mapContainer = document.getElementById('map-container');
             mapContainer.innerHTML = svgData;
-            
-            // Add click listeners to every state path
             const paths = mapContainer.querySelectorAll('path');
             paths.forEach(path => {
                 path.addEventListener('click', function() {
-                    // This SVG has the name built in! (e.g., name="Kerala")
                     const stateName = this.getAttribute('name');
-                    if(stateName) {
-                        handleMapClick(stateName);
-                    }
+                    if(stateName) handleMapClick(stateName);
                 });
             });
-        })
-        .catch(err => console.error("Error loading map:", err));
+        });
 
-
-    // --- STEP B: LOAD DATA FROM GOOGLE SHEETS ---
+    // 2. Load Data
     const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
     
     fetch(url)
@@ -151,112 +187,157 @@
             })).filter(c => c.name && c.name !== "Case Name");
 
             document.getElementById('loading').style.display = 'none';
-            renderCases(allCases); // Show all initially
             
-            // <-- PASTE THE NEW LINE HERE -->
+            // Populate Right Filter Dropdown
+            populateDropdown();
+            
+            // Generate Heatmap
             generateHeatmap(allCases);
+
+            // Check URL for direct link (e.g. ?case=Maneka%20Gandhi)
+            checkUrlParams();
         });
 
-    // --- HELPER FUNCTIONS ---
-
-    function handleMapClick(stateName) {
-        document.getElementById('filter-display').innerHTML = 
-            `<span class="filter-tag" onclick="resetFilter()">Showing: ${stateName} ✕</span>`;
-        filterByState(stateName);
-        
-        // Scroll down slightly to show results
-        document.getElementById('filter-display').scrollIntoView({behavior: "smooth"});
-    }
-
-    function filterByState(stateName) {
-        // Filter logic: Match state name exactly
-        const filtered = allCases.filter(c => c.state === stateName);
-        renderCases(filtered);
-    }
-
-    function resetFilter() {
-        document.getElementById('filter-display').innerHTML = '';
-        renderCases(allCases);
-    }
+    // --- CORE LOGIC ---
 
     function renderCases(cases) {
         const list = document.getElementById('case-list');
         list.innerHTML = '';
         if(cases.length === 0) {
-            list.innerHTML = '<p style="text-align:center">No cases found for this jurisdiction.</p>';
+            list.innerHTML = '<p style="text-align:center">No cases found matching criteria.</p>';
             return;
         }
         
         cases.forEach(item => {
+            // Encode name for URL
+            const urlSafeName = encodeURIComponent(item.name);
+            
             list.innerHTML += `
                 <div class="card">
                     <span class="court-label">${item.court}</span>
                     <h3>${item.name}</h3>
                     <span class="citation">${item.citation}</span>
                     <span class="tag">${item.right}</span>
-                    <p class="summary">${item.summary}</p>
-                    <a href="${item.link}" target="_blank" class="read-btn">Read Judgement →</a>
+                    <div class="summary-preview">${item.summary}</div>
+                    <a class="action-link" onclick="openDetails('${urlSafeName}')">Read Analysis →</a>
                 </div>`;
         });
     }
 
-    // CSV Parsing Utilities
-    function clean(text) { return text ? text.replace(/^"|"$/g, '').replace(/""/g, '"') : ""; }
-    function csvToArray(str) {
-        const rows = []; 
-        let currentRow = []; 
-        let currentCell = ""; 
-        let inQuotes = false;
-        
-        for (let i = 0; i < str.length; i++) {
-            const char = str[i];
-            if (char === '"') { 
-                inQuotes = !inQuotes; 
-            } else if (char === ',' && !inQuotes) { 
-                currentRow.push(currentCell); 
-                currentCell = ""; 
-            } else if (char === '\n' && !inQuotes) { 
-                currentRow.push(currentCell); 
-                rows.push(currentRow); 
-                currentRow = []; 
-                currentCell = ""; 
-            } else { 
-                currentCell += char; 
-            }
-        }
-        
-        // --- THE FIX: Capture the last row ---
-        if (currentCell || currentRow.length > 0) {
-            currentRow.push(currentCell);
-            rows.push(currentRow);
-        }
-        // -------------------------------------
-        
-        return rows;
+    // --- SEARCH & FILTER ---
+
+    function handleSearch() {
+        const query = document.getElementById('search-input').value.toLowerCase();
+        const rightFilter = document.getElementById('right-filter').value;
+
+        // Start with all cases OR currently filtered state cases
+        let baseList = currentFilterState ? allCases.filter(c => c.state === currentFilterState) : allCases;
+
+        const filtered = baseList.filter(c => {
+            const matchesSearch = c.name.toLowerCase().includes(query) || c.summary.toLowerCase().includes(query);
+            const matchesRight = rightFilter ? c.right === rightFilter : true;
+            return matchesSearch && matchesRight;
+        });
+
+        renderCases(filtered);
     }
-// --- UPDATED HEATMAP & TOOLTIP FUNCTION ---
+
+    function handleMapClick(stateName) {
+        currentFilterState = stateName;
+        document.getElementById('filter-display').innerHTML = 
+            `<span class="filter-tag" onclick="resetFilter()">Showing: ${stateName} ✕</span>`;
+        
+        // Reset search inputs
+        document.getElementById('search-input').value = "";
+        document.getElementById('right-filter').value = "";
+        
+        handleSearch(); // Re-run render with new state filter
+        
+        // Scroll to results
+        document.getElementById('controls-bar').scrollIntoView({behavior: "smooth"});
+    }
+
+    function resetFilter() {
+        currentFilterState = null;
+        document.getElementById('filter-display').innerHTML = '';
+        renderCases(allCases);
+    }
+
+    function populateDropdown() {
+        const rights = [...new Set(allCases.map(c => c.right))].sort();
+        const select = document.getElementById('right-filter');
+        rights.forEach(r => {
+            if(r) {
+                const opt = document.createElement('option');
+                opt.value = r;
+                opt.innerText = r;
+                select.appendChild(opt);
+            }
+        });
+    }
+
+    // --- DETAILS PAGE LOGIC ---
+
+    function openDetails(encodedName) {
+        const caseName = decodeURIComponent(encodedName);
+        const item = allCases.find(c => c.name === caseName);
+        
+        if(!item) return;
+
+        // update URL without reloading
+        const newUrl = window.location.pathname + '?case=' + encodedName;
+        window.history.pushState({path: newUrl}, '', newUrl);
+
+        // Populate View
+        document.getElementById('detail-title').innerText = item.name;
+        document.getElementById('detail-citation').innerText = item.citation;
+        document.getElementById('detail-court').innerText = item.court;
+        document.getElementById('detail-right').innerText = item.right;
+        document.getElementById('detail-summary').innerText = item.summary; // Using innerText preserves newlines
+        document.getElementById('detail-link').href = item.link;
+
+        // Toggle Views
+        document.getElementById('main-view').classList.add('hidden');
+        document.getElementById('details-view').style.display = 'block';
+        window.scrollTo(0,0);
+    }
+
+    function closeDetails() {
+        // Clear URL param
+        window.history.pushState({}, document.title, window.location.pathname);
+        
+        document.getElementById('details-view').style.display = 'none';
+        document.getElementById('main-view').classList.remove('hidden');
+    }
+
+    function checkUrlParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const caseParam = urlParams.get('case');
+        if(caseParam) {
+            openDetails(caseParam);
+        } else {
+            renderCases(allCases);
+        }
+    }
+
+    // --- HEATMAP UTILS ---
     function generateHeatmap(cases) {
-        // 1. Count cases per state (Including Supreme Court/Pan-India)
         const counts = {};
         let maxCount = 0;
-
         cases.forEach(c => {
             const s = c.state ? c.state.trim() : "";
             if(s) {
                 counts[s] = (counts[s] || 0) + 1;
-                // Only use state counts for the max intensity (ignore SC for heatmap scaling)
                 if(s !== "Pan-India" && counts[s] > maxCount) maxCount = counts[s];
             }
         });
 
-        // 2. Update Map Colors & Tooltips
         const paths = document.querySelectorAll('path');
         paths.forEach(p => {
             const stateName = p.getAttribute('name');
             const count = counts[stateName] || 0;
             const label = `${stateName}: ${count} Case${count !== 1 ? 's' : ''}`;
             
-            // Set Tooltip
             let titleEl = p.querySelector('title');
             if (!titleEl) {
                 titleEl = document.createElementNS("http://www.w3.org/2000/svg", "title");
@@ -265,7 +346,6 @@
             titleEl.textContent = label;
             p.setAttribute('title', label); 
 
-            // Set Color
             if (count > 0) {
                 const intensity = 0.3 + (0.7 * (count / maxCount));
                 p.style.fill = `rgba(44, 62, 80, ${intensity})`;
@@ -274,12 +354,24 @@
             }
         });
 
-        // 3. Update Supreme Court Button Tooltip
         const scBtn = document.querySelector('.sc-btn');
-        const scCount = counts['Pan-India'] || 0; // Ensure this matches your Sheet spelling exactly
-        const scLabel = `Supreme Court: ${scCount} Case${scCount !== 1 ? 's' : ''}`;
-        
-        scBtn.setAttribute('title', scLabel); // Standard Browser Tooltip
+        const scCount = counts['Pan-India'] || 0;
+        scBtn.setAttribute('title', `Supreme Court: ${scCount} Case${scCount !== 1 ? 's' : ''}`);
+    }
+
+    // --- DATA CLEANING ---
+    function clean(text) { return text ? text.replace(/^"|"$/g, '').replace(/""/g, '"') : ""; }
+    function csvToArray(str) {
+        const rows = []; let currentRow = []; let currentCell = ""; let inQuotes = false;
+        for (let i = 0; i < str.length; i++) {
+            const char = str[i];
+            if (char === '"') { inQuotes = !inQuotes; }
+            else if (char === ',' && !inQuotes) { currentRow.push(currentCell); currentCell = ""; }
+            else if (char === '\n' && !inQuotes) { currentRow.push(currentCell); rows.push(currentRow); currentRow = []; currentCell = ""; }
+            else { currentCell += char; }
+        }
+        if (currentCell || currentRow.length > 0) { currentRow.push(currentCell); rows.push(currentRow); }
+        return rows;
     }
 </script>
 
