@@ -15,17 +15,17 @@
         :root { 
             --primary: #2c3e50; 
             --accent: #c0392b; 
-            --bg: #efeadf; /* Deep parchment tone for eye comfort */
-            --card-bg: #f5f1e9;
+            --bg: #f0e6d2; /* Warmer, rich parchment tone */
+            --card-bg: #f7f0e1;
             --text: #2c2c2c; 
             --text-muted: #5a5a5a;
-            --border: #dcd5c5;
-            --tag-bg: #e5dfd0;
+            --border: #dfd3bc;
+            --tag-bg: #e8dec8;
             --tag-text: #4a4a4a;
             --input-bg: #f9f7f2;
-            --parchment: #e8e2d6;
+            --parchment: #e8dec8;
             --banner-opacity: 0.9;
-            --banner-filter: multiply(1.1);
+            --banner-filter: sepia(20%) contrast(105%);
         }
 
         [data-theme="dark"] {
@@ -40,11 +40,20 @@
             --tag-text: #bdc3c7;
             --input-bg: #252525;
             --parchment: #1a1a1a;
-            --banner-opacity: 0.6;
-            --banner-filter: invert(90%) sepia(10%) hue-rotate(180deg);
+            --banner-opacity: 0.5;
+            --banner-filter: invert(90%) sepia(10%) hue-rotate(180deg) brightness(0.8);
         }
         
-        * { box-sizing: border-box; transition: background-color 0.3s ease, color 0.3s ease; }
+        /* Gradual Transition Logic */
+        * { 
+            box-sizing: border-box; 
+            transition: background-color 0.6s ease, 
+                        color 0.6s ease, 
+                        border-color 0.6s ease, 
+                        box-shadow 0.6s ease, 
+                        filter 0.6s ease,
+                        opacity 0.6s ease; 
+        }
         
         body { 
             font-family: "Georgia", serif; 
@@ -72,6 +81,7 @@
             z-index: 100;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
+        .theme-toggle:hover { background: var(--tag-bg); }
 
         /* --- FULL WIDTH BANNER --- */
         .full-width-banner {
@@ -141,7 +151,7 @@
         /* --- MAP & CONTROLS --- */
         .map-wrapper { position: relative; width: 100%; max-width: 500px; margin: 0 auto 30px auto; }
         svg { width: 100%; height: auto; }
-        path { cursor: pointer; transition: fill 0.3s ease; fill: var(--tag-bg); stroke: var(--bg); stroke-width: 0.7; }
+        path { cursor: pointer; fill: var(--tag-bg); stroke: var(--bg); stroke-width: 0.7; }
         path:hover { fill: var(--accent) !important; }
 
         .sc-btn {
@@ -254,7 +264,7 @@
     <div id="tab-about" class="tab-content" style="display: none;">
         <div style="max-width: 700px; margin: 0 auto;">
             <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px;">About the Project</h2>
-            <p><strong>Procedure Established by Law (PEBL)</strong> is a digital archive auditing the expansion of Article 21 of the Constitution of India. It tracks the judicial reading of unenumerated rights into the "Right to Life and Personal Liberty."</p>
+            <p><strong>Procedure Established by Law (PEBL)</strong> is a digital archive auditing the expansion of Article 21 of the Constitution of India. It tracks the judicial reading of unenumerated rights into the Right to Life and Personal Liberty.</p>
             
             <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">About the Curator</h2>
             <p>Abhinav is 3rd Year B.A., LL.B. (Hons.) Student at the National Law School of India University, Bengaluru. He is deeply interested in Constitutional Interpretation, particularly vis-à-vis Rights Provisions.</p>
