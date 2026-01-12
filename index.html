@@ -223,12 +223,16 @@
         
         cases.forEach(item => {
             const urlSafeName = encodeURIComponent(item.name);
-            let displayDate = item.date;
+// Logic: Default to raw text. Only replace if we successfully parsed a valid date.
+            let displayDate = item.date; 
             try {
                 const d = parseIndianDate(item.date);
+                // If it's a valid date (not 1970), make it pretty
                 if(d.getFullYear() > 1971) {
                     displayDate = d.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
                 }
+                // If it IS 1970, we simply keep 'displayDate' as the raw text (item.date)
+                // instead of overwriting it with the 1970 date object.
             } catch(e) {}
 
             const tagsHtml = item.rights.map(r => `<span class="tag">${r}</span>`).join(' ');
