@@ -1,19 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="google-site-verification" content="CY2YsYkDUhACLPUHQ4Wua_j7XDxizD5BPoM7dzBAWdQ" />
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="A comprehensive case tracker and audit of Article 21 of the Indian Constitution. Tracking the expansion of unenumerated rights by the Supreme Court of India.">
-    <meta name="keywords" content="Article 21 Tracker, PEBL, Procedure Established by Law, Indian Constitution, Supreme Court Cases, Unenumerated Rights, Maneka Gandhi, Puttaswamy, NLSIU Project">
-    <meta name="author" content="PEBL Tracker">
-    
-    <!-- Open Graph (How it looks when shared on WhatsApp/LinkedIn) -->
-    <meta property="og:title" content="Procedure Established by Law | Article 21 Tracker">
-    <meta property="og:description" content="An audit of Article 21 jurisprudence: Tracking the shift from Constitutional Interpretation to Judicial Legislation.">
-    <meta property="og:url" content="https://pebl-tracker.github.io/">
-    <meta property="og:type" content="website">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="An audit of Article 21 jurisprudence. Tracking the shift from Constitutional Interpretation to Judicial Legislation.">
+    <meta name="keywords" content="Article 21, India, Constitution, Supreme Court, PEBL, Unenumerated Rights">
     <title>Procedure Established by Law | PEBL Tracker</title>
     
     <style>
@@ -24,6 +16,7 @@
         
         /* HEADER */
         header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary); padding-bottom: 30px; }
+        header a { text-decoration: none; color: inherit; }
         h1 { margin: 0; color: var(--primary); font-size: 2.5rem; letter-spacing: -1px; }
         p.subtitle { color: #555; font-size: 1.1rem; margin-top: 10px; font-style: italic; font-family: sans-serif; }
 
@@ -83,7 +76,7 @@
         
         .court-label { font-size: 0.8rem; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; display: block; margin-bottom: 5px;}
         .citation { font-family: serif; color: #666; font-style: italic; display: block; margin-bottom: 15px; }
-        .tag { background: #ecf0f1; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; color: #555; display: inline-block; margin-bottom: 10px;}
+        .tag { background: #ecf0f1; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; color: #555; display: inline-block; margin-right: 5px; margin-bottom: 10px;}
         .summary-preview { color: #555; line-height: 1.5; margin-bottom: 15px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
         
         .action-link { 
@@ -107,12 +100,10 @@
 <body>
 
 <div class="container">
-   <header>
-        <!-- The Title is now a Link that reloads the page -->
-        <a href="." style="text-decoration: none; color: inherit;">
+    <header>
+        <a href=".">
             <h1>Procedure Established by Law</h1>
         </a>
-        
         <p class="subtitle">Tracking the Reading of Unenumerated Rights into Article 21</p>
     </header>
 
@@ -124,7 +115,7 @@
 
         <!-- 2. SEARCH & CONTROLS -->
         <div class="controls-bar">
-            <input type="text" id="search-input" placeholder="Search cases..." onkeyup="handleSearch()">
+            <input type="text" id="search-input" placeholder="Search cases (e.g. Maneka Gandhi)..." onkeyup="handleSearch()">
             
             <!-- Sort Filter (Newest/Oldest) -->
             <select id="sort-order" class="filter-select" onchange="handleSearch()">
@@ -154,19 +145,19 @@
             <div style="color: #666; font-family: serif; font-style: italic;" id="detail-citation">Citation</div>
             <div style="margin-top: 10px;">
                 <span class="tag" id="detail-court">Court</span>
-                <span class="tag" id="detail-right">Right</span>
+                <span id="detail-rights-container"></span>
                 <span class="tag" id="detail-date" style="background:#eee;">Date</span>
             </div>
         </div>
         <div class="details-body" id="detail-summary"></div>
-        <a href="#" target="_blank" class="external-btn" id="detail-link">Read Full Judgment →</a>
+        <a href="#" target="_blank" class="external-btn" id="detail-link">Read Full Judgement →</a>
     </div>
 
 </div>
 
 <script>
     // --- CONFIGURATION ---
-    const SHEET_ID = '1k3O3nEbs24UXsoAsrNPmaZfBvpAJCmaEzypuQTD-yuY'; // <--- PASTE ID HERE
+    const SHEET_ID = '1k3O3nEbs24UXsoAsrNPmaZfBvpAJCmaEzypuQTD-yuY'; // YOUR SHEET ID
     const SHEET_NAME = 'Sheet1';
     // ---------------------
 
@@ -200,8 +191,8 @@
                 name: clean(row[0]),
                 citation: clean(row[1]),
                 court: clean(row[2]),
-                state: clean(row[3]), // Raw state name from sheet
-                right: clean(row[4]),
+                state: clean(row[3]) || "Pan-India",
+                rights: clean(row[4]).split(',').map(r => r.trim()).filter(r => r), // Handle Multiple Rights
                 summary: clean(row[5]),
                 link: clean(row[6]) || "#",
                 date: clean(row[7]) // Column H
@@ -213,29 +204,24 @@
             checkUrlParams();
         });
 
-    // --- CORE LOGIC ---
+    // --- SEARCH & FILTER LOGIC ---
 
     function handleSearch() {
         const query = document.getElementById('search-input').value.toLowerCase();
         const rightFilter = document.getElementById('right-filter').value;
         const sortOrder = document.getElementById('sort-order').value;
 
-        // 1. Start with All Cases
-        let filtered = allCases;
+        // 1. Filter by Map State (if any)
+        let filtered = currentFilterState ? allCases.filter(c => c.state === currentFilterState) : allCases;
 
-        // 2. Apply Map Filter (State)
-        if (currentFilterState) {
-            filtered = filtered.filter(c => c.state === currentFilterState);
-        }
-
-        // 3. Apply Text Search & Right Filter
+        // 2. Filter by Search & Right
         filtered = filtered.filter(c => {
             const matchesSearch = c.name.toLowerCase().includes(query) || c.summary.toLowerCase().includes(query);
-            const matchesRight = rightFilter ? c.right === rightFilter : true;
+            const matchesRight = rightFilter ? c.rights.includes(rightFilter) : true;
             return matchesSearch && matchesRight;
         });
 
-        // 4. Sort by Date
+        // 3. Sort by Date
         filtered.sort((a, b) => {
             const dateA = parseIndianDate(a.date);
             const dateB = parseIndianDate(b.date);
@@ -256,7 +242,6 @@
         cases.forEach(item => {
             const urlSafeName = encodeURIComponent(item.name);
             let displayDate = item.date;
-            // Try to pretty-print the date
             try {
                 const d = parseIndianDate(item.date);
                 if(d.getFullYear() > 1900) {
@@ -264,15 +249,17 @@
                 }
             } catch(e) {}
 
+            const tagsHtml = item.rights.map(r => `<span class="tag">${r}</span>`).join(' ');
+
             list.innerHTML += `
                 <div class="card">
+                    <span class="court-label">${item.court}</span>
                     <div class="card-header">
                         <h3>${item.name}</h3>
-                        <span class="court-label">${item.court}</span>
                     </div>
                     <div style="font-size:0.85rem; color:#888; margin-bottom:8px;">${displayDate || ""}</div>
                     <span class="citation">${item.citation}</span>
-                    <span class="tag">${item.right}</span>
+                    <div>${tagsHtml}</div>
                     <div class="summary-preview">${item.summary}</div>
                     <a class="action-link" onclick="openDetails('${urlSafeName}')">Read More →</a>
                 </div>`;
@@ -283,7 +270,6 @@
     function handleMapClick(stateName) {
         currentFilterState = stateName;
         document.getElementById('filter-display').innerHTML = `<span class="filter-tag" onclick="resetFilter()">Showing: ${stateName} ✕</span>`;
-        // Reset only the search box, keep the sort order
         document.getElementById('search-input').value = "";
         handleSearch();
         document.getElementById('search-input').scrollIntoView({behavior: "smooth", block: "start"});
@@ -296,9 +282,10 @@
     }
 
     function populateDropdown() {
-        const rights = [...new Set(allCases.map(c => c.right))].sort();
+        const allRights = allCases.flatMap(c => c.rights);
+        const uniqueRights = [...new Set(allRights)].sort();
         const select = document.getElementById('right-filter');
-        rights.forEach(r => {
+        uniqueRights.forEach(r => {
             if(r) {
                 const opt = document.createElement('option');
                 opt.value = r; opt.innerText = r;
@@ -311,10 +298,7 @@
     function parseIndianDate(dateStr) {
         if (!dateStr) return new Date(0); 
         const parts = dateStr.split(/[-/.]/); 
-        if (parts.length === 3) {
-            // parts[0] = Day, parts[1] = Month, parts[2] = Year
-            return new Date(parts[2], parts[1] - 1, parts[0]);
-        }
+        if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]);
         return new Date(dateStr); 
     }
 
@@ -330,7 +314,10 @@
         document.getElementById('detail-title').innerText = item.name;
         document.getElementById('detail-citation').innerText = item.citation;
         document.getElementById('detail-court').innerText = item.court;
-        document.getElementById('detail-right').innerText = item.right;
+        
+        const rightsHtml = item.rights.map(r => `<span class="tag">${r}</span>`).join(' ');
+        document.getElementById('detail-rights-container').innerHTML = rightsHtml;
+
         document.getElementById('detail-date').innerText = item.date || "Date N/A";
         document.getElementById('detail-summary').innerText = item.summary;
         document.getElementById('detail-link').href = item.link;
@@ -392,18 +379,21 @@
     // --- DATA CLEANING ---
     function clean(text) { return text ? text.replace(/^"|"$/g, '').replace(/""/g, '"').trim() : ""; }
     
-    function csvToArray(str) {
-        const rows = []; let currentRow = []; let currentCell = ""; let inQuotes = false;
-        for (let i = 0; i < str.length; i++) {
-            const char = str[i];
-            if (char === '"') { inQuotes = !inQuotes; }
-            else if (char === ',' && !inQuotes) { currentRow.push(currentCell); currentCell = ""; }
-            else if (char === '\n' && !inQuotes) { currentRow.push(currentCell); rows.push(currentRow); currentRow = []; currentCell = ""; }
-            else { currentCell += char; }
+    // --- ROBUST CSV PARSER (Handles newlines/quotes inside cells) ---
+    function csvToArray(text) {
+        let p = '', row = [''], ret = [row], i = 0, r = 0, s = !0, l;
+        for (l of text) {
+            if ('"' === l) {
+                if (s && l === p) row[i] += l;
+                s = !s;
+            } else if (',' === l && s) l = row[++i] = '';
+            else if ('\n' === l && s) {
+                if ('\r' === p) row[i] = row[i].slice(0, -1);
+                row = ret[++r] = [l = '']; i = 0;
+            } else row[i] += l;
+            p = l;
         }
-        // FIX: Capture the very last row
-        if (currentCell || currentRow.length > 0) { currentRow.push(currentCell); rows.push(currentRow); }
-        return rows;
+        return ret;
     }
 </script>
 
