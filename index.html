@@ -8,68 +8,45 @@
     <meta name="keywords" content="Article 21, India, Constitution, Supreme Court, PEBL, Unenumerated Rights">
     <title>Procedure Established by Law | PEBL Tracker</title>
     
+    <!-- Load PapaParse (The Robust CSV Reader) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+
     <style>
         /* --- CORE STYLES --- */
         :root { --primary: #2c3e50; --accent: #c0392b; --bg: #f8f9fa; }
         body { font-family: "Georgia", serif; background: var(--bg); margin: 0; padding: 0; color: #333; }
         .container { max-width: 950px; margin: 0 auto; padding: 40px 20px; }
         
-        /* --- HEADER (Fixed Layout) --- */
-        header { 
-            margin-bottom: 30px; 
-            border-bottom: 2px solid var(--primary); 
-            padding-bottom: 10px; 
-            position: relative;
-        }
+        /* HEADER */
+        header { margin-bottom: 30px; border-bottom: 2px solid var(--primary); padding-bottom: 10px; position: relative; }
         header a { text-decoration: none; color: inherit; }
-        
-        .header-content {
-            text-align: center; /* Keeps Title Centered */
-            position: relative;
-            padding-bottom: 20px;
-        }
-        
+        .header-content { text-align: center; padding-bottom: 20px; }
         h1 { margin: 0; color: var(--primary); font-size: 2.5rem; letter-spacing: -1px; }
         p.subtitle { color: #555; font-size: 1.1rem; margin-top: 10px; margin-bottom: 0; font-style: italic; font-family: sans-serif; }
-
-        /* Curator Tag - Locks to the right */
+        
+        /* Curator Tag */
         .curator-tag {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            font-family: sans-serif;
-            font-size: 0.85rem;
-            color: #7f8c8d;
-            background: var(--bg); /* Masks the line if needed */
-            padding-left: 10px;
-            font-weight: bold;
+            position: absolute; bottom: 0; right: 0;
+            font-family: sans-serif; font-size: 0.85rem; color: #7f8c8d;
+            background: var(--bg); padding-left: 10px; font-weight: bold;
         }
 
-        /* --- NAVIGATION / SEARCH BAR --- */
+        /* --- NAVIGATION --- */
         .controls-bar {
             display: flex; gap: 10px; margin-bottom: 30px;
             background: white; padding: 15px; border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            font-family: sans-serif; flex-wrap: wrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-family: sans-serif; flex-wrap: wrap;
         }
-        #search-input {
-            flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; min-width: 200px;
-        }
-        .filter-select {
-            padding: 10px; border: 1px solid #ddd; border-radius: 4px; min-width: 140px; cursor: pointer; background: white;
-        }
+        #search-input { flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; min-width: 200px; }
+        .filter-select { padding: 10px; border: 1px solid #ddd; border-radius: 4px; min-width: 140px; cursor: pointer; background: white; }
 
         /* --- MAP SECTION --- */
-        .map-wrapper {
-            position: relative; width: 100%; max-width: 650px;
-            margin: 0 auto 30px auto;
-        }
+        .map-wrapper { position: relative; width: 100%; max-width: 650px; margin: 0 auto 30px auto; }
         svg { width: 100%; height: auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
         path { cursor: pointer; transition: all 0.2s; fill: #6f9c76; stroke: #ffffff; stroke-width: 0.5; }
         path:hover { fill: var(--primary) !important; stroke: #fff; stroke-width: 2; }
         circle { display: none; }
 
-        /* SC BUTTON */
         .sc-btn {
             display: block; width: 220px; margin: 0 auto 40px auto;
             background: var(--accent); color: white; text-align: center;
@@ -81,33 +58,20 @@
 
         /* FILTER TAGS */
         #filter-display { text-align: center; margin-bottom: 20px; min-height: 30px; }
-        .filter-tag { 
-            display: inline-block; background: var(--primary); color: white; 
-            padding: 5px 15px; border-radius: 20px; font-family: sans-serif; 
-            font-size: 0.9rem; cursor: pointer; 
-        }
+        .filter-tag { display: inline-block; background: var(--primary); color: white; padding: 5px 15px; border-radius: 20px; font-family: sans-serif; font-size: 0.9rem; cursor: pointer; }
         .filter-tag:hover { background: var(--accent); }
 
-        /* --- CARD GRID --- */
+        /* --- CARDS --- */
         .case-grid { display: grid; gap: 20px; }
-        .card { 
-            background: white; padding: 25px; border: 1px solid #e0e0e0; 
-            border-left: 5px solid var(--primary); font-family: sans-serif; 
-            transition: transform 0.2s;
-        }
+        .card { background: white; padding: 25px; border: 1px solid #e0e0e0; border-left: 5px solid var(--primary); font-family: sans-serif; transition: transform 0.2s; }
         .card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         .card-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
         .card h3 { margin: 0; color: var(--primary); font-size: 1.4rem; }
-        
         .court-label { font-size: 0.8rem; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; display: block; margin-bottom: 5px;}
         .citation { font-family: serif; color: #666; font-style: italic; display: block; margin-bottom: 15px; }
         .tag { background: #ecf0f1; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; color: #555; display: inline-block; margin-right: 5px; margin-bottom: 10px;}
         .summary-preview { color: #555; line-height: 1.5; margin-bottom: 15px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-        
-        .action-link { 
-            color: var(--primary); font-weight: bold; text-decoration: none; 
-            border-bottom: 2px solid var(--primary); cursor: pointer;
-        }
+        .action-link { color: var(--primary); font-weight: bold; text-decoration: none; border-bottom: 2px solid var(--primary); cursor: pointer; }
         .action-link:hover { color: var(--accent); border-color: var(--accent); }
 
         /* --- DETAILS VIEW --- */
@@ -127,46 +91,34 @@
 <div class="container">
     <header>
         <div class="header-content">
-            <a href=".">
-                <h1>Procedure Established by Law</h1>
-            </a>
+            <a href="."><h1>Procedure Established by Law</h1></a>
             <p class="subtitle">Tracking the Reading of Unenumerated Rights into Article 21</p>
         </div>
-        <!-- Curator Tag placed relative to the header line -->
         <div class="curator-tag">Curator: Abhinav Somani</div>
     </header>
 
-    <!-- === MAIN VIEW === -->
+    <!-- MAIN VIEW -->
     <div id="main-view">
-        <!-- 1. MAP -->
         <div class="map-wrapper" id="map-container"></div>
         <div class="sc-btn" onclick="handleMapClick('Pan-India')">★ Supreme Court</div>
 
-        <!-- 2. SEARCH & CONTROLS -->
         <div class="controls-bar">
-            <input type="text" id="search-input" placeholder="Search cases (e.g. Maneka Gandhi)..." onkeyup="handleSearch()">
-            
-            <!-- Sort Filter (Newest/Oldest) -->
+            <input type="text" id="search-input" placeholder="Search cases..." onkeyup="handleSearch()">
             <select id="sort-order" class="filter-select" onchange="handleSearch()">
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
             </select>
-
-            <!-- Rights Filter -->
             <select id="right-filter" class="filter-select" onchange="handleSearch()">
                 <option value="">All Rights</option>
             </select>
         </div>
 
-        <!-- 3. FILTER STATUS -->
         <div id="filter-display"></div>
-
-        <!-- 4. CASE LIST -->
         <div id="loading">Loading Database...</div>
         <div class="case-grid" id="case-list"></div>
     </div>
 
-    <!-- === DETAILS VIEW === -->
+    <!-- DETAILS VIEW -->
     <div id="details-view">
         <div class="back-btn" onclick="closeDetails()">← Back to Tracker</div>
         <div class="details-meta">
@@ -181,12 +133,11 @@
         <div class="details-body" id="detail-summary"></div>
         <a href="#" target="_blank" class="external-btn" id="detail-link">Read Full Judgement →</a>
     </div>
-
 </div>
 
 <script>
     // --- CONFIGURATION ---
-    const SHEET_ID = '1k3O3nEbs24UXsoAsrNPmaZfBvpAJCmaEzypuQTD-yuY'; // YOUR SHEET ID
+    const SHEET_ID = '1k3O3nEbs24UXsoAsrNPmaZfBvpAJCmaEzypuQTD-yuY';
     const SHEET_NAME = 'Sheet1';
     // ---------------------
 
@@ -213,20 +164,21 @@
     fetch(url)
         .then(r => r.text())
         .then(csvText => {
-            // Use the Robust Parser here
-            const rows = csvToArray(csvText);
+            // USE PAPAPARSE TO HANDLE NEWLINES
+            const parsed = Papa.parse(csvText, { header: false, skipEmptyLines: true });
+            const rows = parsed.data;
             
             // Map Columns: Name[0], Citation[1], Court[2], State[3], Right[4], Summary[5], Link[6], Date[7]
             allCases = rows.slice(1).map(row => ({
-                name: clean(row[0]),
-                citation: clean(row[1]),
-                court: clean(row[2]),
-                state: clean(row[3]), 
-                // Handle Multiple Rights (Split by comma)
-                rights: clean(row[4]).split(',').map(r => r.trim()).filter(r => r), 
-                summary: clean(row[5]),
-                link: clean(row[6]) || "#",
-                date: clean(row[7]) 
+                name: (row[0] || "").trim(),
+                citation: (row[1] || "").trim(),
+                court: (row[2] || "").trim(),
+                state: (row[3] || "Pan-India").trim(),
+                // Split rights by comma safely
+                rights: (row[4] || "").split(',').map(r => r.trim()).filter(r => r),
+                summary: (row[5] || "").trim(),
+                link: (row[6] || "#").trim(),
+                date: (row[7] || "").trim()
             })).filter(c => c.name && c.name !== "Case Name");
 
             document.getElementById('loading').style.display = 'none';
@@ -241,13 +193,12 @@
         const rightFilter = document.getElementById('right-filter').value;
         const sortOrder = document.getElementById('sort-order').value;
 
-        // 1. Filter by Map State (if any)
+        // 1. Filter by Map State
         let filtered = currentFilterState ? allCases.filter(c => c.state === currentFilterState) : allCases;
 
         // 2. Filter by Search & Right
         filtered = filtered.filter(c => {
             const matchesSearch = c.name.toLowerCase().includes(query) || c.summary.toLowerCase().includes(query);
-            // Check if the case has the selected right (exact match in the list)
             const matchesRight = rightFilter ? c.rights.includes(rightFilter) : true;
             return matchesSearch && matchesRight;
         });
@@ -262,7 +213,6 @@
         renderCases(filtered);
     }
 
-    // --- RENDER CARDS ---
     function renderCases(cases) {
         const list = document.getElementById('case-list');
         list.innerHTML = '';
@@ -281,7 +231,6 @@
                 }
             } catch(e) {}
 
-            // Create a tag for each right
             const tagsHtml = item.rights.map(r => `<span class="tag">${r}</span>`).join(' ');
 
             list.innerHTML += `
@@ -292,7 +241,7 @@
                     </div>
                     <div style="font-size:0.85rem; color:#888; margin-bottom:8px;">${displayDate || ""}</div>
                     <span class="citation">${item.citation}</span>
-                    <div style="margin-bottom:5px;">${tagsHtml}</div>
+                    <div>${tagsHtml}</div>
                     <div class="summary-preview">${item.summary}</div>
                     <a class="action-link" onclick="openDetails('${urlSafeName}')">Read More →</a>
                 </div>`;
@@ -315,10 +264,8 @@
     }
 
     function populateDropdown() {
-        // Collect all rights from all cases into one unique list
         const allRights = allCases.flatMap(c => c.rights);
         const uniqueRights = [...new Set(allRights)].sort();
-        
         const select = document.getElementById('right-filter');
         uniqueRights.forEach(r => {
             if(r) {
@@ -336,30 +283,7 @@
         return new Date(dateStr); 
     }
 
-    // --- ROBUST CSV PARSER (Fixes the Vanishing Case Issue) ---
-    // This parser correctly handles newlines inside cells
-    function csvToArray(text) {
-        let p = '', row = [''], ret = [row], i = 0, r = 0, s = !0, l;
-        for (l of text) {
-            if ('"' === l) {
-                if (s && l === p) row[i] += l;
-                s = !s;
-            } else if (',' === l && s) l = row[++i] = '';
-            else if ('\n' === l && s) {
-                if ('\r' === p) row[i] = row[i].slice(0, -1);
-                row = ret[++r] = [l = '']; i = 0;
-            } else row[i] += l;
-            p = l;
-        }
-        return ret;
-    }
-
-    function clean(text) { 
-        if(!text) return "";
-        return text.replace(/^"|"$/g, '').replace(/""/g, '"').trim(); 
-    }
-
-    // --- DETAILS & HEATMAP ---
+    // --- DETAILS PAGE ---
     function openDetails(encodedName) {
         const caseName = decodeURIComponent(encodedName);
         const item = allCases.find(c => c.name === caseName);
