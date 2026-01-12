@@ -226,7 +226,7 @@
             let displayDate = item.date;
             try {
                 const d = parseIndianDate(item.date);
-                if(d.getFullYear() > 1900) {
+                if(d.getFullYear() > 1971) {
                     displayDate = d.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
                 }
             } catch(e) {}
