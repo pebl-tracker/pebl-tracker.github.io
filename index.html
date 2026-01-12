@@ -14,29 +14,37 @@
         body { font-family: "Georgia", serif; background: var(--bg); margin: 0; padding: 0; color: #333; }
         .container { max-width: 950px; margin: 0 auto; padding: 40px 20px; }
         
-        //* HEADER STYLES */
+        /* --- HEADER (Fixed Layout) --- */
         header { 
-            text-align: center; 
             margin-bottom: 30px; 
             border-bottom: 2px solid var(--primary); 
-            padding-bottom: 30px; 
-            position: relative; /* This allows us to position the curator text */
+            padding-bottom: 10px; 
+            position: relative;
         }
         header a { text-decoration: none; color: inherit; }
         
-        /* The Curator Signature */
+        .header-content {
+            text-align: center; /* Keeps Title Centered */
+            position: relative;
+            padding-bottom: 20px;
+        }
+        
+        h1 { margin: 0; color: var(--primary); font-size: 2.5rem; letter-spacing: -1px; }
+        p.subtitle { color: #555; font-size: 1.1rem; margin-top: 10px; margin-bottom: 0; font-style: italic; font-family: sans-serif; }
+
+        /* Curator Tag - Locks to the right */
         .curator-tag {
             position: absolute;
-            bottom: 0;       /* Sits exactly on the bottom padding line */
-            right: 0;        /* Aligns to the right */
+            bottom: 0;
+            right: 0;
             font-family: sans-serif;
             font-size: 0.85rem;
             color: #7f8c8d;
-            background: var(--bg); /* Matches background to look clean */
-            padding-left: 10px;    /* Adds a little breathing room */
-            line-height: 1;
-            margin-bottom: 5px;    /* Nudges it slightly up to rest on the border */
+            background: var(--bg); /* Masks the line if needed */
+            padding-left: 10px;
+            font-weight: bold;
         }
+
         /* --- NAVIGATION / SEARCH BAR --- */
         .controls-bar {
             display: flex; gap: 10px; margin-bottom: 30px;
@@ -118,12 +126,13 @@
 
 <div class="container">
     <header>
-        <a href=".">
-            <h1>Procedure Established by Law</h1>
-        </a>
-        <p class="subtitle">Tracking the Reading of Unenumerated Rights into Article 21</p>
-        
-        <!-- The Curator Name -->
+        <div class="header-content">
+            <a href=".">
+                <h1>Procedure Established by Law</h1>
+            </a>
+            <p class="subtitle">Tracking the Reading of Unenumerated Rights into Article 21</p>
+        </div>
+        <!-- Curator Tag placed relative to the header line -->
         <div class="curator-tag">Curator: Abhinav Somani</div>
     </header>
 
@@ -211,11 +220,11 @@
                 name: clean(row[0]),
                 citation: clean(row[1]),
                 court: clean(row[2]),
-                state: clean(row[3]) || "Pan-India",
-                rights: clean(row[4]).split(',').map(r => r.trim()).filter(r => r), // Handle Multiple Rights
+                state: clean(row[3]), 
+                rights: clean(row[4]).split(',').map(r => r.trim()).filter(r => r), 
                 summary: clean(row[5]),
                 link: clean(row[6]) || "#",
-                date: clean(row[7]) // Column H
+                date: clean(row[7]) 
             })).filter(c => c.name && c.name !== "Case Name");
 
             document.getElementById('loading').style.display = 'none';
@@ -273,9 +282,9 @@
 
             list.innerHTML += `
                 <div class="card">
-                    <span class="court-label">${item.court}</span>
                     <div class="card-header">
                         <h3>${item.name}</h3>
+                        <span class="court-label">${item.court}</span>
                     </div>
                     <div style="font-size:0.85rem; color:#888; margin-bottom:8px;">${displayDate || ""}</div>
                     <span class="citation">${item.citation}</span>
@@ -396,10 +405,9 @@
         scBtn.setAttribute('title', `Supreme Court: ${scCount} Case${scCount !== 1 ? 's' : ''}`);
     }
 
-    // --- DATA CLEANING ---
+    // --- DATA CLEANING (Robust Parser) ---
     function clean(text) { return text ? text.replace(/^"|"$/g, '').replace(/""/g, '"').trim() : ""; }
     
-    // --- ROBUST CSV PARSER (Handles newlines/quotes inside cells) ---
     function csvToArray(text) {
         let p = '', row = [''], ret = [row], i = 0, r = 0, s = !0, l;
         for (l of text) {
