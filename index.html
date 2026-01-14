@@ -65,6 +65,26 @@
         .tab-btn { background: none; border: none; font-size: 0.8rem; color: #777; padding: 12px 5px; cursor: pointer; border-bottom: 2px solid transparent; font-weight: bold; letter-spacing: 1.5px; }
         .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
 
+        /* --- TRACKER UI (MAP SIZE INCREASED) --- */
+        .map-wrapper { 
+            position: relative; 
+            width: 100%; 
+            max-width: 850px; /* Increased from 500px */
+            margin: 0 auto 40px auto; 
+        }
+        svg { width: 100%; height: auto; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.05)); }
+        path { cursor: pointer; fill: var(--tag-bg); stroke: var(--bg); stroke-width: 0.7; }
+        path:hover { fill: var(--accent) !important; }
+
+        .sc-btn { display: block; width: fit-content; margin: 0 auto 50px auto; background: var(--accent); color: white; text-align: center; padding: 10px 25px; border-radius: 50px; text-decoration: none; font-family: sans-serif; font-size: 0.85rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .sc-btn:hover { transform: translateY(-2px); }
+
+        .controls-bar { display: flex; gap: 12px; margin-bottom: 25px; background: var(--card-bg); padding: 15px; border: 1px solid var(--border); border-radius: 4px; font-family: sans-serif; flex-wrap: wrap; }
+        #search-input { flex-grow: 2; padding: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); color: var(--text); }
+        .filter-select { flex-grow: 1; padding: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); color: var(--text); }
+        #filter-display { text-align: center; margin-bottom: 25px; min-height: 35px; }
+        .filter-tag { display: inline-block; background: var(--primary); color: var(--bg); padding: 5px 15px; border-radius: 20px; font-family: sans-serif; font-size: 0.8rem; cursor: pointer; }
+
         /* --- CHAIN OF CITATION TAB (WIDE LAYOUT) --- */
         #tab-map { width: 100%; display: none; }
         .map-description { text-align: center; font-style: italic; color: var(--text-muted); margin-bottom: 20px; font-size: 0.95rem; padding: 0 20px; }
@@ -100,18 +120,6 @@
             z-index: 10;
         }
 
-        /* --- TRACKER UI --- */
-        .map-wrapper { position: relative; width: 100%; max-width: 500px; margin: 0 auto 30px auto; }
-        svg { width: 100%; height: auto; }
-        path { cursor: pointer; fill: var(--tag-bg); stroke: var(--bg); stroke-width: 0.7; }
-        path:hover { fill: var(--accent) !important; }
-        .sc-btn { display: block; width: fit-content; margin: 0 auto 50px auto; background: var(--accent); color: white; text-align: center; padding: 10px 25px; border-radius: 50px; text-decoration: none; font-family: sans-serif; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
-        .controls-bar { display: flex; gap: 12px; margin-bottom: 25px; background: var(--card-bg); padding: 15px; border: 1px solid var(--border); border-radius: 4px; font-family: sans-serif; flex-wrap: wrap; }
-        #search-input { flex-grow: 2; padding: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); color: var(--text); }
-        .filter-select { flex-grow: 1; padding: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); color: var(--text); }
-        #filter-display { text-align: center; margin-bottom: 25px; min-height: 35px; }
-        .filter-tag { display: inline-block; background: var(--primary); color: var(--bg); padding: 5px 15px; border-radius: 20px; font-family: sans-serif; font-size: 0.8rem; cursor: pointer; }
-
         /* --- CARDS --- */
         .case-grid { display: grid; gap: 25px; }
         .card { background: var(--card-bg); padding: 30px; border: 1px solid var(--border); border-left: 5px solid var(--primary); font-family: sans-serif; }
@@ -140,11 +148,13 @@
             .court-label { margin-left: 0; margin-top: 5px; }
             .theme-toggle { top: 10px; right: 10px; }
             #tab-map-container { width: 100vw; height: 70vh; border-radius: 0; border-left: none; border-right: none; }
+            .map-wrapper { max-width: 100%; }
         }
     </style>
 </head>
 <body>
 
+<!-- BANNER AREA -->
 <div class="full-width-banner">
     <img src="article21.png" alt="Article 21 Calligraphy" class="banner-img" onerror="this.parentElement.style.display='none'">
 </div>
@@ -170,7 +180,7 @@
         <div class="map-wrapper" id="map-container"></div>
         <div class="sc-btn" onclick="handleMapClick('Pan-India')">★ Supreme Court (Pan-India)</div>
         <div class="controls-bar">
-            <input type="text" id="search-input" placeholder="Search cases..." onkeyup="handleSearch()">
+            <input type="text" id="search-input" placeholder="Search cases or keywords..." onkeyup="handleSearch()">
             <select id="right-filter" class="filter-select" onchange="handleSearch()"><option value="">All Rights</option></select>
             <select id="sort-order" class="filter-select" onchange="handleSearch()"><option value="newest">Newest First</option><option value="oldest">Oldest First</option></select>
         </div>
@@ -414,6 +424,14 @@
     }
 
     function resetFilter() { currentFilterState = null; document.getElementById('filter-display').innerHTML = ''; handleSearch(); }
+
+    function switchTab(t) {
+        document.querySelectorAll('.tab-content, #details-view').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + t).style.display = 'block';
+        document.getElementById('btn-' + t).classList.add('active');
+        if(t === 'map') setTimeout(initCitationMap, 100);
+    }
 
     function openDetails(enc) {
         const c = allCases.find(x => x.name === decodeURIComponent(enc));
