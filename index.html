@@ -64,7 +64,7 @@
         .tab-btn { background: none; border: none; font-size: 0.8rem; color: #777; padding: 12px 5px; cursor: pointer; border-bottom: 2px solid transparent; font-weight: bold; letter-spacing: 1.5px; }
         .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
 
-        /* --- CITATION MAP TAB --- */
+        /* --- CHAIN OF CITATION TAB --- */
         .map-description { text-align: center; font-style: italic; color: var(--text-muted); margin-bottom: 20px; font-size: 0.95rem; }
         #tab-map-container { width: 100%; height: 75vh; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; position: relative; overflow: hidden; }
         #network-viz { width: 100%; height: 100%; cursor: grab; }
@@ -131,6 +131,7 @@
 </head>
 <body>
 
+<!-- BANNER AREA -->
 <div class="full-width-banner">
     <img src="article21.png" alt="Article 21 Calligraphy" class="banner-img" onerror="this.parentElement.style.display='none'">
 </div>
@@ -147,7 +148,7 @@
 
     <nav class="tab-nav">
         <button id="btn-tracker" class="tab-btn active" onclick="switchTab('tracker')">TRACKER</button>
-        <button id="btn-map" class="tab-btn" onclick="switchTab('map')">CITATION MAP</button>
+        <button id="btn-map" class="tab-btn" onclick="switchTab('map')">CHAIN OF CITATION</button>
         <button id="btn-about" class="tab-btn" onclick="switchTab('about')">ABOUT</button>
     </nav>
 
@@ -165,7 +166,7 @@
         <div class="case-grid" id="case-list"></div>
     </div>
 
-    <!-- TAB: CITATION MAP -->
+    <!-- TAB: CHAIN OF CITATION -->
     <div id="tab-map" class="tab-content" style="display: none;">
         <p class="map-description">This map traces expansion of Article 21 by following the chain of precedent citations.</p>
         <div id="tab-map-container">
@@ -176,19 +177,22 @@
                 <button class="map-btn" id="physics-btn" onclick="togglePhysics()">Freeze</button>
             </div>
             <div id="network-viz"></div>
-            <div class="map-hint">Scroll to Zoom • Drag to Pan • Click Node for Details</div>
+            <div class="map-hint">Scroll to Zoom • Drag to Pan • Click a Case for Details</div>
         </div>
     </div>
 
     <!-- TAB: ABOUT -->
     <div id="tab-about" class="tab-content" style="display: none;">
         <div style="max-width: 700px; margin: 0 auto;">
-            <h2>About the Project</h2>
+            <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px;">About the Project</h2>
             <p><strong>Procedure Established by Law (PEBL)</strong> is a digital archive auditing the expansion of Article 21 of the Constitution of India. It tracks the judicial reading of unenumerated rights into the Right to Life and Personal Liberty.</p>
-            <h2>About the Curator</h2>
-            <p>Abhinav Somani is 3rd Year B.A., LL.B. (Hons.) Student at the National Law School of India University, Bengaluru.</p>
-            <h2>Contact</h2>
-            <p>Reach out at: <a href="mailto:pebl.tracker@gmail.com" style="color: var(--accent); font-weight: bold; text-decoration: none;">pebl.tracker@gmail.com</a></p>
+            
+            <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">About the Curator</h2>
+            <p>Abhinav Somani is 3rd Year B.A., LL.B. (Hons.) Student at the National Law School of India University, Bengaluru. He is deeply interested in Constitutional Interpretation, particularly vis-à-vis Rights Provisions.</p>
+
+            <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">Contact</h2>
+            <p>Reach out at: <br>
+            <a href="mailto:pebl.tracker@gmail.com" style="color: var(--accent); font-weight: bold; text-decoration: none;">pebl.tracker@gmail.com</a></p>
         </div>
     </div>
 
@@ -210,34 +214,45 @@
 </div>
 
 <script>
+    // --- THEME LOGIC ---
+    function toggleTheme() {
+        const current = document.documentElement.getAttribute('data-theme');
+        const target = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', target);
+        localStorage.setItem('theme', target);
+        generateHeatmap(); 
+        if(network) initCitationMap(); 
+    }
+
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
+    // --- DATA LOGIC ---
+    const SHEET_ID = '1k3O3nEbs24UXsoAsrNPmaZfBvpAJCmaEzypuQTD-yuY';
+    const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
+
     let allCases = [];
     let currentFilterState = null;
     let network = null;
     let physicsEnabled = true;
 
-    // --- THEME LOGIC ---
-    function toggleTheme() {
-        const target = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', target);
-        localStorage.setItem('theme', target);
-        generateHeatmap();
-        if(network) initCitationMap(); 
-    }
-    document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light');
-
-    // --- DATA FETCHING ---
-    const SHEET_ID = '1k3O3nEbs24UXsoAsrNPmaZfBvpAJCmaEzypuQTD-yuY';
-    const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
-
     window.addEventListener('DOMContentLoaded', () => {
+        loadMap();
+        fetchData();
+    });
+
+    function loadMap() {
         fetch('india.svg').then(r => r.text()).then(svg => {
             document.getElementById('map-container').innerHTML = svg;
             document.querySelectorAll('#map-container path').forEach(p => {
-                p.addEventListener('click', () => { const n = p.getAttribute('name'); if(n) handleMapClick(n); });
+                p.addEventListener('click', () => {
+                    const n = p.getAttribute('name');
+                    if(n) handleMapClick(n);
+                });
             });
+            generateHeatmap();
         });
-        fetchData();
-    });
+    }
 
     function fetchData() {
         fetch(CSV_URL).then(r => r.text()).then(csv => {
@@ -261,7 +276,7 @@
         });
     }
 
-    // --- CITATION MAP LOGIC ---
+    // --- CHAIN OF CITATION LOGIC ---
     function initCitationMap() {
         const container = document.getElementById('network-viz');
         const nodes = [];
@@ -273,7 +288,8 @@
             nodes.push({
                 id: c.name,
                 label: c.name.split(' v. ')[0],
-                title: `${c.name} (${year})`,
+                // Tooltip shows Name, Court, and Year
+                title: `${c.name}\nCourt: ${c.court}\nYear: ${year}`,
                 value: 15,
                 color: {
                     background: isDark ? '#2c3e50' : '#ffffff',
@@ -336,9 +352,15 @@
         const query = document.getElementById('search-input').value.toLowerCase();
         const right = document.getElementById('right-filter').value;
         const sort = document.getElementById('sort-order').value;
+
         let filtered = currentFilterState ? allCases.filter(c => c.state === currentFilterState) : allCases;
         filtered = filtered.filter(c => (c.name.toLowerCase().includes(query) || c.summary.toLowerCase().includes(query)) && (right ? c.rights.includes(right) : true));
-        filtered.sort((a, b) => { const dA = parseDate(a.date); const dB = parseDate(b.date); return sort === 'newest' ? dB - dA : dA - dB; });
+        
+        filtered.sort((a, b) => {
+            const dA = parseDate(a.date); const dB = parseDate(b.date);
+            return sort === 'newest' ? dB - dA : dA - dB;
+        });
+
         renderCases(filtered);
     }
 
@@ -346,18 +368,53 @@
         const list = document.getElementById('case-list');
         list.innerHTML = cases.length ? '' : '<p style="text-align:center; color:var(--text-muted); padding: 40px;">No judgments found.</p>';
         cases.forEach(c => {
+            const tags = c.rights.map(r => `<span class="tag">${r}</span>`).join('');
             let dDisp = c.date;
-            try { const d = parseDate(c.date); if(d.getTime() > 0) dDisp = d.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}); } catch(e){}
-            list.innerHTML += `<div class="card"><div class="card-header"><h3>${c.name}</h3><span class="court-label">${c.court}</span></div><div class="card-date">${dDisp}</div><span class="citation">${c.citation}</span><div>${c.rights.map(r => `<span class="tag">${r}</span>`).join('')}</div><div class="summary-preview">${c.summary}</div><a class="action-link" onclick="openDetails('${encodeURIComponent(c.name)}')">VIEW ANALYSIS →</a></div>`;
+            try { 
+                const d = parseDate(c.date); 
+                if(d.getTime() > 0) dDisp = d.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+            } catch(e){}
+
+            list.innerHTML += `
+                <div class="card">
+                    <div class="card-header"><h3>${c.name}</h3><span class="court-label">${c.court}</span></div>
+                    <div class="card-date">${dDisp}</div>
+                    <span class="citation">${c.citation}</span>
+                    <div>${tags}</div>
+                    <div class="summary-preview">${c.summary}</div>
+                    <a class="action-link" onclick="openDetails('${encodeURIComponent(c.name)}')">VIEW ANALYSIS →</a>
+                </div>`;
         });
     }
 
-    function parseDate(s) { if(!s) return new Date(0); const p = s.split(/[-/.]/); return p.length === 3 ? new Date(p[2], p[1]-1, p[0]) : (p.length === 1 ? new Date(p[0],0,1) : new Date(s)); }
-    function handleMapClick(n) { switchTab('tracker'); currentFilterState = n; document.getElementById('filter-display').innerHTML = `<span class="filter-tag" onclick="resetFilter()">Jurisdiction: ${n} ✕</span>`; handleSearch(); }
+    function parseDate(s) {
+        if(!s) return new Date(0);
+        const p = s.split(/[-/.]/);
+        return p.length === 3 ? new Date(p[2], p[1]-1, p[0]) : (p.length === 1 ? new Date(p[0],0,1) : new Date(s));
+    }
+
+    function handleMapClick(n) {
+        switchTab('tracker');
+        currentFilterState = n;
+        document.getElementById('filter-display').innerHTML = `<span class="filter-tag" onclick="resetFilter()">Jurisdiction: ${n} ✕</span>`;
+        handleSearch();
+        document.getElementById('search-input').scrollIntoView({behavior: "smooth", block: "start"});
+    }
+
     function resetFilter() { currentFilterState = null; document.getElementById('filter-display').innerHTML = ''; handleSearch(); }
+
+    function switchTab(t) {
+        document.querySelectorAll('.tab-content, #details-view').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + t).style.display = 'block';
+        document.getElementById('btn-' + t).classList.add('active');
+        if(t === 'map') setTimeout(initCitationMap, 100);
+    }
+
     function openDetails(enc) {
         const c = allCases.find(x => x.name === decodeURIComponent(enc));
         if(!c) return;
+        window.history.pushState({}, '', '?case=' + enc);
         document.getElementById('detail-title').innerText = c.name;
         document.getElementById('detail-citation').innerText = c.citation;
         document.getElementById('detail-court').innerText = c.court;
@@ -369,19 +426,40 @@
         document.getElementById('details-view').style.display = 'block';
         window.scrollTo(0,0);
     }
-    function closeDetails() { switchTab('tracker'); }
-    function populateDropdown() { const rts = [...new Set(allCases.flatMap(c => c.rights))].sort(); const sel = document.getElementById('right-filter'); rts.forEach(r => { const o = document.createElement('option'); o.value = r; o.innerText = r; sel.appendChild(o); }); }
+
+    function closeDetails() { window.history.pushState({}, '', window.location.pathname); switchTab('tracker'); }
+
+    function populateDropdown() {
+        const rts = [...new Set(allCases.flatMap(c => c.rights))].sort();
+        const sel = document.getElementById('right-filter');
+        rts.forEach(r => { const o = document.createElement('option'); o.value = r; o.innerText = r; sel.appendChild(o); });
+    }
+
     function generateHeatmap() {
         const counts = {}; let max = 0;
         allCases.forEach(c => { if(c.state && c.state !== "Pan-India") { counts[c.state] = (counts[c.state] || 0) + 1; if(counts[c.state] > max) max = counts[c.state]; }});
+        
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         const baseColor = isDark ? [236, 240, 241] : [44, 62, 80]; 
+
         document.querySelectorAll('#map-container path').forEach(p => {
             const n = p.getAttribute('name'); const count = counts[n] || 0;
-            if(count > 0) { const opacity = 0.15 + (0.85 * (count / max)); p.style.fill = `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${opacity})`; }
-            else { p.style.fill = ''; }
+            if(count > 0) {
+                const opacity = 0.15 + (0.85 * (count / max));
+                p.style.fill = `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${opacity})`;
+            } else {
+                p.style.fill = ''; 
+            }
         });
     }
+
+    function checkUrlParams() {
+        const p = new URLSearchParams(window.location.search).get('case');
+        if(p) openDetails(p); else handleSearch();
+    }
+
+    window.onpopstate = () => { const p = new URLSearchParams(window.location.search).get('case'); if(p) openDetails(p); else closeDetails(); };
 </script>
+
 </body>
 </html>
