@@ -61,7 +61,7 @@
         header a { text-decoration: none; color: inherit; }
         p.subtitle { color: var(--text-muted); font-size: 1.05rem; margin-top: 12px; font-style: italic; }
 
-        .tab-nav { display: flex; justify(content: center; gap: 25px; margin-bottom: 40px; font-family: sans-serif; border-bottom: 1px solid var(--border); margin-top: 30px; justify-content: center; }
+        .tab-nav { display: flex; justify-content: center; gap: 25px; margin-bottom: 40px; font-family: sans-serif; border-bottom: 1px solid var(--border); margin-top: 30px; }
         .tab-btn { background: none; border: none; font-size: 0.8rem; color: #777; padding: 12px 5px; cursor: pointer; border-bottom: 2px solid transparent; font-weight: bold; letter-spacing: 1.5px; }
         .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
 
@@ -69,7 +69,6 @@
         #tab-map { width: 100%; display: none; }
         .map-description { text-align: center; font-style: italic; color: var(--text-muted); margin-bottom: 20px; font-size: 0.95rem; padding: 0 20px; }
         
-        /* This container breaks out of the 950px limit */
         #tab-map-container { 
             width: 95vw; 
             max-width: 1600px;
@@ -146,7 +145,6 @@
 </head>
 <body>
 
-<!-- BANNER AREA -->
 <div class="full-width-banner">
     <img src="article21.png" alt="Article 21 Calligraphy" class="banner-img" onerror="this.parentElement.style.display='none'">
 </div>
@@ -213,7 +211,7 @@
     </div>
 </div>
 
-<!-- TAB: CHAIN OF CITATION (OUTSIDE MAIN CONTAINER FOR WIDTH) -->
+<!-- TAB: CHAIN OF CITATION (WIDE LAYOUT) -->
 <div id="tab-map" class="tab-content">
     <p class="map-description">This map traces expansion of Article 21 by following the chain of precedent citations.</p>
     <div id="tab-map-container">
