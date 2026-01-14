@@ -296,6 +296,7 @@
             populateDropdown();
             generateHeatmap();
             handleSearch();
+            checkUrlParams(); // Trigger deep linking check after data load
         });
     }
 
@@ -424,14 +425,6 @@
     }
 
     function resetFilter() { currentFilterState = null; document.getElementById('filter-display').innerHTML = ''; handleSearch(); }
-
-    function switchTab(t) {
-        document.querySelectorAll('.tab-content, #details-view').forEach(el => el.style.display = 'none');
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById('tab-' + t).style.display = 'block';
-        document.getElementById('btn-' + t).classList.add('active');
-        if(t === 'map') setTimeout(initCitationMap, 100);
-    }
 
     function openDetails(enc) {
         const c = allCases.find(x => x.name === decodeURIComponent(enc));
