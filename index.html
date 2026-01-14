@@ -61,15 +61,15 @@
         header a { text-decoration: none; color: inherit; }
         p.subtitle { color: var(--text-muted); font-size: 1.05rem; margin-top: 12px; font-style: italic; }
 
-        .tab-nav { display: flex; justify-content: center; gap: 25px; margin-bottom: 40px; font-family: sans-serif; border-bottom: 1px solid var(--border); margin-top: 30px; }
+        .tab-nav { display: flex; justify-content: center; gap: 25px; margin-bottom: 40px; font-family: sans-serif; border-bottom: 1px solid var(--border); margin-top: 30px; flex-wrap: wrap; }
         .tab-btn { background: none; border: none; font-size: 0.8rem; color: #777; padding: 12px 5px; cursor: pointer; border-bottom: 2px solid transparent; font-weight: bold; letter-spacing: 1.5px; }
         .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
 
-        /* --- TRACKER UI (MAP SIZE INCREASED) --- */
+        /* --- TRACKER UI --- */
         .map-wrapper { 
             position: relative; 
             width: 100%; 
-            max-width: 850px; /* Increased from 500px */
+            max-width: 850px; 
             margin: 0 auto 40px auto; 
         }
         svg { width: 100%; height: auto; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.05)); }
@@ -85,7 +85,76 @@
         #filter-display { text-align: center; margin-bottom: 25px; min-height: 35px; }
         .filter-tag { display: inline-block; background: var(--primary); color: var(--bg); padding: 5px 15px; border-radius: 20px; font-family: sans-serif; font-size: 0.8rem; cursor: pointer; }
 
-        /* --- CHAIN OF CITATION TAB (WIDE LAYOUT) --- */
+        /* --- TIMELINE TAB --- */
+        #tab-timeline { width: 100%; display: none; }
+        .timeline-scroll-area { 
+            width: 100%; 
+            overflow-x: auto; 
+            padding: 60px 20px; 
+            background: var(--card-bg); 
+            border: 1px solid var(--border); 
+            border-radius: 8px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.02);
+        }
+        .timeline-axis { 
+            position: relative; 
+            height: 4px; 
+            background: var(--border); 
+            margin-top: 40px; 
+            margin-bottom: 40px;
+            /* Width set dynamically via JS */
+        }
+        .timeline-node { 
+            position: absolute; 
+            top: 50%; 
+            transform: translate(-50%, -50%); 
+            width: 14px; 
+            height: 14px; 
+            background: var(--primary); 
+            border-radius: 50%; 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+            border: 2px solid var(--card-bg);
+            z-index: 2;
+        }
+        .timeline-node:hover { 
+            transform: translate(-50%, -50%) scale(1.6); 
+            background: var(--accent); 
+            z-index: 10; 
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+        .timeline-label {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-family: sans-serif;
+            font-size: 0.75rem;
+            color: var(--text);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            background: var(--tag-bg);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+        .timeline-node:hover .timeline-label { opacity: 1; }
+        .t-top { bottom: 20px; }
+        .t-bottom { top: 20px; }
+        .year-marker {
+            position: absolute;
+            top: 15px;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-family: sans-serif;
+            border-left: 1px solid var(--border);
+            height: 10px;
+            padding-left: 5px;
+        }
+
+        /* --- CHAIN OF CITATION TAB --- */
         #tab-map { width: 100%; display: none; }
         .map-description { text-align: center; font-style: italic; color: var(--text-muted); margin-bottom: 20px; font-size: 0.95rem; padding: 0 20px; }
         
@@ -171,6 +240,7 @@
 
     <nav class="tab-nav">
         <button id="btn-tracker" class="tab-btn active" onclick="switchTab('tracker')">TRACKER</button>
+        <button id="btn-timeline" class="tab-btn" onclick="switchTab('timeline')">TIMELINE</button>
         <button id="btn-map" class="tab-btn" onclick="switchTab('map')">CHAIN OF CITATION</button>
         <button id="btn-about" class="tab-btn" onclick="switchTab('about')">ABOUT</button>
     </nav>
@@ -187,6 +257,16 @@
         <div id="filter-display"></div>
         <div id="loading">Consulting the Archives...</div>
         <div class="case-grid" id="case-list"></div>
+    </div>
+
+    <!-- TAB: TIMELINE -->
+    <div id="tab-timeline" class="tab-content">
+        <p class="map-description">A chronological view of the expansion of rights. Scroll horizontally to explore.</p>
+        <div class="timeline-scroll-area">
+            <div id="timeline-axis" class="timeline-axis">
+                <!-- Nodes injected via JS -->
+            </div>
+        </div>
     </div>
 
     <!-- TAB: ABOUT -->
@@ -296,7 +376,57 @@
             populateDropdown();
             generateHeatmap();
             handleSearch();
-            checkUrlParams(); // Trigger deep linking check after data load
+            checkUrlParams(); 
+        });
+    }
+
+    // --- TIMELINE LOGIC ---
+    function initTimeline() {
+        const container = document.getElementById('timeline-axis');
+        container.innerHTML = '';
+        
+        // Filter valid dates and sort
+        const validCases = allCases.filter(c => {
+            const d = parseDate(c.date);
+            return d.getTime() > 0;
+        }).sort((a, b) => parseDate(a.date) - parseDate(b.date));
+
+        if(validCases.length === 0) return;
+
+        const minDate = parseDate(validCases[0].date);
+        const maxDate = parseDate(validCases[validCases.length - 1].date);
+        const yearSpan = maxDate.getFullYear() - minDate.getFullYear();
+        
+        // Dynamic width: 100px per year
+        const width = Math.max(1000, yearSpan * 100);
+        container.style.width = width + 'px';
+
+        // Add Year Markers
+        for(let y = minDate.getFullYear(); y <= maxDate.getFullYear(); y++) {
+            const marker = document.createElement('div');
+            marker.className = 'year-marker';
+            marker.innerText = y;
+            const pct = ((new Date(y, 0, 1) - minDate) / (maxDate - minDate)) * 100;
+            marker.style.left = pct + '%';
+            container.appendChild(marker);
+        }
+
+        // Add Nodes
+        validCases.forEach((c, index) => {
+            const d = parseDate(c.date);
+            const pct = ((d - minDate) / (maxDate - minDate)) * 100;
+            
+            const node = document.createElement('div');
+            node.className = 'timeline-node';
+            node.style.left = pct + '%';
+            node.onclick = () => openDetails(encodeURIComponent(c.name));
+
+            const label = document.createElement('div');
+            label.className = `timeline-label ${index % 2 === 0 ? 't-top' : 't-bottom'}`;
+            label.innerHTML = `<strong>${c.name}</strong><br>${d.getFullYear()}`;
+            
+            node.appendChild(label);
+            container.appendChild(node);
         });
     }
 
@@ -368,7 +498,9 @@
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
         document.getElementById('tab-' + t).style.display = 'block';
         document.getElementById('btn-' + t).classList.add('active');
+        
         if(t === 'map') setTimeout(initCitationMap, 100);
+        if(t === 'timeline') setTimeout(initTimeline, 100);
     }
 
     function handleSearch() {
@@ -405,7 +537,7 @@
                     <span class="citation">${c.citation}</span>
                     <div>${tags}</div>
                     <div class="summary-preview">${c.summary}</div>
-                    <a class="action-link" onclick="openDetails('${encodeURIComponent(c.name)}')">VIEW ANALYSIS →</a>
+                    <a class="action-link" onclick="openDetails('${encodeURIComponent(c.name)}')">READ MORE →</a>
                 </div>`;
         });
     }
