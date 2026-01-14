@@ -4,219 +4,94 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- Primary Meta Tags for Search Engines -->
     <title>PEBL | Procedure Established by Law</title>
     <meta name="description" content="An audit of Article 21 jurisprudence. Tracking the shift from Constitutional Interpretation to Judicial Legislation.">
-    <meta name="keywords" content="Article 21, India, Constitution, Supreme Court, PEBL, Unenumerated Rights">
     <meta name="author" content="Abhinav Somani">
 
-    <!-- Google Site Name Structured Data (This fixes the "GitHub" issue) -->
+    <!-- Google Site Name Structured Data -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
       "name": "PEBL",
-      "alternateName": ["Procedure Established by Law", "PEBL Tracker"],
       "url": "https://pebl-tracker.github.io/"
     }
     </script>
 
-    <!-- Open Graph / Facebook (Helps with site name on social media) -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://pebl-tracker.github.io/">
-    <meta property="og:title" content="Procedure Established by Law | PEBL Tracker">
-    <meta property="og:description" content="Tracking the Reading of Unenumerated Rights into Article 21.">
-    <meta property="og:site_name" content="PEBL">
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <!-- Vis.js for the Scrollable Network -->
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 
     <style>
         /* --- THEME VARIABLES --- */
         :root { 
-            --primary: #2c3e50; 
-            --accent: #c0392b; 
-            --bg: #f8f4e9; /* Soft Ivory Background */
-            --card-bg: #ffffff; /* Pure White Cards */
-            --text: #2c2c2c; 
-            --text-muted: #5a5a5a;
-            --border: #e8e2d8;
-            --tag-bg: #f0ede4;
-            --tag-text: #4a4a4a;
-            --input-bg: #ffffff;
-            --parchment: #f2ede4;
-            --banner-opacity: 0.95;
-            --banner-filter: sepia(10%) contrast(102%);
+            --primary: #2c3e50; --accent: #c0392b; --bg: #f8f4e9; 
+            --card-bg: #ffffff; --text: #2c2c2c; --text-muted: #5a5a5a;
+            --border: #e8e2d8; --tag-bg: #f0ede4; --tag-text: #4a4a4a;
+            --input-bg: #ffffff; --parchment: #f2ede4;
+            --banner-opacity: 0.95; --banner-filter: sepia(10%) contrast(102%);
         }
 
         [data-theme="dark"] {
-            --primary: #ecf0f1;
-            --accent: #e74c3c;
-            --bg: #121212;
-            --card-bg: #1e1e1e;
-            --text: #e0e0e0;
-            --text-muted: #aaaaaa;
-            --border: #333333;
-            --tag-bg: #2c3e50;
-            --tag-text: #bdc3c7;
-            --input-bg: #252525;
-            --parchment: #1a1a1a;
-            --banner-opacity: 0.5;
-            --banner-filter: invert(90%) sepia(10%) hue-rotate(180deg) brightness(0.8);
+            --primary: #ecf0f1; --accent: #e74c3c; --bg: #121212;
+            --card-bg: #1e1e1e; --text: #e0e0e0; --text-muted: #aaaaaa;
+            --border: #333333; --tag-bg: #2c3e50; --tag-text: #bdc3c7;
+            --input-bg: #252525; --parchment: #1a1a1a;
+            --banner-opacity: 0.5; --banner-filter: invert(90%) sepia(10%) hue-rotate(180deg) brightness(0.8);
         }
         
-        /* Gradual Transition Logic */
-        * { 
-            box-sizing: border-box; 
-            transition: background-color 0.6s ease, 
-                        color 0.6s ease, 
-                        border-color 0.6s ease, 
-                        box-shadow 0.6s ease, 
-                        filter 0.6s ease, 
-                        opacity 0.6s ease; 
-        }
-        
-        body { 
-            font-family: "Georgia", serif; 
-            background: var(--bg); 
-            margin: 0; 
-            padding: 0; 
-            color: var(--text); 
-            line-height: 1.6;
-        }
+        /* Gradual Transition */
+        * { box-sizing: border-box; transition: background-color 0.6s ease, color 0.6s ease, border-color 0.6s ease; }
+        body { font-family: "Georgia", serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); line-height: 1.6; }
 
-        /* --- THEME TOGGLE --- */
-        .theme-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 6px 12px;
-            cursor: pointer;
-            border-radius: 4px;
-            font-family: sans-serif;
-            font-size: 0.75rem;
-            font-weight: bold;
-            z-index: 100;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .theme-toggle:hover { background: var(--tag-bg); }
+        .theme-toggle { position: absolute; top: 20px; right: 20px; background: var(--card-bg); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; cursor: pointer; border-radius: 4px; font-family: sans-serif; font-size: 0.75rem; font-weight: bold; z-index: 100; }
 
-        /* --- FULL WIDTH BANNER --- */
-        .full-width-banner {
-            width: 100%;
-            height: 180px; 
-            overflow: hidden;
-            background-color: var(--parchment); 
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+        .full-width-banner { width: 100%; height: 180px; overflow: hidden; background-color: var(--parchment); border-bottom: 1px solid var(--border); display: flex; justify-content: center; align-items: center; }
+        .banner-img { max-width: 100%; height: 100%; object-fit: contain; opacity: var(--banner-opacity); filter: var(--banner-filter); }
 
-        .banner-img {
-            max-width: 100%;
-            height: 100%;
-            object-fit: contain; 
-            opacity: var(--banner-opacity);
-            filter: var(--banner-filter);
-        }
-
-        /* --- MAIN LAYOUT --- */
-        .container { 
-            max-width: 950px; 
-            margin: 0 auto; 
-            padding: 0 20px 60px 20px; 
-            position: relative;
-        }
-        
-        header { 
-            margin-top: 30px;
-            margin-bottom: 40px; 
-            text-align: center;
-        }
-
-        h1 { 
-            margin: 0; 
-            color: var(--primary); 
-            font-size: clamp(1.8rem, 5vw, 2.8rem); 
-            letter-spacing: -1px; 
-            font-weight: bold;
-        }
+        .container { max-width: 950px; margin: 0 auto; padding: 0 20px 60px 20px; position: relative; }
+        header { margin-top: 30px; margin-bottom: 40px; text-align: center; }
+        h1 { margin: 0; color: var(--primary); font-size: clamp(1.8rem, 5vw, 2.8rem); letter-spacing: -1px; font-weight: bold; }
         header a { text-decoration: none; color: inherit; }
-        
-        p.subtitle { 
-            color: var(--text-muted); 
-            font-size: 1.05rem; 
-            margin-top: 12px; 
-            margin-bottom: 0; 
-            font-style: italic; 
-        }
+        p.subtitle { color: var(--text-muted); font-size: 1.05rem; margin-top: 12px; font-style: italic; }
 
-        /* --- TABS --- */
-        .tab-nav {
-            display: flex; justify-content: center; gap: 40px; margin-bottom: 40px;
-            font-family: sans-serif; border-bottom: 1px solid var(--border);
-            margin-top: 30px;
-        }
-        .tab-btn {
-            background: none; border: none; font-size: 0.85rem; color: #777;
-            padding: 12px 5px; cursor: pointer; border-bottom: 2px solid transparent;
-            font-weight: bold; letter-spacing: 1.5px;
-        }
-        .tab-btn:hover { color: var(--primary); }
+        .tab-nav { display: flex; justify-content: center; gap: 25px; margin-bottom: 40px; font-family: sans-serif; border-bottom: 1px solid var(--border); margin-top: 30px; }
+        .tab-btn { background: none; border: none; font-size: 0.8rem; color: #777; padding: 12px 5px; cursor: pointer; border-bottom: 2px solid transparent; font-weight: bold; letter-spacing: 1.5px; }
         .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
 
-        /* --- MAP & CONTROLS --- */
+        /* --- NETWORK TAB (SCROLLABLE) --- */
+        #tab-map { width: 100%; height: 75vh; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; position: relative; overflow: hidden; cursor: grab; }
+        #tab-map:active { cursor: grabbing; }
+        #network-viz { width: 100%; height: 100%; }
+        
+        .map-controls { position: absolute; top: 15px; left: 15px; display: flex; flex-direction: column; gap: 8px; z-index: 10; }
+        .map-btn { background: var(--bg); border: 1px solid var(--border); padding: 8px 12px; font-size: 0.75rem; cursor: pointer; font-family: sans-serif; border-radius: 4px; font-weight: bold; color: var(--text); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .map-btn:hover { background: var(--tag-bg); }
+        
+        .map-hint { position: absolute; bottom: 15px; right: 15px; font-family: sans-serif; font-size: 0.7rem; color: var(--text-muted); pointer-events: none; background: rgba(255,255,255,0.7); padding: 4px 8px; border-radius: 4px; }
+
+        /* --- TRACKER UI --- */
         .map-wrapper { position: relative; width: 100%; max-width: 500px; margin: 0 auto 30px auto; }
         svg { width: 100%; height: auto; }
         path { cursor: pointer; fill: var(--tag-bg); stroke: var(--bg); stroke-width: 0.7; }
         path:hover { fill: var(--accent) !important; }
-
-        .sc-btn {
-            display: block; width: fit-content; margin: 0 auto 50px auto;
-            background: var(--accent); color: white; text-align: center;
-            padding: 10px 25px; border-radius: 50px; text-decoration: none;
-            font-family: sans-serif; font-size: 0.85rem; font-weight: bold; cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-
-        .controls-bar {
-            display: flex; gap: 12px; margin-bottom: 25px;
-            background: var(--card-bg); padding: 15px; border: 1px solid var(--border);
-            border-radius: 4px; font-family: sans-serif; flex-wrap: wrap;
-        }
-        #search-input { flex-grow: 2; padding: 10px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.95rem; background: var(--input-bg); color: var(--text); }
-        .filter-select { flex-grow: 1; padding: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); color: var(--text); cursor: pointer; }
-
+        .sc-btn { display: block; width: fit-content; margin: 0 auto 50px auto; background: var(--accent); color: white; text-align: center; padding: 10px 25px; border-radius: 50px; text-decoration: none; font-family: sans-serif; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
+        .controls-bar { display: flex; gap: 12px; margin-bottom: 25px; background: var(--card-bg); padding: 15px; border: 1px solid var(--border); border-radius: 4px; font-family: sans-serif; flex-wrap: wrap; }
+        #search-input { flex-grow: 2; padding: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); color: var(--text); }
+        .filter-select { flex-grow: 1; padding: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); color: var(--text); }
         #filter-display { text-align: center; margin-bottom: 25px; min-height: 35px; }
-        .filter-tag { 
-            display: inline-block; background: var(--primary); color: var(--bg); 
-            padding: 5px 15px; border-radius: 20px; font-family: sans-serif; 
-            font-size: 0.8rem; cursor: pointer;
-        }
+        .filter-tag { display: inline-block; background: var(--primary); color: var(--bg); padding: 5px 15px; border-radius: 20px; font-family: sans-serif; font-size: 0.8rem; cursor: pointer; }
 
-        /* --- CASE CARDS --- */
+        /* --- CARDS --- */
         .case-grid { display: grid; gap: 25px; }
-        .card { 
-            background: var(--card-bg); padding: 30px; border: 1px solid var(--border); 
-            border-left: 5px solid var(--primary); font-family: sans-serif; 
-        }
+        .card { background: var(--card-bg); padding: 30px; border: 1px solid var(--border); border-left: 5px solid var(--primary); font-family: sans-serif; }
         .card:hover { box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
         .card h3 { margin: 0; color: var(--primary); font-size: 1.3rem; line-height: 1.3; flex: 1; }
         .court-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: bold; margin-left: 15px; }
         .card-date { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px; font-weight: bold; }
         .citation { font-family: "Georgia", serif; color: var(--text-muted); font-style: italic; display: block; margin-bottom: 15px; font-size: 0.95rem; }
-        
-        .tag { 
-            background: var(--tag-bg); padding: 4px 10px; border-radius: 3px; 
-            font-size: 0.7rem; font-weight: bold; color: #666; 
-            display: inline-block; margin-right: 6px; margin-bottom: 6px;
-            text-transform: uppercase;
-        }
-        
+        .tag { background: var(--tag-bg); padding: 4px 10px; border-radius: 3px; font-size: 0.7rem; font-weight: bold; color: #666; display: inline-block; margin-right: 6px; margin-bottom: 6px; text-transform: uppercase; }
         .summary-preview { color: var(--text); line-height: 1.6; margin-bottom: 15px; font-size: 0.95rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
         .action-link { color: var(--primary); font-weight: bold; text-decoration: none; border-bottom: 2px solid var(--primary); cursor: pointer; font-size: 0.85rem; }
 
@@ -234,12 +109,12 @@
             .card-header { flex-direction: column; }
             .court-label { margin-left: 0; margin-top: 5px; }
             .theme-toggle { top: 10px; right: 10px; }
+            #tab-map { height: 60vh; }
         }
     </style>
 </head>
 <body>
 
-<!-- BANNER AREA -->
 <div class="full-width-banner">
     <img src="article21.png" alt="Article 21 Calligraphy" class="banner-img" onerror="this.parentElement.style.display='none'">
 </div>
@@ -256,42 +131,45 @@
 
     <nav class="tab-nav">
         <button id="btn-tracker" class="tab-btn active" onclick="switchTab('tracker')">TRACKER</button>
+        <button id="btn-map" class="tab-btn" onclick="switchTab('map')">CITATION NETWORK</button>
         <button id="btn-about" class="tab-btn" onclick="switchTab('about')">ABOUT</button>
     </nav>
 
-    <!-- TRACKER TAB -->
+    <!-- TAB: TRACKER -->
     <div id="tab-tracker" class="tab-content">
         <div class="map-wrapper" id="map-container"></div>
         <div class="sc-btn" onclick="handleMapClick('Pan-India')">★ Supreme Court (Pan-India)</div>
-
         <div class="controls-bar">
-            <input type="text" id="search-input" placeholder="Search cases or keywords..." onkeyup="handleSearch()">
-            <select id="right-filter" class="filter-select" onchange="handleSearch()">
-                <option value="">All Rights</option>
-            </select>
-            <select id="sort-order" class="filter-select" onchange="handleSearch()">
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-            </select>
+            <input type="text" id="search-input" placeholder="Search cases..." onkeyup="handleSearch()">
+            <select id="right-filter" class="filter-select" onchange="handleSearch()"><option value="">All Rights</option></select>
+            <select id="sort-order" class="filter-select" onchange="handleSearch()"><option value="newest">Newest First</option><option value="oldest">Oldest First</option></select>
         </div>
-
         <div id="filter-display"></div>
         <div id="loading">Consulting the Archives...</div>
         <div class="case-grid" id="case-list"></div>
     </div>
 
-    <!-- ABOUT TAB -->
+    <!-- TAB: CITATION MAP (SCROLLABLE) -->
+    <div id="tab-map" class="tab-content" style="display: none;">
+        <div class="map-controls">
+            <button class="map-btn" onclick="zoomMap(1.2)">+</button>
+            <button class="map-btn" onclick="zoomMap(0.8)">-</button>
+            <button class="map-btn" onclick="resetMap()">Fit Screen</button>
+            <button class="map-btn" id="physics-btn" onclick="togglePhysics()">Freeze</button>
+        </div>
+        <div id="network-viz"></div>
+        <div class="map-hint">Scroll to Zoom • Drag to Pan • Click Node for Details</div>
+    </div>
+
+    <!-- TAB: ABOUT -->
     <div id="tab-about" class="tab-content" style="display: none;">
         <div style="max-width: 700px; margin: 0 auto;">
-            <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px;">About the Project</h2>
+            <h2>About the Project</h2>
             <p><strong>Procedure Established by Law (PEBL)</strong> is a digital archive auditing the expansion of Article 21 of the Constitution of India. It tracks the judicial reading of unenumerated rights into the Right to Life and Personal Liberty.</p>
-            
-            <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">About the Curator</h2>
-            <p>Abhinav Somani is 3rd Year B.A., LL.B. (Hons.) Student at the National Law School of India University, Bengaluru. He is deeply interested in Constitutional Interpretation, particularly vis-à-vis Rights Provisions.</p>
-
-            <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">Contact</h2>
-            <p>Reach out at: <br>
-            <a href="mailto:pebl.tracker@gmail.com" style="color: var(--accent); font-weight: bold; text-decoration: none;">pebl.tracker@gmail.com</a></p>
+            <h2>About the Curator</h2>
+            <p>Abhinav Somani is 3rd Year B.A., LL.B. (Hons.) Student at the National Law School of India University, Bengaluru.</p>
+            <h2>Contact</h2>
+            <p>Reach out at: <a href="mailto:pebl.tracker@gmail.com" style="color: var(--accent); font-weight: bold; text-decoration: none;">pebl.tracker@gmail.com</a></p>
         </div>
     </div>
 
@@ -313,42 +191,34 @@
 </div>
 
 <script>
+    let allCases = [];
+    let currentFilterState = null;
+    let network = null;
+    let physicsEnabled = true;
+
     // --- THEME LOGIC ---
     function toggleTheme() {
-        const current = document.documentElement.getAttribute('data-theme');
-        const target = current === 'dark' ? 'light' : 'dark';
+        const target = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         document.documentElement.setAttribute('data-theme', target);
         localStorage.setItem('theme', target);
-        generateHeatmap(); 
+        generateHeatmap();
+        if(network) initCitationMap(); 
     }
+    document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light');
 
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-
-    // --- DATA LOGIC ---
+    // --- DATA FETCHING ---
     const SHEET_ID = '1k3O3nEbs24UXsoAsrNPmaZfBvpAJCmaEzypuQTD-yuY';
     const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
 
-    let allCases = [];
-    let currentFilterState = null;
-
     window.addEventListener('DOMContentLoaded', () => {
-        loadMap();
-        fetchData();
-    });
-
-    function loadMap() {
         fetch('india.svg').then(r => r.text()).then(svg => {
             document.getElementById('map-container').innerHTML = svg;
             document.querySelectorAll('#map-container path').forEach(p => {
-                p.addEventListener('click', () => {
-                    const n = p.getAttribute('name');
-                    if(n) handleMapClick(n);
-                });
+                p.addEventListener('click', () => { const n = p.getAttribute('name'); if(n) handleMapClick(n); });
             });
-            generateHeatmap();
         });
-    }
+        fetchData();
+    });
 
     function fetchData() {
         fetch(CSV_URL).then(r => r.text()).then(csv => {
@@ -361,29 +231,102 @@
                 rights: (row[4] || "").split(',').map(r => r.trim()).filter(r => r),
                 summary: (row[5] || "").trim(),
                 link: (row[6] || "#").trim(),
-                date: (row[7] || "").trim()
+                date: (row[7] || "").trim(),
+                cites: (row[8] || "").split(',').map(c => c.trim()).filter(c => c)
             })).filter(c => c.name && c.name !== "Case Name");
 
             document.getElementById('loading').style.display = 'none';
             populateDropdown();
             generateHeatmap();
-            checkUrlParams();
+            handleSearch();
         });
+    }
+
+    // --- CITATION MAP LOGIC (SCROLLABLE) ---
+    function initCitationMap() {
+        const container = document.getElementById('network-viz');
+        const nodes = [];
+        const edges = [];
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+        allCases.forEach((c) => {
+            const year = parseDate(c.date).getFullYear();
+            nodes.push({
+                id: c.name,
+                label: c.name.split(' v. ')[0],
+                title: `${c.name} (${year})`,
+                value: 15,
+                color: {
+                    background: isDark ? '#2c3e50' : '#ffffff',
+                    border: isDark ? '#ecf0f1' : '#2c3e50',
+                    highlight: { background: '#c0392b', border: '#c0392b' }
+                },
+                font: { color: isDark ? '#e0e0e0' : '#2c2c2c', size: 14, face: 'Georgia' }
+            });
+
+            c.cites.forEach(citedCaseName => {
+                // Only link if the cited case exists in our database
+                if (allCases.some(x => x.name === citedCaseName)) {
+                    edges.push({
+                        from: c.name,
+                        to: citedCaseName,
+                        arrows: 'to',
+                        color: { color: isDark ? '#555' : '#bbb', opacity: 0.8 },
+                        width: 2,
+                        smooth: { type: 'curvedCW', roundness: 0.2 }
+                    });
+                }
+            });
+        });
+
+        const data = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
+        const options = {
+            nodes: { shape: 'dot', scaling: { min: 10, max: 30 } },
+            physics: {
+                enabled: physicsEnabled,
+                forceAtlas2Based: { gravitationalConstant: -150, centralGravity: 0.01, springLength: 200, springConstant: 0.05 },
+                solver: 'forceAtlas2Based',
+                stabilization: { iterations: 150 }
+            },
+            interaction: { 
+                dragNodes: true, 
+                dragView: true, 
+                zoomView: true, // This enables scroll-to-zoom
+                hover: true, 
+                tooltipDelay: 200 
+            }
+        };
+
+        network = new vis.Network(container, data, options);
+        network.on("click", (params) => {
+            if (params.nodes.length > 0) openDetails(encodeURIComponent(params.nodes[0]));
+        });
+    }
+
+    function zoomMap(scale) { network.moveTo({ scale: network.getScale() * scale }); }
+    function resetMap() { network.fit({ animation: true }); }
+    function togglePhysics() {
+        physicsEnabled = !physicsEnabled;
+        network.setOptions({ physics: { enabled: physicsEnabled } });
+        document.getElementById('physics-btn').innerText = physicsEnabled ? "Freeze" : "Unfreeze";
+    }
+
+    // --- UI LOGIC ---
+    function switchTab(t) {
+        document.querySelectorAll('.tab-content, #details-view').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + t).style.display = 'block';
+        document.getElementById('btn-' + t).classList.add('active');
+        if(t === 'map') setTimeout(initCitationMap, 100);
     }
 
     function handleSearch() {
         const query = document.getElementById('search-input').value.toLowerCase();
         const right = document.getElementById('right-filter').value;
         const sort = document.getElementById('sort-order').value;
-
         let filtered = currentFilterState ? allCases.filter(c => c.state === currentFilterState) : allCases;
         filtered = filtered.filter(c => (c.name.toLowerCase().includes(query) || c.summary.toLowerCase().includes(query)) && (right ? c.rights.includes(right) : true));
-        
-        filtered.sort((a, b) => {
-            const dA = parseDate(a.date); const dB = parseDate(b.date);
-            return sort === 'newest' ? dB - dA : dA - dB;
-        });
-
+        filtered.sort((a, b) => { const dA = parseDate(a.date); const dB = parseDate(b.date); return sort === 'newest' ? dB - dA : dA - dB; });
         renderCases(filtered);
     }
 
@@ -391,52 +334,18 @@
         const list = document.getElementById('case-list');
         list.innerHTML = cases.length ? '' : '<p style="text-align:center; color:var(--text-muted); padding: 40px;">No judgments found.</p>';
         cases.forEach(c => {
-            const tags = c.rights.map(r => `<span class="tag">${r}</span>`).join('');
             let dDisp = c.date;
-            try { 
-                const d = parseDate(c.date); 
-                if(d.getTime() > 0) dDisp = d.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
-            } catch(e){}
-
-            list.innerHTML += `
-                <div class="card">
-                    <div class="card-header"><h3>${c.name}</h3><span class="court-label">${c.court}</span></div>
-                    <div class="card-date">${dDisp}</div>
-                    <span class="citation">${c.citation}</span>
-                    <div>${tags}</div>
-                    <div class="summary-preview">${c.summary}</div>
-                    <a class="action-link" onclick="openDetails('${encodeURIComponent(c.name)}')">VIEW ANALYSIS →</a>
-                </div>`;
+            try { const d = parseDate(c.date); if(d.getTime() > 0) dDisp = d.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}); } catch(e){}
+            list.innerHTML += `<div class="card"><div class="card-header"><h3>${c.name}</h3><span class="court-label">${c.court}</span></div><div class="card-date">${dDisp}</div><span class="citation">${c.citation}</span><div>${c.rights.map(r => `<span class="tag">${r}</span>`).join('')}</div><div class="summary-preview">${c.summary}</div><a class="action-link" onclick="openDetails('${encodeURIComponent(c.name)}')">VIEW ANALYSIS →</a></div>`;
         });
     }
 
-    function parseDate(s) {
-        if(!s) return new Date(0);
-        const p = s.split(/[-/.]/);
-        return p.length === 3 ? new Date(p[2], p[1]-1, p[0]) : (p.length === 1 ? new Date(p[0],0,1) : new Date(s));
-    }
-
-    function handleMapClick(n) {
-        switchTab('tracker');
-        currentFilterState = n;
-        document.getElementById('filter-display').innerHTML = `<span class="filter-tag" onclick="resetFilter()">Jurisdiction: ${n} ✕</span>`;
-        handleSearch();
-        document.getElementById('search-input').scrollIntoView({behavior: "smooth", block: "start"});
-    }
-
+    function parseDate(s) { if(!s) return new Date(0); const p = s.split(/[-/.]/); return p.length === 3 ? new Date(p[2], p[1]-1, p[0]) : (p.length === 1 ? new Date(p[0],0,1) : new Date(s)); }
+    function handleMapClick(n) { switchTab('tracker'); currentFilterState = n; document.getElementById('filter-display').innerHTML = `<span class="filter-tag" onclick="resetFilter()">Jurisdiction: ${n} ✕</span>`; handleSearch(); }
     function resetFilter() { currentFilterState = null; document.getElementById('filter-display').innerHTML = ''; handleSearch(); }
-
-    function switchTab(t) {
-        document.querySelectorAll('.tab-content, #details-view').forEach(el => el.style.display = 'none');
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById('tab-' + t).style.display = 'block';
-        document.getElementById('btn-' + t).classList.add('active');
-    }
-
     function openDetails(enc) {
         const c = allCases.find(x => x.name === decodeURIComponent(enc));
         if(!c) return;
-        window.history.pushState({}, '', '?case=' + enc);
         document.getElementById('detail-title').innerText = c.name;
         document.getElementById('detail-citation').innerText = c.citation;
         document.getElementById('detail-court').innerText = c.court;
@@ -448,40 +357,19 @@
         document.getElementById('details-view').style.display = 'block';
         window.scrollTo(0,0);
     }
-
-    function closeDetails() { window.history.pushState({}, '', window.location.pathname); switchTab('tracker'); }
-
-    function populateDropdown() {
-        const rts = [...new Set(allCases.flatMap(c => c.rights))].sort();
-        const sel = document.getElementById('right-filter');
-        rts.forEach(r => { const o = document.createElement('option'); o.value = r; o.innerText = r; sel.appendChild(o); });
-    }
-
+    function closeDetails() { switchTab('tracker'); }
+    function populateDropdown() { const rts = [...new Set(allCases.flatMap(c => c.rights))].sort(); const sel = document.getElementById('right-filter'); rts.forEach(r => { const o = document.createElement('option'); o.value = r; o.innerText = r; sel.appendChild(o); }); }
     function generateHeatmap() {
         const counts = {}; let max = 0;
         allCases.forEach(c => { if(c.state && c.state !== "Pan-India") { counts[c.state] = (counts[c.state] || 0) + 1; if(counts[c.state] > max) max = counts[c.state]; }});
-        
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         const baseColor = isDark ? [236, 240, 241] : [44, 62, 80]; 
-
         document.querySelectorAll('#map-container path').forEach(p => {
             const n = p.getAttribute('name'); const count = counts[n] || 0;
-            if(count > 0) {
-                const opacity = 0.15 + (0.85 * (count / max));
-                p.style.fill = `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${opacity})`;
-            } else {
-                p.style.fill = ''; 
-            }
+            if(count > 0) { const opacity = 0.15 + (0.85 * (count / max)); p.style.fill = `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${opacity})`; }
+            else { p.style.fill = ''; }
         });
     }
-
-    function checkUrlParams() {
-        const p = new URLSearchParams(window.location.search).get('case');
-        if(p) openDetails(p); else handleSearch();
-    }
-
-    window.onpopstate = () => { const p = new URLSearchParams(window.location.search).get('case'); if(p) openDetails(p); else closeDetails(); };
 </script>
-
 </body>
 </html>
