@@ -47,7 +47,7 @@
             transition: background-color 0.6s ease, color 0.6s ease, border-color 0.6s ease; 
         }
         
-        body { font-family: "Georgia", serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); line-height: 1.6; }
+        body { font-family: "Georgia", serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); line-height: 1.6; overflow-x: hidden; }
 
         .theme-toggle { position: absolute; top: 20px; right: 20px; background: var(--card-bg); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; cursor: pointer; border-radius: 4px; font-family: sans-serif; font-size: 0.75rem; font-weight: bold; z-index: 100; }
 
@@ -55,18 +55,33 @@
         .banner-img { max-width: 100%; height: 100%; object-fit: contain; opacity: var(--banner-opacity); filter: var(--banner-filter); }
 
         .container { max-width: 950px; margin: 0 auto; padding: 0 20px 60px 20px; position: relative; }
+        
         header { margin-top: 30px; margin-bottom: 40px; text-align: center; }
         h1 { margin: 0; color: var(--primary); font-size: clamp(1.8rem, 5vw, 2.8rem); letter-spacing: -1px; font-weight: bold; }
         header a { text-decoration: none; color: inherit; }
         p.subtitle { color: var(--text-muted); font-size: 1.05rem; margin-top: 12px; font-style: italic; }
 
-        .tab-nav { display: flex; justify-content: center; gap: 25px; margin-bottom: 40px; font-family: sans-serif; border-bottom: 1px solid var(--border); margin-top: 30px; }
+        .tab-nav { display: flex; justify(content: center; gap: 25px; margin-bottom: 40px; font-family: sans-serif; border-bottom: 1px solid var(--border); margin-top: 30px; justify-content: center; }
         .tab-btn { background: none; border: none; font-size: 0.8rem; color: #777; padding: 12px 5px; cursor: pointer; border-bottom: 2px solid transparent; font-weight: bold; letter-spacing: 1.5px; }
         .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
 
-        /* --- CHAIN OF CITATION TAB --- */
-        .map-description { text-align: center; font-style: italic; color: var(--text-muted); margin-bottom: 20px; font-size: 0.95rem; }
-        #tab-map-container { width: 100%; height: 75vh; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; position: relative; overflow: hidden; }
+        /* --- CHAIN OF CITATION TAB (WIDE LAYOUT) --- */
+        #tab-map { width: 100%; display: none; }
+        .map-description { text-align: center; font-style: italic; color: var(--text-muted); margin-bottom: 20px; font-size: 0.95rem; padding: 0 20px; }
+        
+        /* This container breaks out of the 950px limit */
+        #tab-map-container { 
+            width: 95vw; 
+            max-width: 1600px;
+            height: 85vh; 
+            margin: 0 auto 40px auto;
+            background: var(--card-bg); 
+            border: 1px solid var(--border); 
+            border-radius: 8px; 
+            position: relative; 
+            overflow: hidden; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
         #network-viz { width: 100%; height: 100%; cursor: grab; }
         #network-viz:active { cursor: grabbing; }
         
@@ -125,7 +140,7 @@
             .card-header { flex-direction: column; }
             .court-label { margin-left: 0; margin-top: 5px; }
             .theme-toggle { top: 10px; right: 10px; }
-            #tab-map-container { height: 60vh; }
+            #tab-map-container { width: 100vw; height: 70vh; border-radius: 0; border-left: none; border-right: none; }
         }
     </style>
 </head>
@@ -166,21 +181,6 @@
         <div class="case-grid" id="case-list"></div>
     </div>
 
-    <!-- TAB: CHAIN OF CITATION -->
-    <div id="tab-map" class="tab-content" style="display: none;">
-        <p class="map-description">This map traces expansion of Article 21 by following the chain of precedent citations.</p>
-        <div id="tab-map-container">
-            <div class="map-controls">
-                <button class="map-btn" onclick="zoomMap(1.2)">+</button>
-                <button class="map-btn" onclick="zoomMap(0.8)">-</button>
-                <button class="map-btn" onclick="resetMap()">Fit Screen</button>
-                <button class="map-btn" id="physics-btn" onclick="togglePhysics()">Freeze</button>
-            </div>
-            <div id="network-viz"></div>
-            <div class="map-hint">Scroll to Zoom • Drag to Pan • Click a Case for Details</div>
-        </div>
-    </div>
-
     <!-- TAB: ABOUT -->
     <div id="tab-about" class="tab-content" style="display: none;">
         <div style="max-width: 700px; margin: 0 auto;">
@@ -210,6 +210,21 @@
         </div>
         <div class="details-body" id="detail-summary"></div>
         <a href="#" target="_blank" class="external-btn" id="detail-link">Read Full Judgment →</a>
+    </div>
+</div>
+
+<!-- TAB: CHAIN OF CITATION (OUTSIDE MAIN CONTAINER FOR WIDTH) -->
+<div id="tab-map" class="tab-content">
+    <p class="map-description">This map traces expansion of Article 21 by following the chain of precedent citations.</p>
+    <div id="tab-map-container">
+        <div class="map-controls">
+            <button class="map-btn" onclick="zoomMap(1.2)">+</button>
+            <button class="map-btn" onclick="zoomMap(0.8)">-</button>
+            <button class="map-btn" onclick="resetMap()">Fit Screen</button>
+            <button class="map-btn" id="physics-btn" onclick="togglePhysics()">Freeze</button>
+        </div>
+        <div id="network-viz"></div>
+        <div class="map-hint">Scroll to Zoom • Drag to Pan • Click a Case for Details</div>
     </div>
 </div>
 
@@ -288,7 +303,6 @@
             nodes.push({
                 id: c.name,
                 label: c.name.split(' v. ')[0],
-                // Tooltip shows Name, Court, and Year
                 title: `${c.name}\nCourt: ${c.court}\nYear: ${year}`,
                 value: 15,
                 color: {
@@ -318,7 +332,7 @@
             nodes: { shape: 'dot', scaling: { min: 10, max: 30 } },
             physics: {
                 enabled: physicsEnabled,
-                forceAtlas2Based: { gravitationalConstant: -150, centralGravity: 0.01, springLength: 200, springConstant: 0.05 },
+                forceAtlas2Based: { gravitationalConstant: -250, centralGravity: 0.01, springLength: 300, springConstant: 0.05 },
                 solver: 'forceAtlas2Based',
                 stabilization: { iterations: 150 }
             },
@@ -402,14 +416,6 @@
     }
 
     function resetFilter() { currentFilterState = null; document.getElementById('filter-display').innerHTML = ''; handleSearch(); }
-
-    function switchTab(t) {
-        document.querySelectorAll('.tab-content, #details-view').forEach(el => el.style.display = 'none');
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById('tab-' + t).style.display = 'block';
-        document.getElementById('btn-' + t).classList.add('active');
-        if(t === 'map') setTimeout(initCitationMap, 100);
-    }
 
     function openDetails(enc) {
         const c = allCases.find(x => x.name === decodeURIComponent(enc));
