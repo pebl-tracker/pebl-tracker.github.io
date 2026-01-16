@@ -158,10 +158,11 @@
             font-family: sans-serif;
             font-weight: bold;
             color: var(--accent);
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             margin-bottom: 5px;
             display: block;
             letter-spacing: 1px;
+            text-transform: uppercase;
         }
         .t-title {
             margin: 0 0 10px 0;
@@ -435,7 +436,7 @@
             item.innerHTML = `
                 <div class="timeline-dot"></div>
                 <div class="timeline-content" onclick="openDetails('${encodeURIComponent(c.name)}')">
-                    <span class="t-date">${dateStr}</span>
+                    <span class="t-date">${dateStr} • ${c.court.toUpperCase()}</span>
                     <h3 class="t-title">${c.name}</h3>
                     <p class="t-summary">${c.summary}</p>
                 </div>
