@@ -11,7 +11,6 @@
     <!-- OPEN GRAPH / SOCIAL SHARING TAGS -->
     <meta property="og:title" content="PEBL | Procedure Established by Law">
     <meta property="og:description" content="Tracking the Reading of Unenumerated Rights into Article 21">
-    <!-- UPDATED: Points to the new, larger social card image -->
     <meta property="og:image" content="https://pebl-tracker.github.io/social_card.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -74,7 +73,6 @@
 
         .container { max-width: 950px; margin: 0 auto; padding: 0 20px 60px 20px; position: relative; flex: 1; }
         
-        /* Increased margin-top to prevent Theme button overlap */
         header { margin-top: 60px; margin-bottom: 40px; text-align: center; }
         h1 { margin: 0; color: var(--primary); font-size: clamp(1.8rem, 5vw, 2.8rem); letter-spacing: -1px; font-weight: bold; }
         header a { text-decoration: none; color: inherit; }
@@ -85,12 +83,7 @@
         .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
 
         /* --- TRACKER UI --- */
-        .map-wrapper { 
-            position: relative; 
-            width: 100%; 
-            max-width: 850px; 
-            margin: 0 auto 40px auto; 
-        }
+        .map-wrapper { position: relative; width: 100%; max-width: 850px; margin: 0 auto 40px auto; }
         svg { width: 100%; height: auto; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.05)); }
         path { cursor: pointer; fill: var(--tag-bg); stroke: var(--bg); stroke-width: 0.7; }
         path:hover { fill: var(--accent) !important; }
@@ -107,23 +100,8 @@
 
         /* --- VERTICAL TIMELINE --- */
         #tab-timeline { width: 100%; display: none; }
-        .timeline-container {
-            position: relative;
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 40px 0;
-        }
-        .timeline-container::after {
-            content: '';
-            position: absolute;
-            width: 4px;
-            background-color: var(--timeline-line);
-            top: 0;
-            bottom: 0;
-            left: 50%;
-            margin-left: -2px;
-            border-radius: 2px;
-        }
+        .timeline-container { position: relative; max-width: 1000px; margin: 0 auto; padding: 40px 0; }
+        .timeline-container::after { content: ''; position: absolute; width: 4px; background-color: var(--timeline-line); top: 0; bottom: 0; left: 50%; margin-left: -2px; border-radius: 2px; }
         .timeline-item { padding: 10px 40px; position: relative; background-color: inherit; width: 50%; box-sizing: border-box; }
         .timeline-item.left { left: 0; text-align: right; }
         .timeline-item.right { left: 50%; text-align: left; }
@@ -175,16 +153,19 @@
         .cite-btn { background: var(--card-bg); border: 1px solid var(--border); padding: 8px 15px; border-radius: 20px; cursor: pointer; font-family: sans-serif; font-weight: bold; color: var(--primary); margin-top: 15px; display: inline-block; }
         .cite-btn:hover { background: var(--primary); color: var(--bg); }
 
+        /* --- LOADING & SCROLL --- */
         #loading { text-align: center; color: var(--text-muted); padding: 60px; font-style: italic; }
+        .loader { border: 4px solid var(--border); border-top: 4px solid var(--accent); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 15px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
+        .scroll-top-btn { position: fixed; bottom: 30px; right: 30px; background: var(--primary); color: var(--bg); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 100; }
+        .scroll-top-btn:hover { transform: translateY(-3px); }
+
         /* --- MOBILE RESPONSIVENESS --- */
         @media (max-width: 600px) {
             .full-width-banner { height: auto; padding: 0; border-bottom: 1px solid var(--border); }
             .banner-img { width: 100%; height: auto; object-fit: contain; display: block; }
-            
-            /* Increased padding to clear the Theme button on mobile */
             header { margin-top: 0; padding-top: 50px; } 
-            
             .card-header { flex-direction: column; }
             .court-label { margin-left: 0; margin-top: 5px; }
             .theme-toggle { top: 10px; right: 10px; }
@@ -234,7 +215,10 @@
             <button class="download-btn" onclick="downloadData()">Download CSV</button>
         </div>
         <div id="filter-display"></div>
-        <div id="loading">Consulting the Archives...</div>
+        <div id="loading">
+            <div class="loader"></div>
+            Consulting the Archives...
+        </div>
         <div class="case-grid" id="case-list"></div>
     </div>
 
@@ -316,6 +300,9 @@
     </div>
 </footer>
 
+<!-- BACK TO TOP BUTTON -->
+<button class="scroll-top-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</button>
+
 <script>
     // --- THEME LOGIC ---
     function toggleTheme() {
@@ -342,6 +329,13 @@
     window.addEventListener('DOMContentLoaded', () => {
         loadMap();
         fetchData();
+        
+        // Scroll Listener for Back-to-Top
+        window.addEventListener('scroll', () => {
+            const btn = document.querySelector('.scroll-top-btn');
+            if (window.scrollY > 300) btn.style.display = 'block';
+            else btn.style.display = 'none';
+        });
     });
 
     function loadMap() {
@@ -359,11 +353,14 @@
                 });
             });
             generateHeatmap();
-        });
+        }).catch(err => console.error("Map load failed", err));
     }
 
     function fetchData() {
-        fetch(CSV_URL).then(r => r.text()).then(csv => {
+        fetch(CSV_URL).then(r => {
+            if (!r.ok) throw new Error("Network response was not ok");
+            return r.text();
+        }).then(csv => {
             const parsed = Papa.parse(csv, { header: false, skipEmptyLines: true });
             allCases = parsed.data.slice(1).map(row => ({
                 name: (row[0] || "").trim(),
@@ -382,12 +379,14 @@
             generateHeatmap();
             handleSearch();
             checkUrlParams(); 
+        }).catch(error => {
+            document.getElementById('loading').innerHTML = `<p style="color:var(--accent); font-weight:bold;">Unable to load case data.<br>Please check your internet connection or try again later.</p>`;
+            console.error("Data fetch failed:", error);
         });
     }
 
     // --- CITATION & EXPORT LOGIC ---
     function copyCaseCitation() {
-        // Grab only the text inside the span, ignoring the button
         const text = document.getElementById('raw-citation').innerText.trim();
         navigator.clipboard.writeText(text).then(() => alert('Citation copied to clipboard!'));
     }
