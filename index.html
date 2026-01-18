@@ -180,14 +180,6 @@
             overflow: hidden;
         }
 
-        /* Mobile Responsive Timeline */
-        @media screen and (max-width: 768px) {
-            .timeline-container::after { left: 31px; }
-            .timeline-item { width: 100%; padding-left: 70px; padding-right: 25px; }
-            .timeline-item.left, .timeline-item.right { left: 0; text-align: left; }
-            .timeline-dot { left: 21px !important; right: auto; }
-        }
-
         /* --- CHAIN OF CITATION TAB --- */
         #tab-map { width: 100%; display: none; }
         .map-description { text-align: center; font-style: italic; color: var(--text-muted); margin-bottom: 20px; font-size: 0.95rem; padding: 0 20px; }
@@ -245,13 +237,29 @@
 
         #loading { text-align: center; color: var(--text-muted); padding: 60px; font-style: italic; }
         
+        /* --- MOBILE RESPONSIVENESS FIXES --- */
         @media (max-width: 600px) {
-            .full-width-banner { height: 120px; }
+            /* Fix Banner Scaling */
+            .full-width-banner { height: auto; min-height: 80px; padding: 10px; }
+            .banner-img { width: 100%; height: auto; object-fit: contain; }
+
+            /* Fix Header Overlap */
+            header { margin-top: 10px; padding-top: 40px; } /* Push text down to clear button */
             .card-header { flex-direction: column; }
             .court-label { margin-left: 0; margin-top: 5px; }
             .theme-toggle { top: 10px; right: 10px; }
+            
+            /* Fix Map & Timeline */
             #tab-map-container { width: 100vw; height: 70vh; border-radius: 0; border-left: none; border-right: none; }
             .map-wrapper { max-width: 100%; }
+            .timeline-container::after { left: 31px; }
+            .timeline-item { width: 100%; padding-left: 70px; padding-right: 25px; }
+            .timeline-item.left, .timeline-item.right { left: 0; text-align: left; }
+            .timeline-dot { left: 21px !important; right: auto; }
+
+            /* Fix Controls Overflow */
+            .controls-bar { flex-direction: column; gap: 10px; }
+            #search-input, .filter-select { width: 100%; flex-grow: 1; }
         }
     </style>
 </head>
