@@ -69,13 +69,14 @@
 
         body { font-family: "Georgia", serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); line-height: 1.6; overflow-x: hidden; display: flex; flex-direction: column; min-height: 100vh; }
 
-        .theme-toggle { position: absolute; top: 20px; right: 20px; background: var(--card-bg); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; cursor: pointer; border-radius: 4px; font-family: sans-serif; font-size: 0.75rem; font-weight: bold; z-index: 100; }
-
         .full-width-banner { width: 100%; height: 180px; overflow: hidden; background-color: var(--parchment); border-bottom: 1px solid var(--border); display: flex; justify-content: center; align-items: center; }
         .banner-img { max-width: 100%; height: 100%; object-fit: contain; opacity: var(--banner-opacity); filter: var(--banner-filter); }
 
         .container { max-width: 950px; margin: 0 auto; padding: 0 20px 60px 20px; position: relative; flex: 1; }
         
+        /* Theme Toggle: Positioned relative to the container, not the window */
+        .theme-toggle { position: absolute; top: 30px; right: 20px; background: var(--card-bg); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; cursor: pointer; border-radius: 4px; font-family: sans-serif; font-size: 0.75rem; font-weight: bold; z-index: 100; }
+
         header { margin-top: 60px; margin-bottom: 40px; text-align: center; }
         h1 { margin: 0; color: var(--primary); font-size: clamp(1.8rem, 5vw, 2.8rem); letter-spacing: -1px; font-weight: bold; }
         header a { text-decoration: none; color: inherit; }
@@ -137,7 +138,25 @@
         /* --- CHAIN OF CITATION TAB --- */
         #tab-map { width: 100%; display: none; }
         .map-description { text-align: center; font-style: italic; color: var(--text-muted); margin-bottom: 20px; font-size: 0.95rem; padding: 0 20px; }
-        #tab-map-container { width: 95vw; max-width: 1600px; height: 85vh; margin: 0 auto 40px auto; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        
+        /* FIX: Breakout layout to center wide map inside narrow container */
+        #tab-map-container { 
+            width: 95vw; 
+            max-width: 1600px; 
+            height: 85vh; 
+            margin: 0 auto 40px auto; 
+            background: var(--card-bg); 
+            border: 1px solid var(--border); 
+            border-radius: 8px; 
+            position: relative; 
+            overflow: hidden; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            
+            /* Centering trick for wide elements */
+            margin-left: 50%;
+            transform: translateX(-50%);
+        }
+        
         #network-viz { width: 100%; height: 100%; cursor: grab; }
         #network-viz:active { cursor: grabbing; }
         .map-controls { position: absolute; top: 15px; left: 15px; display: flex; flex-direction: column; gap: 8px; z-index: 10; }
@@ -189,7 +208,7 @@
             .card-header { flex-direction: column; }
             .court-label { margin-left: 0; margin-top: 5px; }
             .theme-toggle { top: 10px; right: 10px; }
-            #tab-map-container { width: 100vw; height: 70vh; border-radius: 0; border-left: none; border-right: none; }
+            #tab-map-container { width: 100vw; height: 70vh; border-radius: 0; border-left: none; border-right: none; margin-left: 0; transform: none; }
             .map-wrapper { max-width: 100%; }
             .timeline-container::after { left: 31px; }
             .timeline-item { width: 100%; padding-left: 70px; padding-right: 25px; }
