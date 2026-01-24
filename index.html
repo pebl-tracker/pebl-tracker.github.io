@@ -64,6 +64,9 @@
             transition: background-color 0.6s ease, color 0.6s ease, border-color 0.6s ease; 
         }
         
+        /* FIX: Forces scrollbar track to always exist, preventing layout jumps */
+        html { overflow-y: scroll; }
+
         body { font-family: "Georgia", serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); line-height: 1.6; overflow-x: hidden; display: flex; flex-direction: column; min-height: 100vh; }
 
         .theme-toggle { position: absolute; top: 20px; right: 20px; background: var(--card-bg); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; cursor: pointer; border-radius: 4px; font-family: sans-serif; font-size: 0.75rem; font-weight: bold; z-index: 100; }
@@ -91,10 +94,28 @@
         .sc-btn { display: block; width: fit-content; margin: 0 auto 50px auto; background: var(--accent); color: white; text-align: center; padding: 10px 25px; border-radius: 50px; text-decoration: none; font-family: sans-serif; font-size: 0.85rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .sc-btn:hover { transform: translateY(-2px); }
 
-        .controls-bar { display: flex; gap: 12px; margin-bottom: 25px; background: var(--card-bg); padding: 15px; border: 1px solid var(--border); border-radius: 4px; font-family: sans-serif; flex-wrap: wrap; }
+        .controls-bar { display: flex; gap: 12px; margin-bottom: 25px; background: var(--card-bg); padding: 15px; border: 1px solid var(--border); border-radius: 4px; font-family: sans-serif; flex-wrap: wrap; align-items: center; }
         #search-input { flex-grow: 2; padding: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); color: var(--text); }
         .filter-select { flex-grow: 1; padding: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); color: var(--text); }
-        .download-btn { background: var(--primary); color: var(--bg); border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.8rem; white-space: nowrap; }
+        
+        /* REDESIGNED DOWNLOAD BUTTON */
+        .download-btn { 
+            background: transparent; 
+            color: var(--primary); 
+            border: 1px solid var(--primary); 
+            padding: 10px 20px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 0.8rem; 
+            white-space: nowrap; 
+            transition: all 0.3s ease;
+        }
+        .download-btn:hover { 
+            background: var(--primary); 
+            color: var(--bg); 
+        }
+
         #filter-display { text-align: center; margin-bottom: 25px; min-height: 35px; }
         .filter-tag { display: inline-block; background: var(--primary); color: var(--bg); padding: 5px 15px; border-radius: 20px; font-family: sans-serif; font-size: 0.8rem; cursor: pointer; }
 
@@ -175,7 +196,7 @@
             .timeline-item { width: 100%; padding-left: 70px; padding-right: 25px; }
             .timeline-item.left, .timeline-item.right { left: 0; text-align: left; }
             .timeline-dot { left: 21px !important; right: auto; }
-            .controls-bar { flex-direction: column; gap: 10px; }
+            .controls-bar { flex-direction: column; gap: 10px; align-items: stretch; }
             #search-input, .filter-select, .download-btn { width: 100%; flex-grow: 1; }
         }
     </style>
@@ -224,7 +245,10 @@
 
     <!-- TAB: TIMELINE (VERTICAL) -->
     <div id="tab-timeline" class="tab-content">
-        <p class="map-description">A chronological history of the expansion of Article 21.</p>
+        <p class="map-description">
+            A chronological history of the expansion of Article 21.<br>
+            <span style="font-size: 0.8rem;">Format inspired by <a href="https://www.scobserver.in/journal/the-right-to-life-and-personal-liberty-under-article-21-a-timeline/" target="_blank" style="color: var(--accent); text-decoration: none;">Supreme Court Observer</a>.</span>
+        </p>
         <div class="timeline-container" id="timeline-container">
             <!-- Items injected via JS -->
         </div>
@@ -247,12 +271,9 @@
             <p>The SVG map of India is sourced from SimpleMaps:<br>
             <a href="https://simplemaps.com/svg/country/in" target="_blank" style="color: var(--accent); font-weight: bold; text-decoration: none;">SimpleMaps India SVG →</a></p>
 
-            <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">Technical Credits</h2>
-            <p>This tracker is hosted entirely on <strong>GitHub Pages</strong>.<br>
-            The codebase was developed with the assistance of <strong>Gemini 3 Pro and Flash</strong>, available for free via Google AI Studio.</p>
-
-            <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">Source Code</h2>
-            <p>The complete source code for this website is available on GitHub:<br>
+            <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">Technical Architecture & Source Code</h2>
+            <p>This tracker is hosted entirely on <strong>GitHub Pages</strong>. The codebase was developed with the assistance of <strong>Gemini 3 Pro and Flash</strong>, available for free via Google AI Studio.<br>
+            The complete source code for this website is open-source and available on GitHub:<br>
             <a href="https://github.com/pebl-tracker/pebl-tracker.github.io" target="_blank" style="color: var(--accent); font-weight: bold; text-decoration: none;">View Repository →</a></p>
 
             <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">Contact</h2>
@@ -299,7 +320,7 @@
 <!-- FOOTER -->
 <footer>
     <div class="footer-content">
-        <p><strong>Disclaimer:</strong> The content on this tracker is for academic and informational purposes only. It does not constitute legal advice. Summaries are the author's interpretation and should not be cited as legal authority. Please refer to the official judgment text.</p>
+        <p><strong>Disclaimer:</strong> The content on this tracker is for academic and informational purposes only. It does not constitute legal advice. Summaries are the curator's interpretation and should not be cited as legal authority. Please refer to the official judgment text.</p>
         <button class="cite-btn" onclick="copyArchiveCitation()">Cite This Tracker</button>
     </div>
 </footer>
