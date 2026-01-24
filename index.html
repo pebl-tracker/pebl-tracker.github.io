@@ -45,6 +45,9 @@
             --map-hint-bg: rgba(255, 255, 255, 0.8);
             --timeline-line: #dcd6cc;
             --footer-bg: #e8e2d8;
+            
+            /* RGB values for map gradient generation */
+            --map-base-rgb: 44, 62, 80; 
         }
 
         [data-theme="dark"] {
@@ -56,6 +59,9 @@
             --map-hint-bg: rgba(30, 30, 30, 0.9);
             --timeline-line: #333;
             --footer-bg: #1a1a1a;
+
+            /* RGB values for map gradient generation */
+            --map-base-rgb: 236, 240, 241;
         }
         
         /* Gradual Transition */
@@ -114,7 +120,7 @@
         .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
 
         /* --- TRACKER UI --- */
-        .map-wrapper { position: relative; width: 100%; max-width: 850px; margin: 0 auto 40px auto; }
+        .map-wrapper { position: relative; width: 100%; max-width: 850px; margin: 0 auto 10px auto; }
         svg { width: 100%; height: auto; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.05)); }
         path { cursor: pointer; fill: var(--tag-bg); stroke: var(--bg); stroke-width: 0.7; }
         path:hover { fill: var(--accent) !important; }
@@ -135,6 +141,25 @@
             z-index: 1000;
             box-shadow: 0 4px 15px rgba(0,0,0,0.15);
             white-space: nowrap;
+        }
+
+        /* --- HEATMAP LEGEND --- */
+        .heatmap-legend {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 0 auto 40px auto;
+            font-family: sans-serif;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .legend-bar {
+            width: 150px;
+            height: 10px;
+            border-radius: 5px;
+            background: linear-gradient(to right, rgba(var(--map-base-rgb), 0.15), rgba(var(--map-base-rgb), 1));
+            border: 1px solid var(--border);
         }
 
         .sc-btn { display: block; width: fit-content; margin: 0 auto 50px auto; background: var(--accent); color: white; text-align: center; padding: 10px 25px; border-radius: 50px; text-decoration: none; font-family: sans-serif; font-size: 0.85rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
@@ -295,7 +320,16 @@
     <!-- TAB: TRACKER -->
     <div id="tab-tracker" class="tab-content">
         <div class="map-wrapper" id="map-container"></div>
+        
+        <!-- HEATMAP LEGEND -->
+        <div class="heatmap-legend">
+            <span>Low Activity</span>
+            <div class="legend-bar"></div>
+            <span>High Activity</span>
+        </div>
+
         <div class="sc-btn" onclick="handleMapClick('Pan-India')">★ Supreme Court (Pan-India)</div>
+        
         <div class="controls-bar">
             <input type="text" id="search-input" placeholder="Search cases or keywords..." onkeyup="handleSearch()">
             <select id="right-filter" class="filter-select" onchange="handleSearch()"><option value="">All Rights</option></select>
@@ -429,38 +463,44 @@
             if (window.scrollY > 300) btn.style.display = 'block';
             else btn.style.display = 'none';
         });
+
+        // Attach tooltip listener to the static SC button
+        const scBtn = document.querySelector('.sc-btn');
+        if(scBtn) attachTooltip(scBtn, 'Supreme Court (Pan-India)');
     });
+
+    // Helper to attach tooltip logic to any element
+    function attachTooltip(element, name) {
+        const tooltip = document.getElementById('map-tooltip');
+        element.addEventListener('mouseenter', () => {
+            const count = element.getAttribute('data-count') || 0;
+            const label = count == 1 ? 'Case' : 'Cases';
+            tooltip.innerHTML = `${name}<br><span style="font-weight:normal; opacity:0.8;">${count} ${label}</span>`;
+            tooltip.style.display = 'block';
+        });
+
+        element.addEventListener('mousemove', (e) => {
+            // Offset slightly so cursor doesn't cover text
+            tooltip.style.left = (e.clientX + 15) + 'px';
+            tooltip.style.top = (e.clientY + 15) + 'px';
+        });
+
+        element.addEventListener('mouseleave', () => {
+            tooltip.style.display = 'none';
+        });
+    }
 
     function loadMap() {
         fetch('india.svg').then(r => r.text()).then(svg => {
             document.getElementById('map-container').innerHTML = svg;
             
-            const tooltip = document.getElementById('map-tooltip');
-
             // Inject ARIA labels and Tooltip Listeners
             document.querySelectorAll('#map-container path').forEach(p => {
                 const name = p.getAttribute('name');
                 if(name) {
                     p.setAttribute('role', 'button');
                     p.setAttribute('aria-label', `View cases for ${name}`);
-                    
-                    // --- TOOLTIP LOGIC ---
-                    p.addEventListener('mouseenter', () => {
-                        const count = p.getAttribute('data-count') || 0;
-                        const label = count == 1 ? 'Case' : 'Cases';
-                        tooltip.innerHTML = `${name}<br><span style="font-weight:normal; opacity:0.8;">${count} ${label}</span>`;
-                        tooltip.style.display = 'block';
-                    });
-
-                    p.addEventListener('mousemove', (e) => {
-                        // Offset slightly so cursor doesn't cover text
-                        tooltip.style.left = (e.clientX + 15) + 'px';
-                        tooltip.style.top = (e.clientY + 15) + 'px';
-                    });
-
-                    p.addEventListener('mouseleave', () => {
-                        tooltip.style.display = 'none';
-                    });
+                    attachTooltip(p, name);
                 }
                 p.addEventListener('click', () => {
                     if(name) handleMapClick(name);
@@ -716,15 +756,22 @@
 
     function generateHeatmap() {
         const counts = {}; let max = 0;
+        let panIndiaCount = 0;
         
         // Calculate counts
         allCases.forEach(c => { 
-            if(c.state && c.state !== "Pan-India") { 
+            if(c.state === "Pan-India") {
+                panIndiaCount++;
+            } else if(c.state) { 
                 counts[c.state] = (counts[c.state] || 0) + 1; 
                 if(counts[c.state] > max) max = counts[c.state]; 
             }
         });
         
+        // Update SC Button Count
+        const scBtn = document.querySelector('.sc-btn');
+        if(scBtn) scBtn.setAttribute('data-count', panIndiaCount);
+
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         const baseColor = isDark ? [236, 240, 241] : [44, 62, 80]; 
 
