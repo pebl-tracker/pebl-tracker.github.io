@@ -94,7 +94,7 @@
         .controls-bar { display: flex; gap: 12px; margin-bottom: 25px; background: var(--card-bg); padding: 15px; border: 1px solid var(--border); border-radius: 4px; font-family: sans-serif; flex-wrap: wrap; }
         #search-input { flex-grow: 2; padding: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); color: var(--text); }
         .filter-select { flex-grow: 1; padding: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); color: var(--text); }
-        .download-btn { background: var(--primary); color: var(--bg); border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
+        .download-btn { background: var(--primary); color: var(--bg); border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.8rem; white-space: nowrap; }
         #filter-display { text-align: center; margin-bottom: 25px; min-height: 35px; }
         .filter-tag { display: inline-block; background: var(--primary); color: var(--bg); padding: 5px 15px; border-radius: 20px; font-family: sans-serif; font-size: 0.8rem; cursor: pointer; }
 
@@ -212,7 +212,7 @@
             <input type="text" id="search-input" placeholder="Search cases or keywords..." onkeyup="handleSearch()">
             <select id="right-filter" class="filter-select" onchange="handleSearch()"><option value="">All Rights</option></select>
             <select id="sort-order" class="filter-select" onchange="handleSearch()"><option value="newest">Newest First</option><option value="oldest">Oldest First</option></select>
-            <button class="download-btn" onclick="downloadData()">Download CSV</button>
+            <button class="download-btn" onclick="downloadData()">Download Filtered Data (CSV)</button>
         </div>
         <div id="filter-display"></div>
         <div id="loading">
@@ -250,6 +250,10 @@
             <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">Technical Credits</h2>
             <p>This tracker is hosted entirely on <strong>GitHub Pages</strong>.<br>
             The codebase was developed with the assistance of <strong>Gemini 3 Pro and Flash</strong>, available for free via Google AI Studio.</p>
+
+            <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">Source Code</h2>
+            <p>The complete source code for this website is available on GitHub:<br>
+            <a href="https://github.com/pebl-tracker/pebl-tracker.github.io" target="_blank" style="color: var(--accent); font-weight: bold; text-decoration: none;">View Repository →</a></p>
 
             <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">Contact</h2>
             <p>Reach out at: <br>
@@ -322,6 +326,7 @@
     const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
 
     let allCases = [];
+    let filteredCases = []; // Stores the currently visible dataset
     let currentFilterState = null;
     let network = null;
     let physicsEnabled = true;
@@ -374,6 +379,7 @@
                 cites: (row[8] || "").split(',').map(c => c.trim()).filter(c => c)
             })).filter(c => c.name && c.name !== "Case Name");
 
+            filteredCases = allCases; // Initialize filtered list
             document.getElementById('loading').style.display = 'none';
             populateDropdown();
             generateHeatmap();
@@ -400,7 +406,8 @@
     }
 
     function downloadData() {
-        const csv = Papa.unparse(allCases);
+        // Use filteredCases instead of allCases
+        const csv = Papa.unparse(filteredCases);
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
@@ -530,6 +537,7 @@
             return sort === 'newest' ? dB - dA : dA - dB;
         });
 
+        filteredCases = filtered; // Update global filtered list for CSV export
         renderCases(filtered);
     }
 
