@@ -119,6 +119,24 @@
         path { cursor: pointer; fill: var(--tag-bg); stroke: var(--bg); stroke-width: 0.7; }
         path:hover { fill: var(--accent) !important; }
 
+        /* --- MAP TOOLTIP --- */
+        .map-tooltip {
+            position: fixed;
+            background: var(--card-bg);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: sans-serif;
+            font-size: 0.8rem;
+            font-weight: bold;
+            pointer-events: none; /* Allows mouse to pass through to the map */
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            white-space: nowrap;
+        }
+
         .sc-btn { display: block; width: fit-content; margin: 0 auto 50px auto; background: var(--accent); color: white; text-align: center; padding: 10px 25px; border-radius: 50px; text-decoration: none; font-family: sans-serif; font-size: 0.85rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .sc-btn:hover { transform: translateY(-2px); }
 
@@ -255,6 +273,9 @@
 <div class="full-width-banner">
     <img src="article21.png" alt="Article 21 Calligraphy" class="banner-img" onerror="this.parentElement.style.display='none'">
 </div>
+
+<!-- TOOLTIP CONTAINER -->
+<div id="map-tooltip" class="map-tooltip"></div>
 
 <div class="container">
     <header>
@@ -413,12 +434,33 @@
     function loadMap() {
         fetch('india.svg').then(r => r.text()).then(svg => {
             document.getElementById('map-container').innerHTML = svg;
-            // Inject ARIA labels automatically
+            
+            const tooltip = document.getElementById('map-tooltip');
+
+            // Inject ARIA labels and Tooltip Listeners
             document.querySelectorAll('#map-container path').forEach(p => {
                 const name = p.getAttribute('name');
                 if(name) {
                     p.setAttribute('role', 'button');
                     p.setAttribute('aria-label', `View cases for ${name}`);
+                    
+                    // --- TOOLTIP LOGIC ---
+                    p.addEventListener('mouseenter', () => {
+                        const count = p.getAttribute('data-count') || 0;
+                        const label = count == 1 ? 'Case' : 'Cases';
+                        tooltip.innerHTML = `${name}<br><span style="font-weight:normal; opacity:0.8;">${count} ${label}</span>`;
+                        tooltip.style.display = 'block';
+                    });
+
+                    p.addEventListener('mousemove', (e) => {
+                        // Offset slightly so cursor doesn't cover text
+                        tooltip.style.left = (e.clientX + 15) + 'px';
+                        tooltip.style.top = (e.clientY + 15) + 'px';
+                    });
+
+                    p.addEventListener('mouseleave', () => {
+                        tooltip.style.display = 'none';
+                    });
                 }
                 p.addEventListener('click', () => {
                     if(name) handleMapClick(name);
@@ -674,13 +716,25 @@
 
     function generateHeatmap() {
         const counts = {}; let max = 0;
-        allCases.forEach(c => { if(c.state && c.state !== "Pan-India") { counts[c.state] = (counts[c.state] || 0) + 1; if(counts[c.state] > max) max = counts[c.state]; }});
+        
+        // Calculate counts
+        allCases.forEach(c => { 
+            if(c.state && c.state !== "Pan-India") { 
+                counts[c.state] = (counts[c.state] || 0) + 1; 
+                if(counts[c.state] > max) max = counts[c.state]; 
+            }
+        });
         
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         const baseColor = isDark ? [236, 240, 241] : [44, 62, 80]; 
 
         document.querySelectorAll('#map-container path').forEach(p => {
-            const n = p.getAttribute('name'); const count = counts[n] || 0;
+            const n = p.getAttribute('name'); 
+            const count = counts[n] || 0;
+            
+            // Store the count in the DOM for the tooltip to read
+            p.setAttribute('data-count', count);
+
             if(count > 0) {
                 const opacity = 0.15 + (0.85 * (count / max));
                 p.style.fill = `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${opacity})`;
