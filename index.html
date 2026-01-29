@@ -234,6 +234,17 @@
         .map-btn:hover { background: var(--tag-bg); }
         .map-hint { position: absolute; bottom: 15px; right: 15px; font-family: sans-serif; font-size: 0.7rem; color: var(--text); pointer-events: none; background: var(--map-hint-bg); padding: 6px 12px; border-radius: 4px; border: 1px solid var(--border); z-index: 10; }
 
+        /* --- JUDGE ANALYTICS TAB --- */
+        #tab-judges { width: 100%; display: none; }
+        .judge-stats-container { max-width: 800px; margin: 0 auto; }
+        .judge-stat-row { display: flex; align-items: center; margin-bottom: 15px; cursor: pointer; padding: 10px; border-radius: 6px; transition: background 0.2s; }
+        .judge-stat-row:hover { background: var(--tag-bg); }
+        .judge-name-col { width: 30%; font-family: sans-serif; font-size: 0.9rem; color: var(--primary); font-weight: bold; padding-right: 15px; text-align: right; }
+        .judge-bar-col { flex-grow: 1; position: relative; height: 24px; background: rgba(0,0,0,0.05); border-radius: 4px; overflow: hidden; }
+        .judge-bar-total { height: 100%; background-color: var(--primary); opacity: 0.3; position: absolute; left: 0; top: 0; border-radius: 4px; }
+        .judge-bar-auth { height: 100%; background-color: var(--accent); position: absolute; left: 0; top: 0; border-radius: 4px; z-index: 2; }
+        .judge-count-col { width: 15%; padding-left: 15px; font-family: sans-serif; font-size: 0.8rem; color: var(--text-muted); }
+
         /* --- CARDS --- */
         .case-grid { display: grid; gap: 25px; }
         .card { background: var(--card-bg); padding: 30px; border: 1px solid var(--border); border-left: 5px solid var(--primary); font-family: sans-serif; }
@@ -243,7 +254,10 @@
         .court-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: bold; margin-left: 15px; }
         .card-date { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px; font-weight: bold; }
         .citation { font-family: "Georgia", serif; color: var(--text-muted); font-style: italic; display: block; margin-bottom: 10px; font-size: 0.95rem; }
-        .bench-info { font-size: 0.8rem; color: var(--text); margin-bottom: 15px; font-weight: bold; opacity: 0.8; }
+        
+        /* UPDATED BENCH INFO STYLE */
+        .bench-info { font-size: 0.85rem; color: var(--text); margin-bottom: 15px; font-family: sans-serif; }
+        
         .tag { background: var(--tag-bg); padding: 4px 10px; border-radius: 3px; font-size: 0.7rem; font-weight: bold; color: #666; display: inline-block; margin-right: 6px; margin-bottom: 6px; text-transform: uppercase; }
         .summary-preview { color: var(--text); line-height: 1.6; margin-bottom: 15px; font-size: 0.95rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
         .action-link { color: var(--primary); font-weight: bold; text-decoration: none; border-bottom: 2px solid var(--primary); cursor: pointer; font-size: 0.85rem; }
@@ -287,6 +301,12 @@
             .timeline-dot { left: 21px !important; right: auto; }
             .controls-bar { flex-direction: column; gap: 10px; align-items: stretch; }
             #search-input, .filter-select, .download-btn { width: 100%; flex-grow: 1; }
+            
+            /* Judge Analytics Mobile */
+            .judge-name-col { width: 100%; text-align: left; margin-bottom: 5px; }
+            .judge-stat-row { flex-direction: column; align-items: stretch; }
+            .judge-bar-col { width: 100%; }
+            .judge-count-col { width: 100%; text-align: right; margin-top: 5px; }
         }
     </style>
 </head>
@@ -315,6 +335,7 @@
         <button id="btn-tracker" class="tab-btn active" onclick="switchTab('tracker')">TRACKER</button>
         <button id="btn-timeline" class="tab-btn" onclick="switchTab('timeline')">TIMELINE</button>
         <button id="btn-map" class="tab-btn" onclick="switchTab('map')">CHAIN OF CITATION</button>
+        <button id="btn-judges" class="tab-btn" onclick="switchTab('judges')">JUDGES</button>
         <button id="btn-about" class="tab-btn" onclick="switchTab('about')">ABOUT</button>
     </nav>
 
@@ -354,6 +375,20 @@
         </p>
         <div class="timeline-container" id="timeline-container">
             <!-- Items injected via JS -->
+        </div>
+    </div>
+
+    <!-- TAB: JUDGE ANALYTICS -->
+    <div id="tab-judges" class="tab-content">
+        <p class="map-description">
+            Frequency of participation in Article 21 cases.<br>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">
+                <span style="display:inline-block; width:10px; height:10px; background:var(--primary); opacity:0.3; margin-right:5px;"></span>Total Cases
+                <span style="display:inline-block; width:10px; height:10px; background:var(--accent); margin-left:15px; margin-right:5px;"></span>Authored Judgments
+            </span>
+        </p>
+        <div class="judge-stats-container" id="judge-stats-list">
+            <!-- Injected via JS -->
         </div>
     </div>
 
@@ -605,6 +640,68 @@
         });
     }
 
+    // --- JUDGE ANALYTICS LOGIC ---
+    function initJudgeAnalytics() {
+        const container = document.getElementById('judge-stats-list');
+        container.innerHTML = '';
+
+        const stats = {};
+        
+        // Aggregate Data
+        allCases.forEach(c => {
+            c.judges.forEach(rawName => {
+                const cleanName = cleanJudgeName(rawName);
+                if(!stats[cleanName]) stats[cleanName] = { total: 0, authored: 0 };
+                
+                stats[cleanName].total++;
+                if(rawName.toLowerCase().includes('(author)') || rawName.includes('*')) {
+                    stats[cleanName].authored++;
+                }
+            });
+        });
+
+        // Convert to Array and Sort
+        const sortedJudges = Object.keys(stats)
+            .map(name => ({ name, ...stats[name] }))
+            .sort((a, b) => b.total - a.total);
+
+        if(sortedJudges.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:var(--text-muted);">No judge data available.</p>';
+            return;
+        }
+
+        const maxTotal = sortedJudges[0].total;
+
+        // Render Bars
+        sortedJudges.forEach(j => {
+            const totalPct = (j.total / maxTotal) * 100;
+            const authPct = (j.authored / maxTotal) * 100; // Relative to max total for scale consistency
+
+            const row = document.createElement('div');
+            row.className = 'judge-stat-row';
+            row.onclick = () => {
+                // Switch to tracker and filter
+                switchTab('tracker');
+                document.getElementById('judge-filter').value = j.name;
+                handleSearch();
+                document.getElementById('search-input').scrollIntoView({behavior: "smooth", block: "start"});
+            };
+
+            row.innerHTML = `
+                <div class="judge-name-col">${j.name}</div>
+                <div class="judge-bar-col">
+                    <div class="judge-bar-total" style="width: ${totalPct}%"></div>
+                    <div class="judge-bar-auth" style="width: ${authPct}%"></div>
+                </div>
+                <div class="judge-count-col">
+                    ${j.total} Cases <br>
+                    <span style="font-size:0.7rem; color:var(--accent);">(${j.authored} Auth.)</span>
+                </div>
+            `;
+            container.appendChild(row);
+        });
+    }
+
     // --- CHAIN OF CITATION LOGIC ---
     function initCitationMap() {
         const container = document.getElementById('network-viz');
@@ -676,11 +773,12 @@
         
         if(t === 'map') setTimeout(initCitationMap, 100);
         if(t === 'timeline') setTimeout(initTimeline, 100);
+        if(t === 'judges') setTimeout(initJudgeAnalytics, 100);
     }
 
     // Helper to clean judge names for filtering (removes markers)
     function cleanJudgeName(name) {
-        return name.replace(/\(Author\)/gi, '').replace(/\*/g, '').trim();
+        return name.replace(/\(Author\)/gi, '').replace(/\(Auth\.\)/gi, '').replace(/\*/g, '').trim();
     }
 
     function handleSearch() {
@@ -717,12 +815,13 @@
             let benchHTML = '';
             if (c.judges.length > 0) {
                 const formattedJudges = c.judges.map(j => {
-                    if (j.toLowerCase().includes('(author)') || j.includes('*')) {
-                        return `<strong style="color:var(--primary);">${cleanJudgeName(j)} (Auth.)</strong>`;
+                    if (j.toLowerCase().includes('(author)') || j.toLowerCase().includes('(auth.)') || j.includes('*')) {
+                        return `${cleanJudgeName(j)} (Auth.)`;
                     }
                     return j;
                 }).join(', ');
-                benchHTML = `<div class="bench-info">⚖️ ${formattedJudges}</div>`;
+                // UPDATED: Removed emoji, removed bold, added "Justices:" prefix
+                benchHTML = `<div class="bench-info"><span style="color:var(--text-muted); font-weight:bold;">Justices:</span> ${formattedJudges}</div>`;
             }
             
             let dDisp = c.date;
