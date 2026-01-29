@@ -242,7 +242,8 @@
         .card h3 { margin: 0; color: var(--primary); font-size: 1.3rem; line-height: 1.3; flex: 1; }
         .court-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: bold; margin-left: 15px; }
         .card-date { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px; font-weight: bold; }
-        .citation { font-family: "Georgia", serif; color: var(--text-muted); font-style: italic; display: block; margin-bottom: 15px; font-size: 0.95rem; }
+        .citation { font-family: "Georgia", serif; color: var(--text-muted); font-style: italic; display: block; margin-bottom: 10px; font-size: 0.95rem; }
+        .bench-info { font-size: 0.8rem; color: var(--text); margin-bottom: 15px; font-weight: bold; opacity: 0.8; }
         .tag { background: var(--tag-bg); padding: 4px 10px; border-radius: 3px; font-size: 0.7rem; font-weight: bold; color: #666; display: inline-block; margin-right: 6px; margin-bottom: 6px; text-transform: uppercase; }
         .summary-preview { color: var(--text); line-height: 1.6; margin-bottom: 15px; font-size: 0.95rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
         .action-link { color: var(--primary); font-weight: bold; text-decoration: none; border-bottom: 2px solid var(--primary); cursor: pointer; font-size: 0.85rem; }
@@ -333,6 +334,7 @@
         <div class="controls-bar">
             <input type="text" id="search-input" placeholder="Search cases or keywords..." onkeyup="handleSearch()">
             <select id="right-filter" class="filter-select" onchange="handleSearch()"><option value="">All Rights</option></select>
+            <select id="judge-filter" class="filter-select" onchange="handleSearch()"><option value="">All Judges</option></select>
             <select id="sort-order" class="filter-select" onchange="handleSearch()"><option value="newest">Newest First</option><option value="oldest">Oldest First</option></select>
             <button class="download-btn" onclick="downloadData()">Download Filtered Data (CSV)</button>
         </div>
@@ -525,12 +527,15 @@
                 summary: (row[5] || "").trim(),
                 link: (row[6] || "#").trim(),
                 date: (row[7] || "").trim(),
-                cites: (row[8] || "").split(',').map(c => c.trim()).filter(c => c)
+                cites: (row[8] || "").split(',').map(c => c.trim()).filter(c => c),
+                // Parse Judges from Column 10 (Index 9)
+                judges: (row[9] || "").split(',').map(j => j.trim()).filter(j => j)
             })).filter(c => c.name && c.name !== "Case Name");
 
             filteredCases = allCases; // Initialize filtered list
             document.getElementById('loading').style.display = 'none';
             populateDropdown();
+            populateJudgeDropdown(); 
             generateHeatmap();
             handleSearch();
             checkUrlParams(); 
@@ -673,13 +678,25 @@
         if(t === 'timeline') setTimeout(initTimeline, 100);
     }
 
+    // Helper to clean judge names for filtering (removes markers)
+    function cleanJudgeName(name) {
+        return name.replace(/\(Author\)/gi, '').replace(/\*/g, '').trim();
+    }
+
     function handleSearch() {
         const query = document.getElementById('search-input').value.toLowerCase();
         const right = document.getElementById('right-filter').value;
+        const judge = document.getElementById('judge-filter').value; 
         const sort = document.getElementById('sort-order').value;
 
         let filtered = currentFilterState ? allCases.filter(c => c.state === currentFilterState) : allCases;
-        filtered = filtered.filter(c => (c.name.toLowerCase().includes(query) || c.summary.toLowerCase().includes(query)) && (right ? c.rights.includes(right) : true));
+        
+        filtered = filtered.filter(c => 
+            (c.name.toLowerCase().includes(query) || c.summary.toLowerCase().includes(query)) && 
+            (right ? c.rights.includes(right) : true) &&
+            // Compare clean names for filtering
+            (judge ? c.judges.some(j => cleanJudgeName(j) === judge) : true)
+        );
         
         filtered.sort((a, b) => {
             const dA = parseDate(a.date); const dB = parseDate(b.date);
@@ -695,6 +712,19 @@
         list.innerHTML = cases.length ? '' : '<p style="text-align:center; color:var(--text-muted); padding: 40px;">No judgments found.</p>';
         cases.forEach(c => {
             const tags = c.rights.map(r => `<span class="tag">${r}</span>`).join('');
+            
+            // Format Judges: Check for markers and bold the author
+            let benchHTML = '';
+            if (c.judges.length > 0) {
+                const formattedJudges = c.judges.map(j => {
+                    if (j.toLowerCase().includes('(author)') || j.includes('*')) {
+                        return `<strong style="color:var(--primary);">${cleanJudgeName(j)} (Auth.)</strong>`;
+                    }
+                    return j;
+                }).join(', ');
+                benchHTML = `<div class="bench-info">⚖️ ${formattedJudges}</div>`;
+            }
+            
             let dDisp = c.date;
             try { 
                 const d = parseDate(c.date); 
@@ -706,6 +736,7 @@
                     <div class="card-header"><h3>${c.name}</h3><span class="court-label">${c.court}</span></div>
                     <div class="card-date">${dDisp}</div>
                     <span class="citation">${c.citation}</span>
+                    ${benchHTML}
                     <div>${tags}</div>
                     <div class="summary-preview">${c.summary}</div>
                     <a class="action-link" onclick="openDetails('${encodeURIComponent(c.name)}')">READ MORE →</a>
@@ -752,6 +783,19 @@
         const rts = [...new Set(allCases.flatMap(c => c.rights))].sort();
         const sel = document.getElementById('right-filter');
         rts.forEach(r => { const o = document.createElement('option'); o.value = r; o.innerText = r; sel.appendChild(o); });
+    }
+
+    // Populate Judge Dropdown with CLEAN names
+    function populateJudgeDropdown() {
+        const judges = [...new Set(allCases.flatMap(c => c.judges.map(cleanJudgeName)))].sort();
+        const sel = document.getElementById('judge-filter');
+        judges.forEach(j => {
+            if(!j) return;
+            const o = document.createElement('option');
+            o.value = j;
+            o.innerText = j;
+            sel.appendChild(o);
+        });
     }
 
     function generateHeatmap() {
