@@ -267,7 +267,20 @@
         .back-btn { display: inline-block; margin-bottom: 30px; cursor: pointer; color: var(--text-muted); font-family: sans-serif; font-size: 0.8rem; font-weight: bold; letter-spacing: 1px; }
         .details-meta { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 30px; }
         .details-body { font-size: 1.15rem; line-height: 1.8; white-space: pre-wrap; color: var(--text); }
-        .external-btn { display: inline-block; margin-top: 40px; background: var(--primary); color: var(--bg); padding: 12px 25px; text-decoration: none; border-radius: 4px; font-family: sans-serif; font-weight: bold; }
+        
+        /* UPDATED EXTERNAL BUTTON STYLE FOR MULTIPLE LINKS */
+        .external-btn { 
+            display: inline-block; 
+            background: var(--primary); 
+            color: var(--bg); 
+            padding: 12px 25px; 
+            text-decoration: none; 
+            border-radius: 4px; 
+            font-family: sans-serif; 
+            font-weight: bold; 
+            margin-bottom: 10px; /* Added for wrapping */
+        }
+        
         .copy-btn { background: none; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; margin-left: 10px; vertical-align: middle; }
         .copy-btn:hover { background: var(--tag-bg); color: var(--primary); }
 
@@ -436,7 +449,9 @@
             </div>
         </div>
         <div class="details-body" id="detail-summary"></div>
-        <a href="#" target="_blank" class="external-btn" id="detail-link">Read Full Judgment →</a>
+        
+        <!-- UPDATED: Container for multiple link buttons -->
+        <div id="detail-links-container" style="margin-top: 40px; display: flex; gap: 15px; flex-wrap: wrap;"></div>
     </div>
 </div>
 
@@ -556,7 +571,8 @@
                 // SMART PARSING APPLIED TO RIGHTS
                 rights: smartSplit(row[4]),
                 summary: (row[5] || "").trim(),
-                link: (row[6] || "#").trim(),
+                // SMART PARSING APPLIED TO LINKS
+                links: smartSplit(row[6]),
                 date: (row[7] || "").trim(),
                 // SMART PARSING APPLIED TO CITATIONS
                 cites: smartSplit(row[8]),
@@ -866,8 +882,24 @@
         document.getElementById('detail-court').innerText = c.court;
         document.getElementById('detail-date').innerText = c.date;
         document.getElementById('detail-summary').innerText = c.summary;
-        document.getElementById('detail-link').href = c.link;
+        // document.getElementById('detail-link').href = c.link; // REMOVED: Old single link logic
         document.getElementById('detail-rights-container').innerHTML = c.rights.map(r => `<span class="tag" style="background:var(--primary); color:var(--bg);">${r}</span>`).join('');
+        
+        // NEW: Generate Multiple Link Buttons
+        const linkContainer = document.getElementById('detail-links-container');
+        linkContainer.innerHTML = ''; // Clear previous
+        if (c.links.length > 0) {
+            c.links.forEach((url, index) => {
+                if(url === "#" || url === "") return;
+                const btn = document.createElement('a');
+                btn.href = url;
+                btn.target = "_blank";
+                btn.className = "external-btn";
+                btn.innerText = c.links.length === 1 ? "Read Full Judgment →" : `Read Full Judgment (Source ${index + 1}) →`;
+                linkContainer.appendChild(btn);
+            });
+        }
+
         document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
         document.getElementById('details-view').style.display = 'block';
         window.scrollTo(0,0);
