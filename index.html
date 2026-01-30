@@ -37,7 +37,7 @@
     <style>
         /* --- THEME VARIABLES --- */
         :root { 
-            --primary: #2c3e50; --accent: #c0392b; --bg: #f8f4e9; 
+            --primary: #2c3e50; --accent: #c0392b; --dissent: #e67e22; --bg: #f8f4e9; 
             --card-bg: #ffffff; --text: #2c2c2c; --text-muted: #5a5a5a;
             --border: #e8e2d8; --tag-bg: #f0ede4; --tag-text: #4a4a4a;
             --input-bg: #ffffff; --parchment: #f2ede4;
@@ -51,7 +51,7 @@
         }
 
         [data-theme="dark"] {
-            --primary: #ecf0f1; --accent: #e74c3c; --bg: #121212;
+            --primary: #ecf0f1; --accent: #e74c3c; --dissent: #d35400; --bg: #121212;
             --card-bg: #1e1e1e; --text: #e0e0e0; --text-muted: #aaaaaa;
             --border: #333333; --tag-bg: #2c3e50; --tag-text: #bdc3c7;
             --input-bg: #252525; --parchment: #1a1a1a;
@@ -243,6 +243,7 @@
         .judge-bar-col { flex-grow: 1; position: relative; height: 24px; background: rgba(0,0,0,0.05); border-radius: 4px; overflow: hidden; }
         .judge-bar-total { height: 100%; background-color: var(--primary); opacity: 0.3; position: absolute; left: 0; top: 0; border-radius: 4px; }
         .judge-bar-auth { height: 100%; background-color: var(--accent); position: absolute; left: 0; top: 0; border-radius: 4px; z-index: 2; }
+        .judge-bar-dissent { height: 100%; background-color: var(--dissent); position: absolute; right: 0; top: 0; border-radius: 4px; z-index: 3; }
         .judge-count-col { width: 15%; padding-left: 15px; font-family: sans-serif; font-size: 0.8rem; color: var(--text-muted); }
 
         /* --- CARDS --- */
@@ -267,8 +268,6 @@
         .back-btn { display: inline-block; margin-bottom: 30px; cursor: pointer; color: var(--text-muted); font-family: sans-serif; font-size: 0.8rem; font-weight: bold; letter-spacing: 1px; }
         .details-meta { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 30px; }
         .details-body { font-size: 1.15rem; line-height: 1.8; white-space: pre-wrap; color: var(--text); }
-        
-        /* UPDATED EXTERNAL BUTTON STYLE FOR MULTIPLE LINKS */
         .external-btn { 
             display: inline-block; 
             background: var(--primary); 
@@ -278,9 +277,8 @@
             border-radius: 4px; 
             font-family: sans-serif; 
             font-weight: bold; 
-            margin-bottom: 10px; /* Added for wrapping */
+            margin-bottom: 10px; 
         }
-        
         .copy-btn { background: none; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; margin-left: 10px; vertical-align: middle; }
         .copy-btn:hover { background: var(--tag-bg); color: var(--primary); }
 
@@ -398,6 +396,7 @@
             <span style="font-size: 0.8rem; color: var(--text-muted);">
                 <span style="display:inline-block; width:10px; height:10px; background:var(--primary); opacity:0.3; margin-right:5px;"></span>Total Cases
                 <span style="display:inline-block; width:10px; height:10px; background:var(--accent); margin-left:15px; margin-right:5px;"></span>Authored Judgments
+                <span style="display:inline-block; width:10px; height:10px; background:var(--dissent); margin-left:15px; margin-right:5px;"></span>Dissenting Opinions
             </span>
         </p>
         <div class="judge-stats-container" id="judge-stats-list">
@@ -664,11 +663,14 @@
         allCases.forEach(c => {
             c.judges.forEach(rawName => {
                 const cleanName = cleanJudgeName(rawName);
-                if(!stats[cleanName]) stats[cleanName] = { total: 0, authored: 0 };
+                if(!stats[cleanName]) stats[cleanName] = { total: 0, authored: 0, dissenting: 0 };
                 
                 stats[cleanName].total++;
-                if(rawName.toLowerCase().includes('(author)') || rawName.includes('*')) {
+                if(rawName.toLowerCase().includes('(author)') || rawName.toLowerCase().includes('(auth.)') || rawName.includes('*')) {
                     stats[cleanName].authored++;
+                }
+                if(rawName.toLowerCase().includes('(dissent)')) {
+                    stats[cleanName].dissenting++;
                 }
             });
         });
@@ -688,7 +690,8 @@
         // Render Bars
         sortedJudges.forEach(j => {
             const totalPct = (j.total / maxTotal) * 100;
-            const authPct = (j.authored / maxTotal) * 100; // Relative to max total for scale consistency
+            const authPct = (j.authored / maxTotal) * 100; 
+            const dissentPct = (j.dissenting / maxTotal) * 100;
 
             const row = document.createElement('div');
             row.className = 'judge-stat-row';
@@ -705,10 +708,12 @@
                 <div class="judge-bar-col">
                     <div class="judge-bar-total" style="width: ${totalPct}%"></div>
                     <div class="judge-bar-auth" style="width: ${authPct}%"></div>
+                    <div class="judge-bar-dissent" style="width: ${dissentPct}%"></div>
                 </div>
                 <div class="judge-count-col">
                     ${j.total} Cases <br>
                     <span style="font-size:0.7rem; color:var(--accent);">(${j.authored} Auth.)</span>
+                    <span style="font-size:0.7rem; color:var(--dissent);">(${j.dissenting} Diss.)</span>
                 </div>
             `;
             container.appendChild(row);
@@ -791,7 +796,7 @@
 
     // Helper to clean judge names for filtering (removes markers)
     function cleanJudgeName(name) {
-        return name.replace(/\(Author\)/gi, '').replace(/\(Auth\.\)/gi, '').replace(/\*/g, '').trim();
+        return name.replace(/\(Author\)/gi, '').replace(/\(Auth\.\)/gi, '').replace(/\(Dissent\)/gi, '').replace(/\*/g, '').trim();
     }
 
     function handleSearch() {
@@ -828,12 +833,15 @@
             let benchHTML = '';
             if (c.judges.length > 0) {
                 const formattedJudges = c.judges.map(j => {
+                    let display = cleanJudgeName(j);
                     if (j.toLowerCase().includes('(author)') || j.toLowerCase().includes('(auth.)') || j.includes('*')) {
-                        return `${cleanJudgeName(j)} (Auth.)`;
+                        display += ' (Auth.)';
                     }
-                    return j;
+                    if (j.toLowerCase().includes('(dissent)')) {
+                        display = `<span style="color:var(--dissent)">${display} (Dissent)</span>`;
+                    }
+                    return display;
                 }).join(', ');
-                // UPDATED: Removed emoji, removed bold, added "Justice(s):" prefix
                 benchHTML = `<div class="bench-info"><span style="color:var(--text-muted); font-weight:bold;">Justice(s):</span> ${formattedJudges}</div>`;
             }
             
