@@ -440,21 +440,6 @@
     </div>
 </div>
 
-<!-- TAB: CHAIN OF CITATION (WIDE LAYOUT) -->
-<div id="tab-map" class="tab-content">
-    <p class="map-description">This map traces expansion of Article 21 by following the chain of precedent citations.</p>
-    <div id="tab-map-container">
-        <div class="map-controls">
-            <button class="map-btn" onclick="zoomMap(1.2)">+</button>
-            <button class="map-btn" onclick="zoomMap(0.8)">-</button>
-            <button class="map-btn" onclick="resetMap()">Fit Screen</button>
-            <button class="map-btn" id="physics-btn" onclick="togglePhysics()">Freeze</button>
-        </div>
-        <div id="network-viz"></div>
-        <div class="map-hint">Scroll to Zoom • Drag to Pan • Click a Case for Details</div>
-    </div>
-</div>
-
 <!-- FOOTER -->
 <footer>
     <div class="footer-content">
@@ -547,6 +532,16 @@
         }).catch(err => console.error("Map load failed", err));
     }
 
+    // --- SMART SPLIT HELPER ---
+    // Splits by semicolon if present, otherwise splits by comma.
+    function smartSplit(str) {
+        if (!str) return [];
+        if (str.includes(';')) {
+            return str.split(';').map(s => s.trim()).filter(s => s);
+        }
+        return str.split(',').map(s => s.trim()).filter(s => s);
+    }
+
     function fetchData() {
         fetch(CSV_URL).then(r => {
             if (!r.ok) throw new Error("Network response was not ok");
@@ -558,13 +553,15 @@
                 citation: (row[1] || "").trim(),
                 court: (row[2] || "").trim(),
                 state: (row[3] || "Pan-India").trim(),
-                rights: (row[4] || "").split(',').map(r => r.trim()).filter(r => r),
+                // SMART PARSING APPLIED TO RIGHTS
+                rights: smartSplit(row[4]),
                 summary: (row[5] || "").trim(),
                 link: (row[6] || "#").trim(),
                 date: (row[7] || "").trim(),
-                cites: (row[8] || "").split(',').map(c => c.trim()).filter(c => c),
-                // Parse Judges from Column 10 (Index 9)
-                judges: (row[9] || "").split(',').map(j => j.trim()).filter(j => j)
+                // SMART PARSING APPLIED TO CITATIONS
+                cites: smartSplit(row[8]),
+                // SMART PARSING APPLIED TO JUDGES
+                judges: smartSplit(row[9])
             })).filter(c => c.name && c.name !== "Case Name");
 
             filteredCases = allCases; // Initialize filtered list
