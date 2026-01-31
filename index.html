@@ -388,6 +388,7 @@
             <input type="text" id="search-input" placeholder="Search cases or keywords..." onkeyup="handleSearch()">
             <select id="right-filter" class="filter-select" onchange="handleSearch()"><option value="">All Rights</option></select>
             <select id="state-filter" class="filter-select" onchange="handleSearch()"><option value="">All Jurisdictions</option></select>
+            <select id="court-filter" class="filter-select" onchange="handleSearch()"><option value="">All Courts</option></select>
             <select id="judge-filter" class="filter-select" onchange="handleSearch()"><option value="">All Judges</option></select>
             <select id="sort-order" class="filter-select" onchange="handleSearch()"><option value="newest">Newest First</option><option value="oldest">Oldest First</option></select>
             <button class="download-btn" onclick="downloadData()">Download Filtered Data (CSV)</button>
@@ -618,7 +619,8 @@
             filteredCases = allCases; // Initialize filtered list
             document.getElementById('loading').style.display = 'none';
             populateDropdown();
-            populateStateDropdown(); // NEW: Populate State Dropdown
+            populateStateDropdown(); 
+            populateCourtDropdown(); // NEW: Populate Court Dropdown
             populateJudgeDropdown(); 
             generateHeatmap();
             handleSearch();
@@ -839,7 +841,8 @@
     function handleSearch() {
         const rawQuery = document.getElementById('search-input').value.toLowerCase().trim();
         const right = document.getElementById('right-filter').value;
-        const state = document.getElementById('state-filter').value; // NEW: Get State Filter
+        const state = document.getElementById('state-filter').value; 
+        const court = document.getElementById('court-filter').value; // NEW: Get Court Filter
         const judge = document.getElementById('judge-filter').value; 
         const sort = document.getElementById('sort-order').value;
 
@@ -862,10 +865,11 @@
 
             // 2. Dropdown Filters
             const matchesRight = right ? c.rights.includes(right) : true;
-            const matchesState = state ? c.state === state : true; // NEW: State Filter
+            const matchesState = state ? c.state === state : true; 
+            const matchesCourt = court ? c.court === court : true; // NEW: Court Filter
             const matchesJudge = judge ? c.judges.some(j => cleanJudgeName(j) === judge) : true;
 
-            return matchesSearch && matchesRight && matchesState && matchesJudge;
+            return matchesSearch && matchesRight && matchesState && matchesCourt && matchesJudge;
         });
         
         filtered.sort((a, b) => {
@@ -1048,6 +1052,18 @@
             const o = document.createElement('option');
             o.value = s;
             o.innerText = s;
+            sel.appendChild(o);
+        });
+    }
+
+    // NEW: Populate Court Dropdown
+    function populateCourtDropdown() {
+        const courts = [...new Set(allCases.map(c => c.court).filter(c => c))].sort();
+        const sel = document.getElementById('court-filter');
+        courts.forEach(c => {
+            const o = document.createElement('option');
+            o.value = c;
+            o.innerText = c;
             sel.appendChild(o);
         });
     }
