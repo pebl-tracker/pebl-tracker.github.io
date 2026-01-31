@@ -905,13 +905,20 @@
 
     function handleMapClick(n) {
         switchTab('tracker');
-        // Update the dropdown instead of a global variable
         const dropdown = document.getElementById('state-filter');
-        dropdown.value = n;
         
-        // If the state isn't in the dropdown (e.g. data mismatch), reset it
-        if (dropdown.value !== n) dropdown.value = "";
-
+        // Check if option exists
+        let optionExists = Array.from(dropdown.options).some(o => o.value === n);
+        
+        if (!optionExists) {
+            // Create temporary option for states with 0 cases so the filter works
+            const opt = document.createElement('option');
+            opt.value = n;
+            opt.innerText = n;
+            dropdown.appendChild(opt);
+        }
+        
+        dropdown.value = n;
         handleSearch();
         document.getElementById('search-input').scrollIntoView({behavior: "smooth", block: "start"});
     }
