@@ -366,6 +366,7 @@
         <div class="controls-bar">
             <input type="text" id="search-input" placeholder="Search cases or keywords..." onkeyup="handleSearch()">
             <select id="right-filter" class="filter-select" onchange="handleSearch()"><option value="">All Rights</option></select>
+            <select id="state-filter" class="filter-select" onchange="handleSearch()"><option value="">All Jurisdictions</option></select>
             <select id="judge-filter" class="filter-select" onchange="handleSearch()"><option value="">All Judges</option></select>
             <select id="sort-order" class="filter-select" onchange="handleSearch()"><option value="newest">Newest First</option><option value="oldest">Oldest First</option></select>
             <button class="download-btn" onclick="downloadData()">Download Filtered Data (CSV)</button>
@@ -483,9 +484,23 @@
     const SHEET_ID = '1k3O3nEbs24UXsoAsrNPmaZfBvpAJCmaEzypuQTD-yuY';
     const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
 
+    // --- SMART SEARCH SYNONYMS ---
+    const synonymMap = {
+        "road": ["street", "highway", "traffic", "pothole", "infrastructure"],
+        "street": ["road", "highway"],
+        "health": ["medical", "treatment", "hospital", "doctor", "healthcare"],
+        "environment": ["pollution", "climate", "ecology", "clean air", "water", "forest"],
+        "housing": ["shelter", "residence", "home", "eviction", "slum"],
+        "privacy": ["surveillance", "data", "aadhaar", "personal liberty"],
+        "jail": ["prison", "custody", "incarceration", "bail", "undertrial"],
+        "education": ["school", "college", "university", "student"],
+        "internet": ["digital", "web", "online", "connectivity"],
+        "women": ["gender", "female", "maternity", "sexual harassment"],
+        "child": ["juvenile", "minor", "infant"]
+    };
+
     let allCases = [];
     let filteredCases = []; // Stores the currently visible dataset
-    let currentFilterState = null;
     let network = null;
     let physicsEnabled = true;
 
@@ -582,6 +597,7 @@
             filteredCases = allCases; // Initialize filtered list
             document.getElementById('loading').style.display = 'none';
             populateDropdown();
+            populateStateDropdown(); // NEW: Populate State Dropdown
             populateJudgeDropdown(); 
             generateHeatmap();
             handleSearch();
@@ -800,26 +816,43 @@
     }
 
     function handleSearch() {
-        const query = document.getElementById('search-input').value.toLowerCase();
+        const rawQuery = document.getElementById('search-input').value.toLowerCase().trim();
         const right = document.getElementById('right-filter').value;
+        const state = document.getElementById('state-filter').value; // NEW: Get State Filter
         const judge = document.getElementById('judge-filter').value; 
         const sort = document.getElementById('sort-order').value;
 
-        let filtered = currentFilterState ? allCases.filter(c => c.state === currentFilterState) : allCases;
-        
-        filtered = filtered.filter(c => 
-            (c.name.toLowerCase().includes(query) || c.summary.toLowerCase().includes(query)) && 
-            (right ? c.rights.includes(right) : true) &&
-            // Compare clean names for filtering
-            (judge ? c.judges.some(j => cleanJudgeName(j) === judge) : true)
-        );
+        // --- SMART SEARCH EXPANSION ---
+        let searchTerms = [rawQuery];
+        if (rawQuery) {
+            Object.keys(synonymMap).forEach(key => {
+                if (rawQuery.includes(key) || synonymMap[key].some(s => rawQuery.includes(s))) {
+                    searchTerms = [...searchTerms, key, ...synonymMap[key]];
+                }
+            });
+        }
+        searchTerms = [...new Set(searchTerms)];
+
+        // Filter Logic
+        let filtered = allCases.filter(c => {
+            // 1. Text Search
+            const content = `${c.name} ${c.summary} ${c.rights.join(' ')}`.toLowerCase();
+            const matchesSearch = rawQuery === "" || searchTerms.some(term => content.includes(term));
+
+            // 2. Dropdown Filters
+            const matchesRight = right ? c.rights.includes(right) : true;
+            const matchesState = state ? c.state === state : true; // NEW: State Filter
+            const matchesJudge = judge ? c.judges.some(j => cleanJudgeName(j) === judge) : true;
+
+            return matchesSearch && matchesRight && matchesState && matchesJudge;
+        });
         
         filtered.sort((a, b) => {
             const dA = parseDate(a.date); const dB = parseDate(b.date);
             return sort === 'newest' ? dB - dA : dA - dB;
         });
 
-        filteredCases = filtered; // Update global filtered list for CSV export
+        filteredCases = filtered; 
         renderCases(filtered);
     }
 
@@ -872,13 +905,21 @@
 
     function handleMapClick(n) {
         switchTab('tracker');
-        currentFilterState = n;
-        document.getElementById('filter-display').innerHTML = `<span class="filter-tag" onclick="resetFilter()">Jurisdiction: ${n} ✕</span>`;
+        // Update the dropdown instead of a global variable
+        const dropdown = document.getElementById('state-filter');
+        dropdown.value = n;
+        
+        // If the state isn't in the dropdown (e.g. data mismatch), reset it
+        if (dropdown.value !== n) dropdown.value = "";
+
         handleSearch();
         document.getElementById('search-input').scrollIntoView({behavior: "smooth", block: "start"});
     }
 
-    function resetFilter() { currentFilterState = null; document.getElementById('filter-display').innerHTML = ''; handleSearch(); }
+    function resetFilter() { 
+        document.getElementById('state-filter').value = ""; 
+        handleSearch(); 
+    }
 
     function openDetails(enc) {
         const c = allCases.find(x => x.name === decodeURIComponent(enc));
@@ -919,6 +960,18 @@
         const rts = [...new Set(allCases.flatMap(c => c.rights))].sort();
         const sel = document.getElementById('right-filter');
         rts.forEach(r => { const o = document.createElement('option'); o.value = r; o.innerText = r; sel.appendChild(o); });
+    }
+
+    // NEW: Populate State Dropdown
+    function populateStateDropdown() {
+        const states = [...new Set(allCases.map(c => c.state).filter(s => s))].sort();
+        const sel = document.getElementById('state-filter');
+        states.forEach(s => {
+            const o = document.createElement('option');
+            o.value = s;
+            o.innerText = s;
+            sel.appendChild(o);
+        });
     }
 
     // Populate Judge Dropdown with CLEAN names
