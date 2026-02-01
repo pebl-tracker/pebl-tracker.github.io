@@ -280,6 +280,29 @@
         /* UPDATED BENCH INFO STYLE */
         .bench-info { font-size: 0.85rem; color: var(--text); margin-bottom: 15px; font-family: sans-serif; }
         
+        /* NATURE BADGES (Explicit/Implicit) */
+        .nature-badge {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin-left: 10px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            vertical-align: middle;
+            display: inline-block;
+        }
+        .nature-explicit {
+            background-color: var(--primary);
+            color: var(--bg);
+            border: 1px solid var(--primary);
+        }
+        .nature-implicit {
+            background-color: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--text-muted);
+        }
+
         .tag { background: var(--tag-bg); padding: 4px 10px; border-radius: 3px; font-size: 0.7rem; font-weight: bold; color: #666; display: inline-block; margin-right: 6px; margin-bottom: 6px; text-transform: uppercase; }
         .summary-preview { color: var(--text); line-height: 1.6; margin-bottom: 15px; font-size: 0.95rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
         .action-link { color: var(--primary); font-weight: bold; text-decoration: none; border-bottom: 2px solid var(--primary); cursor: pointer; font-size: 0.85rem; }
@@ -613,7 +636,9 @@
                 // SMART PARSING APPLIED TO CITATIONS
                 cites: smartSplit(row[8]),
                 // SMART PARSING APPLIED TO JUDGES
-                judges: smartSplit(row[9])
+                judges: smartSplit(row[9]),
+                // NEW: Nature of Declaration (Column K / Index 10)
+                nature: (row[10] || "").trim()
             })).filter(c => c.name && c.name !== "Case Name");
 
             filteredCases = allCases; // Initialize filtered list
@@ -903,6 +928,13 @@
                 benchHTML = `<div class="bench-info"><span style="color:var(--text-muted); font-weight:bold;">Justice(s):</span> ${formattedJudges}</div>`;
             }
             
+            // NEW: Nature Badge Logic
+            let natureBadge = '';
+            if(c.nature) {
+                const typeClass = c.nature.toLowerCase() === 'implicit' ? 'nature-implicit' : 'nature-explicit';
+                natureBadge = `<span class="nature-badge ${typeClass}">${c.nature}</span>`;
+            }
+            
             let dDisp = c.date;
             try { 
                 const d = parseDate(c.date); 
@@ -911,7 +943,7 @@
 
             list.innerHTML += `
                 <div class="card">
-                    <div class="card-header"><h3>${c.name}</h3><span class="court-label">${c.court}</span></div>
+                    <div class="card-header"><h3>${c.name}</h3><span class="court-label">${c.court} ${natureBadge}</span></div>
                     <div class="card-date">${dDisp}</div>
                     <span class="citation">${c.citation}</span>
                     ${benchHTML}
