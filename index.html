@@ -508,9 +508,7 @@
         <div style="max-width: 700px; margin: 0 auto;">
             <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px;">About the Project</h2>
             <p><strong>Procedure Established by Law (PEBL)</strong> is a digital tracker auditing the expansion of Article 21 of the Constitution of India. It tracks the judicial reading of unenumerated rights into the Right to Life and Personal Liberty.</p>
-            
-            <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">Inspiration</h2>
-            <p>This tracker draws inspiration from the following global legal databases:</p>
+            <p>This tracker draws inspiration from the following databases:</p>
             <ul>
                 <li><a href="https://www.climatecasechart.com/" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: bold;">Climate Change Litigation Databases</a></li>
                 <li><a href="https://globalfreedomofexpression.columbia.edu/" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: bold;">Columbia Global Freedom of Expression</a></li>
@@ -980,7 +978,8 @@
     }
 
     function createBlogCard(post, isPinned) {
-        const pinnedBadge = isPinned ? '<span style="background:var(--accent); color:white; padding:2px 6px; border-radius:4px; font-size:0.6rem; margin-right:8px; vertical-align:middle; font-weight:bold;">📌 PINNED</span>' : '';
+        // Removed 📌
+        const pinnedBadge = isPinned ? '<span style="background:var(--accent); color:white; padding:2px 6px; border-radius:4px; font-size:0.6rem; margin-right:8px; vertical-align:middle; font-weight:bold;">PINNED</span>' : '';
         const borderStyle = isPinned ? 'style="border-left: 5px solid var(--accent);"' : '';
         
         return `
