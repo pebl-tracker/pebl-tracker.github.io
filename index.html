@@ -269,25 +269,21 @@
 
         /* --- BLOG TAB --- */
         #tab-blog { width: 100%; display: none; }
-        .blog-grid { display: grid; gap: 30px; }
-        .blog-card { background: var(--card-bg); padding: 30px; border: 1px solid var(--border); border-radius: 6px; transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .blog-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); border-color: var(--accent); }
+        .blog-grid { display: grid; gap: 30px; max-width: 800px; margin: 0 auto; }
+        .blog-card { background: var(--card-bg); padding: 30px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .blog-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-color: var(--accent); }
         .blog-meta { font-family: sans-serif; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
-        .blog-title { font-size: 1.6rem; color: var(--primary); margin: 0 0 15px 0; line-height: 1.3; }
-        .blog-summary { color: var(--text); font-size: 1rem; line-height: 1.6; margin-bottom: 20px; }
-        .read-more-btn { display: inline-block; background: var(--bg); border: 1px solid var(--primary); color: var(--primary); padding: 8px 20px; border-radius: 4px; text-decoration: none; font-family: sans-serif; font-weight: bold; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease; }
-        .read-more-btn:hover { background: var(--primary); color: var(--bg); }
-
-        /* --- BLOG VIEW --- */
-        #blog-view { display: none; background: var(--bg); padding: 20px 0; }
-        .blog-content { font-size: 1.2rem; line-height: 1.8; color: var(--text); max-width: 800px; margin: 0 auto; }
-        .blog-content h2 { color: var(--primary); margin-top: 40px; font-size: 1.8rem; }
-        .blog-content h3 { color: var(--primary); margin-top: 30px; font-size: 1.4rem; }
+        .blog-title { font-size: 1.6rem; color: var(--primary); margin: 0 0 15px 0; line-height: 1.3; font-weight: bold; }
+        .blog-excerpt { font-size: 1rem; color: var(--text); line-height: 1.6; margin-bottom: 0; }
+        
+        /* BLOG READER VIEW */
+        #blog-reader-view { display: none; max-width: 750px; margin: 0 auto; padding: 20px 0; }
+        .blog-reader-title { font-size: 2.4rem; color: var(--primary); margin-bottom: 10px; line-height: 1.2; }
+        .blog-reader-meta { font-family: sans-serif; color: var(--text-muted); font-size: 0.9rem; border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 30px; }
+        .blog-content { font-size: 1.2rem; line-height: 1.8; color: var(--text); }
         .blog-content p { margin-bottom: 20px; }
-        .blog-content blockquote { border-left: 4px solid var(--accent); padding-left: 20px; margin: 30px 0; font-style: italic; color: var(--text-muted); }
-        .blog-content a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent); }
-        .blog-header { text-align: center; margin-bottom: 50px; border-bottom: 1px solid var(--border); padding-bottom: 30px; }
-        .blog-header h1 { font-size: 2.5rem; margin-bottom: 15px; }
+        .blog-content h3 { margin-top: 40px; color: var(--primary); }
+        .blog-content blockquote { border-left: 4px solid var(--accent); margin: 20px 0; padding-left: 20px; font-style: italic; color: var(--text-muted); }
 
         /* --- CARDS --- */
         .case-grid { display: grid; gap: 25px; }
@@ -326,14 +322,38 @@
         }
 
         .tag { background: var(--tag-bg); padding: 4px 10px; border-radius: 3px; font-size: 0.7rem; font-weight: bold; color: #666; display: inline-block; margin-right: 6px; margin-bottom: 6px; text-transform: uppercase; }
-        .summary-preview { color: var(--text); line-height: 1.6; margin-bottom: 15px; font-size: 0.95rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        /* UPDATED: Justified Text for Summaries */
+        .summary-preview { 
+            color: var(--text); 
+            line-height: 1.6; 
+            margin-bottom: 15px; 
+            font-size: 0.95rem; 
+            display: -webkit-box; 
+            -webkit-line-clamp: 3; 
+            -webkit-box-orient: vertical; 
+            overflow: hidden; 
+            text-align: justify; 
+            text-justify: inter-word;
+        }
+        
         .action-link { color: var(--primary); font-weight: bold; text-decoration: none; border-bottom: 2px solid var(--primary); cursor: pointer; font-size: 0.85rem; }
 
         /* --- DETAILS VIEW --- */
         #details-view { display: none; background: var(--bg); padding: 20px 0; }
         .back-btn { display: inline-block; margin-bottom: 30px; cursor: pointer; color: var(--text-muted); font-family: sans-serif; font-size: 0.8rem; font-weight: bold; letter-spacing: 1px; }
         .details-meta { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 30px; }
-        .details-body { font-size: 1.15rem; line-height: 1.8; white-space: pre-wrap; color: var(--text); }
+        
+        /* UPDATED: Justified Text for Details Body */
+        .details-body { 
+            font-size: 1.15rem; 
+            line-height: 1.8; 
+            white-space: pre-wrap; 
+            color: var(--text); 
+            text-align: justify; 
+            text-justify: inter-word;
+        }
+        
         .external-btn { 
             display: inline-block; 
             background: var(--primary); 
@@ -458,25 +478,6 @@
         </div>
     </div>
 
-    <!-- TAB: CHAIN OF CITATION -->
-    <div id="tab-map" class="tab-content">
-        <p class="map-description">
-            Visualizing the citation network between key Article 21 judgments.<br>
-            <span style="font-size: 0.8rem;">Nodes represent cases. Arrows indicate citations.</span>
-        </p>
-        <div id="tab-map-container">
-            <div id="network-viz"></div>
-            <div class="map-controls">
-                <button class="map-btn" onclick="zoomMap(1.2)">+</button>
-                <button class="map-btn" onclick="zoomMap(0.8)">-</button>
-                <button class="map-btn" onclick="resetMap()">Fit</button>
-                <button class="map-btn" id="physics-btn" onclick="togglePhysics()">Freeze</button>
-                <button class="map-btn" onclick="initCitationMap()">Reload Map</button>
-            </div>
-            <div class="map-hint">Scroll to Zoom • Drag to Pan</div>
-        </div>
-    </div>
-
     <!-- TAB: JUDGE ANALYTICS -->
     <div id="tab-judges" class="tab-content">
         <p class="map-description">
@@ -494,12 +495,8 @@
 
     <!-- TAB: BLOG -->
     <div id="tab-blog" class="tab-content">
-        <div id="blog-loading" style="text-align:center; display:none;">
-            <div class="loader"></div>
-            Loading Posts...
-        </div>
         <div class="blog-grid" id="blog-list">
-            <!-- Injected via JS -->
+            <!-- Blog posts injected here -->
         </div>
     </div>
 
@@ -508,12 +505,7 @@
         <div style="max-width: 700px; margin: 0 auto;">
             <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px;">About the Project</h2>
             <p><strong>Procedure Established by Law (PEBL)</strong> is a digital tracker auditing the expansion of Article 21 of the Constitution of India. It tracks the judicial reading of unenumerated rights into the Right to Life and Personal Liberty.</p>
-            <p>This tracker draws inspiration from the following databases:</p>
-            <ul>
-                <li><a href="https://www.climatecasechart.com/" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: bold;">Climate Change Litigation Databases</a></li>
-                <li><a href="https://globalfreedomofexpression.columbia.edu/" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: bold;">Columbia Global Freedom of Expression</a></li>
-            </ul>
-
+            
             <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">About the Curator</h2>
             <p>Abhinav Somani is 3rd Year B.A., LL.B. (Hons.) Student at the National Law School of India University, Bengaluru. He is deeply interested in Constitutional Interpretation, particularly vis-à-vis Rights Provisions.</p>
 
@@ -555,14 +547,27 @@
         <div id="detail-links-container" style="margin-top: 40px; display: flex; gap: 15px; flex-wrap: wrap;"></div>
     </div>
 
-    <!-- BLOG VIEW (POSTS) -->
-    <div id="blog-view">
-        <div class="back-btn" onclick="closeBlog()">← BACK TO BLOG</div>
-        <div class="blog-header">
-            <h1 id="post-title">Post Title</h1>
-            <div class="blog-meta" id="post-meta">Author • Date</div>
+    <!-- BLOG READER VIEW -->
+    <div id="blog-reader-view">
+        <div class="back-btn" onclick="closeBlogReader()">← BACK TO BLOG</div>
+        <h1 class="blog-reader-title" id="blog-reader-title">Blog Title</h1>
+        <div class="blog-reader-meta" id="blog-reader-meta">Author • Date</div>
+        <div class="blog-content" id="blog-reader-content"></div>
+    </div>
+</div>
+
+<!-- TAB: CHAIN OF CITATION (WIDE LAYOUT) -->
+<div id="tab-map" class="tab-content">
+    <p class="map-description">This map traces expansion of Article 21 by following the chain of precedent citations.</p>
+    <div id="tab-map-container">
+        <div class="map-controls">
+            <button class="map-btn" onclick="zoomMap(1.2)">+</button>
+            <button class="map-btn" onclick="zoomMap(0.8)">-</button>
+            <button class="map-btn" onclick="resetMap()">Fit Screen</button>
+            <button class="map-btn" id="physics-btn" onclick="togglePhysics()">Freeze</button>
         </div>
-        <div class="blog-content" id="post-content"></div>
+        <div id="network-viz"></div>
+        <div class="map-hint">Scroll to Zoom • Drag to Pan • Click a Case for Details</div>
     </div>
 </div>
 
@@ -594,7 +599,10 @@
     // --- DATA LOGIC ---
     const SHEET_ID = '1k3O3nEbs24UXsoAsrNPmaZfBvpAJCmaEzypuQTD-yuY';
     const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
-    const BLOG_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=187975411`;
+    
+    // *** IMPORTANT: REPLACE '0' WITH THE ACTUAL GID OF YOUR BLOG SHEET TAB ***
+    const BLOG_SHEET_GID = '1053804867'; 
+    const BLOG_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${BLOG_SHEET_GID}`;
 
     // --- SMART SEARCH SYNONYMS ---
     const synonymMap = {
@@ -613,14 +621,14 @@
 
     let allCases = [];
     let filteredCases = []; 
-    let blogPosts = [];
+    let allBlogPosts = [];
     let network = null;
     let physicsEnabled = true;
 
     window.addEventListener('DOMContentLoaded', () => {
         loadMap();
         fetchData();
-        fetchBlogData();
+        fetchBlogData(); // Fetch blog posts
         
         // Scroll Listener for Back-to-Top
         window.addEventListener('scroll', () => {
@@ -645,6 +653,7 @@
         });
 
         element.addEventListener('mousemove', (e) => {
+            // Offset slightly so cursor doesn't cover text
             tooltip.style.left = (e.clientX + 15) + 'px';
             tooltip.style.top = (e.clientY + 15) + 'px';
         });
@@ -658,6 +667,7 @@
         fetch('india.svg').then(r => r.text()).then(svg => {
             document.getElementById('map-container').innerHTML = svg;
             
+            // Inject ARIA labels and Tooltip Listeners
             document.querySelectorAll('#map-container path').forEach(p => {
                 const name = p.getAttribute('name');
                 if(name) {
@@ -673,6 +683,7 @@
         }).catch(err => console.error("Map load failed", err));
     }
 
+    // --- SMART SPLIT HELPER ---
     function smartSplit(str) {
         if (!str) return [];
         if (str.includes(';')) {
@@ -716,24 +727,77 @@
         });
     }
 
+    // --- BLOG FETCHING LOGIC ---
     function fetchBlogData() {
+        if(BLOG_SHEET_GID === '0') {
+            console.warn("Blog Sheet GID not set. Skipping blog fetch.");
+            return;
+        }
+
         fetch(BLOG_CSV_URL).then(r => {
-            if (!r.ok) throw new Error("Blog fetch failed");
+            if (!r.ok) throw new Error("Blog network response was not ok");
             return r.text();
         }).then(csv => {
             const parsed = Papa.parse(csv, { header: false, skipEmptyLines: true });
-            blogPosts = parsed.data.slice(1).map(row => ({
+            // Assuming Row 1 is header
+            allBlogPosts = parsed.data.slice(1).map(row => ({
                 title: (row[0] || "").trim(),
                 author: (row[1] || "").trim(),
                 date: (row[2] || "").trim(),
                 summary: (row[3] || "").trim(),
                 content: (row[4] || "").trim(),
                 slug: (row[5] || "").trim()
-            })).filter(p => p.title && p.title !== "Title");
+            })).filter(p => p.title);
             
-            renderBlog();
-            checkUrlParams(); // Re-check in case URL was waiting for blog data
-        }).catch(err => console.error("Blog load failed", err));
+            renderBlogPosts();
+            checkUrlParams(); // Re-check in case a blog post was requested
+        }).catch(err => console.error("Blog fetch failed:", err));
+    }
+
+    function renderBlogPosts() {
+        const container = document.getElementById('blog-list');
+        container.innerHTML = '';
+        
+        if(allBlogPosts.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:var(--text-muted);">No blog posts found.</p>';
+            return;
+        }
+
+        allBlogPosts.forEach(post => {
+            const card = document.createElement('div');
+            card.className = 'blog-card';
+            card.onclick = () => openBlogPost(post.slug);
+            card.innerHTML = `
+                <div class="blog-meta">${post.date} • ${post.author}</div>
+                <h3 class="blog-title">${post.title}</h3>
+                <p class="blog-excerpt">${post.summary}</p>
+                <span class="action-link" style="margin-top:15px; display:inline-block;">READ ARTICLE →</span>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function openBlogPost(slug) {
+        const post = allBlogPosts.find(p => p.slug === slug);
+        if(!post) return;
+
+        window.history.pushState({}, '', '?post=' + slug);
+        
+        // Hide other views
+        document.querySelectorAll('.tab-content, #details-view').forEach(el => el.style.display = 'none');
+        
+        // Populate Reader
+        document.getElementById('blog-reader-title').innerText = post.title;
+        document.getElementById('blog-reader-meta').innerText = `${post.date} • By ${post.author}`;
+        document.getElementById('blog-reader-content').innerHTML = post.content; // Allows HTML content
+        
+        document.getElementById('blog-reader-view').style.display = 'block';
+        window.scrollTo(0,0);
+    }
+
+    function closeBlogReader() {
+        window.history.pushState({}, '', window.location.pathname);
+        switchTab('blog');
     }
 
     // --- CITATION & EXPORT LOGIC ---
@@ -861,24 +925,7 @@
 
     // --- CHAIN OF CITATION LOGIC ---
     function initCitationMap() {
-        // Safety Check: Ensure Vis.js is loaded
-        if (typeof vis === 'undefined') {
-            console.error("Vis.js library not loaded.");
-            document.getElementById('network-viz').innerHTML = '<p style="text-align:center; padding-top:50px; color:var(--text-muted);">Visualization library failed to load. Please refresh.</p>';
-            return;
-        }
-
-        // Safety Check: Ensure data exists
-        if (allCases.length === 0) return;
-
         const container = document.getElementById('network-viz');
-        
-        // Cleanup existing network to prevent memory leaks or double rendering
-        if (network !== null) {
-            network.destroy();
-            network = null;
-        }
-
         const nodes = [];
         const edges = [];
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -924,97 +971,23 @@
             interaction: { dragNodes: true, dragView: true, zoomView: true, hover: true, tooltipDelay: 200 }
         };
 
-        try {
-            network = new vis.Network(container, data, options);
-            network.on("click", (params) => {
-                if (params.nodes.length > 0) openDetails(encodeURIComponent(params.nodes[0]));
-            });
-        } catch (e) {
-            console.error("Vis.js initialization error:", e);
-        }
+        network = new vis.Network(container, data, options);
+        network.on("click", (params) => {
+            if (params.nodes.length > 0) openDetails(encodeURIComponent(params.nodes[0]));
+        });
     }
 
-    function zoomMap(scale) { if(network) network.moveTo({ scale: network.getScale() * scale }); }
-    function resetMap() { if(network) network.fit({ animation: true }); }
+    function zoomMap(scale) { network.moveTo({ scale: network.getScale() * scale }); }
+    function resetMap() { network.fit({ animation: true }); }
     function togglePhysics() {
-        if(!network) return;
         physicsEnabled = !physicsEnabled;
         network.setOptions({ physics: { enabled: physicsEnabled } });
         document.getElementById('physics-btn').innerText = physicsEnabled ? "Freeze" : "Unfreeze";
     }
 
-    // --- BLOG LOGIC ---
-    function renderBlog() {
-        const list = document.getElementById('blog-list');
-        const loading = document.getElementById('blog-loading');
-        
-        if(blogPosts.length === 0) {
-            loading.style.display = 'block';
-            loading.innerText = "No posts found.";
-            return;
-        }
-        loading.style.display = 'none';
-        list.innerHTML = '';
-
-        // Logic to pin specific post
-        const pinnedSlug = 'a-statement-of-objects-and-reasons';
-        let pinnedPost = null;
-        let otherPosts = [];
-
-        blogPosts.forEach(p => {
-            if(p.slug === pinnedSlug) pinnedPost = p;
-            else otherPosts.push(p);
-        });
-
-        // Render Pinned Post First
-        if(pinnedPost) {
-            list.innerHTML += createBlogCard(pinnedPost, true);
-        }
-
-        // Render Others
-        otherPosts.forEach(p => {
-            list.innerHTML += createBlogCard(p, false);
-        });
-    }
-
-    function createBlogCard(post, isPinned) {
-        // Removed 📌
-        const pinnedBadge = isPinned ? '<span style="background:var(--accent); color:white; padding:2px 6px; border-radius:4px; font-size:0.6rem; margin-right:8px; vertical-align:middle; font-weight:bold;">PINNED</span>' : '';
-        const borderStyle = isPinned ? 'style="border-left: 5px solid var(--accent);"' : '';
-        
-        return `
-            <div class="blog-card" ${borderStyle}>
-                <div class="blog-meta">${pinnedBadge}${post.date} • ${post.author}</div>
-                <h3 class="blog-title">${post.title}</h3>
-                <p class="blog-summary">${post.summary}</p>
-                <button class="read-more-btn" onclick="openBlogPost('${post.slug}')">READ FULL POST →</button>
-            </div>
-        `;
-    }
-
-    function openBlogPost(slug) {
-        const post = blogPosts.find(p => p.slug === slug);
-        if(!post) return;
-
-        window.history.pushState({}, '', '?post=' + slug);
-        
-        document.getElementById('post-title').innerText = post.title;
-        document.getElementById('post-meta').innerText = `${post.date} • ${post.author}`;
-        document.getElementById('post-content').innerHTML = post.content; // HTML allowed
-
-        document.querySelectorAll('.tab-content, #details-view').forEach(el => el.style.display = 'none');
-        document.getElementById('blog-view').style.display = 'block';
-        window.scrollTo(0,0);
-    }
-
-    function closeBlog() {
-        window.history.pushState({}, '', window.location.pathname);
-        switchTab('blog');
-    }
-
     // --- UI LOGIC ---
     function switchTab(t) {
-        document.querySelectorAll('.tab-content, #details-view, #blog-view').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.tab-content, #details-view, #blog-reader-view').forEach(el => el.style.display = 'none');
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
         document.getElementById('tab-' + t).style.display = 'block';
         document.getElementById('btn-' + t).classList.add('active');
@@ -1024,6 +997,7 @@
         if(t === 'judges') setTimeout(initJudgeAnalytics, 100);
     }
 
+    // Helper to clean judge names for filtering (removes markers)
     function cleanJudgeName(name) {
         return name.replace(/\(Author\)/gi, '').replace(/\(Auth\.\)/gi, '').replace(/\(Dissent\)/gi, '').replace(/\*/g, '').trim();
     }
@@ -1036,6 +1010,7 @@
         const judge = document.getElementById('judge-filter').value; 
         const sort = document.getElementById('sort-order').value;
 
+        // --- SMART SEARCH EXPANSION ---
         let searchTerms = [rawQuery];
         if (rawQuery) {
             Object.keys(synonymMap).forEach(key => {
@@ -1046,9 +1021,13 @@
         }
         searchTerms = [...new Set(searchTerms)];
 
+        // Filter Logic
         let filtered = allCases.filter(c => {
+            // 1. Text Search
             const content = `${c.name} ${c.summary} ${c.rights.join(' ')}`.toLowerCase();
             const matchesSearch = rawQuery === "" || searchTerms.some(term => content.includes(term));
+
+            // 2. Dropdown Filters
             const matchesRight = right ? c.rights.includes(right) : true;
             const matchesState = state ? c.state === state : true; 
             const matchesCourt = court ? c.court === court : true; 
@@ -1072,6 +1051,7 @@
         cases.forEach(c => {
             const tags = c.rights.map(r => `<span class="tag">${r}</span>`).join('');
             
+            // Format Judges: Check for markers and bold the author
             let benchHTML = '';
             if (c.judges.length > 0) {
                 const formattedJudges = c.judges.map(j => {
@@ -1087,6 +1067,7 @@
                 benchHTML = `<div class="bench-info"><span style="color:var(--text-muted); font-weight:bold;">Justice(s):</span> ${formattedJudges}</div>`;
             }
             
+            // Nature Badge Logic
             let natureBadge = '';
             if(c.nature) {
                 const typeClass = c.nature.toLowerCase() === 'implicit' ? 'nature-implicit' : 'nature-explicit';
@@ -1121,16 +1102,26 @@
     function handleMapClick(n) {
         switchTab('tracker');
         const dropdown = document.getElementById('state-filter');
+        
+        // Check if option exists
         let optionExists = Array.from(dropdown.options).some(o => o.value === n);
+        
         if (!optionExists) {
+            // Create temporary option for states with 0 cases so the filter works
             const opt = document.createElement('option');
             opt.value = n;
             opt.innerText = n;
             dropdown.appendChild(opt);
         }
+        
         dropdown.value = n;
         handleSearch();
         document.getElementById('search-input').scrollIntoView({behavior: "smooth", block: "start"});
+    }
+
+    function resetFilter() { 
+        document.getElementById('state-filter').value = ""; 
+        handleSearch(); 
     }
 
     function openDetails(enc) {
@@ -1138,14 +1129,17 @@
         if(!c) return;
         window.history.pushState({}, '', '?case=' + enc);
         document.getElementById('detail-title').innerText = c.name;
+        // Separate the raw citation text from the button
         document.getElementById('detail-citation').innerHTML = `<span id="raw-citation">${c.citation}</span> <button class="copy-btn" onclick="copyCaseCitation()">Copy</button>`;
         document.getElementById('detail-court').innerText = c.court;
         document.getElementById('detail-date').innerText = c.date;
         document.getElementById('detail-summary').innerText = c.summary;
+        // document.getElementById('detail-link').href = c.link; // REMOVED: Old single link logic
         document.getElementById('detail-rights-container').innerHTML = c.rights.map(r => `<span class="tag" style="background:var(--primary); color:var(--bg);">${r}</span>`).join('');
         
+        // NEW: Generate Multiple Link Buttons
         const linkContainer = document.getElementById('detail-links-container');
-        linkContainer.innerHTML = ''; 
+        linkContainer.innerHTML = ''; // Clear previous
         if (c.links.length > 0) {
             c.links.forEach((url, index) => {
                 if(url === "#" || url === "") return;
@@ -1158,7 +1152,7 @@
             });
         }
 
-        document.querySelectorAll('.tab-content, #blog-view').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
         document.getElementById('details-view').style.display = 'block';
         window.scrollTo(0,0);
     }
@@ -1171,20 +1165,60 @@
         rts.forEach(r => { const o = document.createElement('option'); o.value = r; o.innerText = r; sel.appendChild(o); });
     }
 
+    // NEW: Populate State Dropdown
     function populateStateDropdown() {
         const sel = document.getElementById('state-filter');
+        
+        // Clear existing options except the first "All Jurisdictions" (actually, better to rebuild it to ensure order)
         sel.innerHTML = '<option value="">All Jurisdictions</option>';
+
+        // Hardcoded list of all Indian States & UTs
         const states = [
-            "Andaman and Nicobar", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh",
-            "Dādra and Nagar Haveli and Damān and Diu", "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh",
-            "Jammu and Kashmir", "Jharkhand", "Karnataka", "Kerala", "Ladakh", "Lakshadweep", "Madhya Pradesh",
-            "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Orissa", "Puducherry", "Punjab",
-            "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttaranchal", "West Bengal"
+            "Andaman and Nicobar",
+            "Andhra Pradesh",
+            "Arunachal Pradesh",
+            "Assam",
+            "Bihar",
+            "Chandigarh",
+            "Chhattisgarh",
+            "Dādra and Nagar Haveli and Damān and Diu",
+            "Delhi",
+            "Goa",
+            "Gujarat",
+            "Haryana",
+            "Himachal Pradesh",
+            "Jammu and Kashmir",
+            "Jharkhand",
+            "Karnataka",
+            "Kerala",
+            "Ladakh",
+            "Lakshadweep",
+            "Madhya Pradesh",
+            "Maharashtra",
+            "Manipur",
+            "Meghalaya",
+            "Mizoram",
+            "Nagaland",
+            "Orissa",
+            "Puducherry",
+            "Punjab",
+            "Rajasthan",
+            "Sikkim",
+            "Tamil Nadu",
+            "Telangana",
+            "Tripura",
+            "Uttar Pradesh",
+            "Uttaranchal",
+            "West Bengal"
         ];
+
+        // Add Pan-India first
         const panOpt = document.createElement('option');
         panOpt.value = "Pan-India";
         panOpt.innerText = "Pan-India";
         sel.appendChild(panOpt);
+
+        // Add States Alphabetically
         states.sort().forEach(s => {
             const o = document.createElement('option');
             o.value = s;
@@ -1193,17 +1227,40 @@
         });
     }
 
+    // NEW: Populate Court Dropdown
     function populateCourtDropdown() {
         const sel = document.getElementById('court-filter');
         sel.innerHTML = '<option value="">All Courts</option>';
+
         const courts = [
-            "Supreme Court", "Allahabad High Court", "Andhra Pradesh High Court", "Bombay High Court", "Calcutta High Court",
-            "Chhattisgarh High Court", "Delhi High Court", "Gauhati High Court", "Gujarat High Court", "Himachal Pradesh High Court",
-            "Jammu & Kashmir and Ladakh High Court", "Jharkhand High Court", "Karnataka High Court", "Kerala High Court",
-            "Madhya Pradesh High Court", "Madras High Court", "Manipur High Court", "Meghalaya High Court", "Orissa High Court",
-            "Patna High Court", "Punjab & Haryana High Court", "Rajasthan High Court", "Sikkim High Court", "Telangana High Court",
-            "Tripura High Court", "Uttarakhand High Court"
+            "Supreme Court",
+            "Allahabad High Court",
+            "Andhra Pradesh High Court",
+            "Bombay High Court",
+            "Calcutta High Court",
+            "Chhattisgarh High Court",
+            "Delhi High Court",
+            "Gauhati High Court",
+            "Gujarat High Court",
+            "Himachal Pradesh High Court",
+            "Jammu & Kashmir and Ladakh High Court",
+            "Jharkhand High Court",
+            "Karnataka High Court",
+            "Kerala High Court",
+            "Madhya Pradesh High Court",
+            "Madras High Court",
+            "Manipur High Court",
+            "Meghalaya High Court",
+            "Orissa High Court",
+            "Patna High Court",
+            "Punjab & Haryana High Court",
+            "Rajasthan High Court",
+            "Sikkim High Court",
+            "Telangana High Court",
+            "Tripura High Court",
+            "Uttarakhand High Court"
         ];
+
         courts.forEach(c => {
             const o = document.createElement('option');
             o.value = c;
@@ -1212,6 +1269,7 @@
         });
     }
 
+    // Populate Judge Dropdown with CLEAN names
     function populateJudgeDropdown() {
         const judges = [...new Set(allCases.flatMap(c => c.judges.map(cleanJudgeName)))].sort();
         const sel = document.getElementById('judge-filter');
@@ -1228,6 +1286,7 @@
         const counts = {}; let max = 0;
         let panIndiaCount = 0;
         
+        // Calculate counts
         allCases.forEach(c => { 
             if(c.state === "Pan-India") {
                 panIndiaCount++;
@@ -1237,15 +1296,25 @@
             }
         });
         
+        // Update SC Button Count
         const scBtn = document.querySelector('.sc-btn');
         if(scBtn) {
             scBtn.setAttribute('data-count', panIndiaCount);
+            
+            // Calculate max including Pan-India for relative coloring
             let globalMax = max;
             if (panIndiaCount > globalMax) globalMax = panIndiaCount;
+            
+            // Apply heatmap color to button
             const opacity = globalMax === 0 ? 0 : 0.15 + (0.85 * (panIndiaCount / globalMax));
+            
+            // Get base color from CSS variable (requires a small helper or hardcoded check)
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
             const baseColor = isDark ? [236, 240, 241] : [44, 62, 80]; 
+            
             scBtn.style.backgroundColor = `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${opacity})`;
+            
+            // Adjust text color for contrast
             if (opacity > 0.5) {
                 scBtn.style.color = isDark ? '#000' : '#fff';
             } else {
@@ -1259,9 +1328,12 @@
         document.querySelectorAll('#map-container path').forEach(p => {
             const n = p.getAttribute('name'); 
             const count = counts[n] || 0;
+            
+            // Store the count in the DOM for the tooltip to read
             p.setAttribute('data-count', count);
+
             if(count > 0) {
-                const opacity = 0.15 + (0.85 * (count / max)); 
+                const opacity = 0.15 + (0.85 * (count / max)); // Keep map relative to map max for better contrast
                 p.style.fill = `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${opacity})`;
             } else {
                 p.style.fill = ''; 
@@ -1270,37 +1342,11 @@
     }
 
     function checkUrlParams() {
-        const params = new URLSearchParams(window.location.search);
-        const caseParam = params.get('case');
-        const postParam = params.get('post');
-
-        if(caseParam) {
-            openDetails(caseParam);
-        } else if (postParam) {
-            // Wait for blog posts to load if they haven't yet
-            if(blogPosts.length > 0) {
-                openBlogPost(postParam);
-            }
-        } else {
-            // Default view
-        }
+        const p = new URLSearchParams(window.location.search).get('case');
+        if(p) openDetails(p); else handleSearch();
     }
 
-    window.onpopstate = () => { 
-        const params = new URLSearchParams(window.location.search);
-        const caseParam = params.get('case');
-        const postParam = params.get('post');
-
-        if(caseParam) openDetails(caseParam);
-        else if(postParam) openBlogPost(postParam);
-        else {
-            document.querySelectorAll('.tab-content, #details-view, #blog-view').forEach(el => el.style.display = 'none');
-            // Determine which tab to show based on history state or default to tracker
-            // For simplicity, we default to tracker if no params, or we could track last tab.
-            // Here we just close overlays.
-            switchTab('tracker');
-        }
-    };
+    window.onpopstate = () => { const p = new URLSearchParams(window.location.search).get('case'); if(p) openDetails(p); else closeDetails(); };
 </script>
 
 </body>
