@@ -494,9 +494,6 @@
 
     <!-- TAB: BLOG -->
     <div id="tab-blog" class="tab-content">
-        <p class="map-description">
-            Commentary and analysis on recent developments in Article 21 jurisprudence.
-        </p>
         <div id="blog-loading" style="text-align:center; display:none;">
             <div class="loader"></div>
             Loading Posts...
@@ -512,6 +509,13 @@
             <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px;">About the Project</h2>
             <p><strong>Procedure Established by Law (PEBL)</strong> is a digital tracker auditing the expansion of Article 21 of the Constitution of India. It tracks the judicial reading of unenumerated rights into the Right to Life and Personal Liberty.</p>
             
+            <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">Inspiration</h2>
+            <p>This tracker draws inspiration from the following global legal databases:</p>
+            <ul>
+                <li><a href="https://www.climatecasechart.com/" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: bold;">Climate Change Litigation Databases</a></li>
+                <li><a href="https://globalfreedomofexpression.columbia.edu/" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: bold;">Columbia Global Freedom of Expression</a></li>
+            </ul>
+
             <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">About the Curator</h2>
             <p>Abhinav Somani is 3rd Year B.A., LL.B. (Hons.) Student at the National Law School of India University, Bengaluru. He is deeply interested in Constitutional Interpretation, particularly vis-à-vis Rights Provisions.</p>
 
@@ -592,7 +596,6 @@
     // --- DATA LOGIC ---
     const SHEET_ID = '1k3O3nEbs24UXsoAsrNPmaZfBvpAJCmaEzypuQTD-yuY';
     const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
-    // UPDATED GID HERE
     const BLOG_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=187975411`;
 
     // --- SMART SEARCH SYNONYMS ---
@@ -955,16 +958,39 @@
         loading.style.display = 'none';
         list.innerHTML = '';
 
-        blogPosts.forEach(post => {
-            list.innerHTML += `
-                <div class="blog-card">
-                    <div class="blog-meta">${post.date} • ${post.author}</div>
-                    <h3 class="blog-title">${post.title}</h3>
-                    <p class="blog-summary">${post.summary}</p>
-                    <button class="read-more-btn" onclick="openBlogPost('${post.slug}')">READ FULL POST →</button>
-                </div>
-            `;
+        // Logic to pin specific post
+        const pinnedSlug = 'a-statement-of-objects-and-reasons';
+        let pinnedPost = null;
+        let otherPosts = [];
+
+        blogPosts.forEach(p => {
+            if(p.slug === pinnedSlug) pinnedPost = p;
+            else otherPosts.push(p);
         });
+
+        // Render Pinned Post First
+        if(pinnedPost) {
+            list.innerHTML += createBlogCard(pinnedPost, true);
+        }
+
+        // Render Others
+        otherPosts.forEach(p => {
+            list.innerHTML += createBlogCard(p, false);
+        });
+    }
+
+    function createBlogCard(post, isPinned) {
+        const pinnedBadge = isPinned ? '<span style="background:var(--accent); color:white; padding:2px 6px; border-radius:4px; font-size:0.6rem; margin-right:8px; vertical-align:middle; font-weight:bold;">📌 PINNED</span>' : '';
+        const borderStyle = isPinned ? 'style="border-left: 5px solid var(--accent);"' : '';
+        
+        return `
+            <div class="blog-card" ${borderStyle}>
+                <div class="blog-meta">${pinnedBadge}${post.date} • ${post.author}</div>
+                <h3 class="blog-title">${post.title}</h3>
+                <p class="blog-summary">${post.summary}</p>
+                <button class="read-more-btn" onclick="openBlogPost('${post.slug}')">READ FULL POST →</button>
+            </div>
+        `;
     }
 
     function openBlogPost(slug) {
