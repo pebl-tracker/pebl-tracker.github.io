@@ -562,7 +562,8 @@
 
     // --- DATA LOGIC ---
     const SHEET_ID = '1k3O3nEbs24UXsoAsrNPmaZfBvpAJCmaEzypuQTD-yuY';
-    const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
+    // UPDATED: Using export?format=csv to avoid gviz type inference issues
+    const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
 
     // --- SMART SEARCH SYNONYMS ---
     const synonymMap = {
