@@ -34,7 +34,7 @@
     <!-- LIBRARIES -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-    <!-- ADDED FUSE.JS FOR ADVANCED SEARCH -->
+    <!-- FUSE.JS FOR ADVANCED SEARCH -->
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 
     <style>
@@ -588,8 +588,9 @@
         "internet": ["digital", "web", "online", "connectivity"],
         "women": ["gender", "female", "maternity", "sexual harassment"],
         "child": ["juvenile", "minor", "infant"],
-        "marriage": ["married", "matrimony", "wedlock", "spouse", "husband", "wife"],
-        "married": ["marriage", "matrimony", "wedlock", "spouse", "husband", "wife"]
+        "marriage": ["married", "matrimony", "wedlock", "spouse", "husband", "wife", "marry"],
+        "married": ["marriage", "matrimony", "wedlock", "spouse", "husband", "wife", "marry"],
+        "marry": ["marriage", "married", "matrimony", "wedlock", "spouse"]
     };
 
     let allCases = [];
@@ -933,33 +934,57 @@
         const judge = document.getElementById('judge-filter').value; 
         const sort = document.getElementById('sort-order').value;
 
-        // 1. Text Search with Fuse.js
+        // --- MULTI-PASS FUZZY SEARCH ---
         let textResults = allCases;
         if (rawQuery) {
-            // Expand query with synonyms
-            let expandedQuery = rawQuery;
+            // 1. Generate Search Terms (Original + Synonyms)
+            let searchTerms = [rawQuery];
             Object.keys(synonymMap).forEach(key => {
                 if (rawQuery.includes(key)) {
-                    expandedQuery += " " + synonymMap[key].join(" ");
+                    searchTerms = [...searchTerms, ...synonymMap[key]];
                 }
             });
+            // Deduplicate terms
+            searchTerms = [...new Set(searchTerms)];
 
+            // 2. Configure Fuse
             const fuseOptions = {
                 includeScore: true,
-                threshold: 0.3, // Fuzziness threshold
+                threshold: 0.4, // Slightly loose to catch "marriage" vs "married"
+                ignoreLocation: true, // Search everywhere in the string
                 keys: [
                     { name: 'name', weight: 0.4 },
                     { name: 'rights', weight: 0.3 },
                     { name: 'summary', weight: 0.2 },
-                    { name: 'judges', weight: 0.1 }
+                    { name: 'judges', weight: 0.1 },
+                    { name: 'court', weight: 0.1 }
                 ]
             };
             const fuse = new Fuse(allCases, fuseOptions);
-            const results = fuse.search(expandedQuery);
-            textResults = results.map(r => r.item);
+
+            // 3. Run Search for EACH term independently
+            let combinedResults = [];
+            const seenIndices = new Set();
+
+            searchTerms.forEach(term => {
+                const results = fuse.search(term);
+                results.forEach(r => {
+                    if (!seenIndices.has(r.refIndex)) {
+                        seenIndices.add(r.refIndex);
+                        combinedResults.push(r);
+                    } else {
+                        // Optional: Boost score if matched multiple terms?
+                        // For now, simple union is enough.
+                    }
+                });
+            });
+
+            // 4. Sort by Score (lower is better in Fuse)
+            combinedResults.sort((a, b) => a.score - b.score);
+            textResults = combinedResults.map(r => r.item);
         }
 
-        // 2. Apply Dropdown Filters
+        // --- FILTERING ---
         let filtered = textResults.filter(c => {
             const matchesRight = right ? c.rights.includes(right) : true;
             const matchesState = state ? c.state === state : true; 
@@ -968,12 +993,20 @@
             return matchesRight && matchesState && matchesCourt && matchesJudge;
         });
         
-        // 3. Sort (Only if no text query, otherwise keep relevance)
-        if (!rawQuery) {
-            filtered.sort((a, b) => {
-                const dA = parseDate(a.date); const dB = parseDate(b.date);
-                return sort === 'newest' ? dB - dA : dA - dB;
-            });
+        // --- SORTING ---
+        // Only apply date sort if user explicitly wants it OR if no text search was done.
+        // If text search was done, we prefer relevance (Fuse score).
+        if (!rawQuery || sort !== 'newest') { 
+             // If user picked "Oldest", we force it. If "Newest" (default) and no query, we force it.
+             // If query exists, we usually want relevance, but let's respect the dropdown if the user *changed* it?
+             // For simplicity: If query exists, default to relevance. If user changes sort, re-sort.
+             // Current logic: The dropdown defaults to "Newest".
+             
+             if(sort === 'newest') {
+                 filtered.sort((a, b) => parseDate(b.date) - parseDate(a.date));
+             } else {
+                 filtered.sort((a, b) => parseDate(a.date) - parseDate(b.date));
+             }
         }
 
         filteredCases = filtered; 
