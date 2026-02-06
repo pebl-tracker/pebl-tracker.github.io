@@ -661,6 +661,16 @@
         }).catch(err => console.error("Map load failed", err));
     }
 
+    // --- SLUG HELPER ---
+    function createSlug(text) {
+        return text.toString().toLowerCase()
+            .replace(/\s+/g, '-')           // Replace spaces with -
+            .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+            .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+            .replace(/^-+/, '')             // Trim - from start
+            .replace(/-+$/, '');            // Trim - from end
+    }
+
     function smartSplit(str) {
         if (!str) return [];
         if (str.includes(';')) {
@@ -677,6 +687,7 @@
             const parsed = Papa.parse(csv, { header: false, skipEmptyLines: true });
             allCases = parsed.data.slice(1).map(row => ({
                 name: (row[0] || "").trim(),
+                slug: createSlug((row[0] || "").trim()), // Generate Slug
                 citation: (row[1] || "").trim(),
                 court: (row[2] || "").trim(),
                 state: (row[3] || "Pan-India").trim(),
@@ -753,7 +764,7 @@
             
             item.innerHTML = `
                 <div class="timeline-dot"></div>
-                <div class="timeline-content" onclick="openDetails('${encodeURIComponent(c.name)}')">
+                <div class="timeline-content" onclick="openDetails('${c.slug}')">
                     <span class="t-date">${dateStr} • ${c.court.toUpperCase()}</span>
                     <h3 class="t-title">${c.name}</h3>
                     <p class="t-summary">${c.summary}</p>
@@ -1062,7 +1073,7 @@
                     ${benchHTML}
                     <div>${tags}</div>
                     <div class="summary-preview">${c.summary}</div>
-                    <a class="action-link" onclick="openDetails('${encodeURIComponent(c.name)}')">READ MORE →</a>
+                    <a class="action-link" onclick="openDetails('${c.slug}')">READ MORE →</a>
                 </div>`;
         });
     }
@@ -1088,10 +1099,15 @@
         document.getElementById('search-input').scrollIntoView({behavior: "smooth", block: "start"});
     }
 
-    function openDetails(enc) {
-        const c = allCases.find(x => x.name === decodeURIComponent(enc));
+    function openDetails(identifier) {
+        // identifier could be "Maneka Gandhi..." (Old) or "maneka-gandhi..." (New)
+        // We decode it just in case it's an old link with %20
+        const decoded = decodeURIComponent(identifier);
+        const c = allCases.find(x => x.slug === identifier || x.name === decoded);
+        
         if(!c) return;
-        window.history.pushState({}, '', '?case=' + enc);
+        
+        window.history.pushState({}, '', '?case=' + c.slug);
         document.getElementById('detail-title').innerText = c.name;
         document.getElementById('detail-citation').innerHTML = `<span id="raw-citation">${c.citation}</span> <button class="copy-btn" onclick="copyCaseCitation()">Copy</button>`;
         document.getElementById('detail-court').innerText = c.court;
