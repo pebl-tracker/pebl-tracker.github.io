@@ -262,12 +262,20 @@
         .judge-stat-row:hover { background: var(--tag-bg); }
         .judge-name-col { width: 30%; font-family: sans-serif; font-size: 0.9rem; color: var(--primary); font-weight: bold; padding-right: 15px; text-align: right; }
         
-        /* UPDATED: Removed background color to fix "half full" confusion */
-        .judge-bar-col { flex-grow: 1; position: relative; height: 24px; border-radius: 4px; overflow: hidden; }
-        
-        .judge-bar-total { height: 100%; background-color: var(--primary); opacity: 0.3; position: absolute; left: 0; top: 0; border-radius: 4px; }
-        .judge-bar-auth { height: 100%; background-color: var(--accent); position: absolute; left: 0; top: 0; border-radius: 4px; z-index: 2; }
-        .judge-bar-dissent { height: 100%; background-color: var(--dissent); position: absolute; right: 0; top: 0; border-radius: 4px; z-index: 3; }
+        /* UPDATED: Stacked Bar Chart CSS */
+        .judge-bar-col { 
+            flex-grow: 1; 
+            display: flex; 
+            height: 24px; 
+            background: rgba(0,0,0,0.05); /* Faint track */
+            border-radius: 4px; 
+            overflow: hidden; 
+        }
+        .jb-segment { height: 100%; transition: width 0.5s ease; }
+        .jb-auth { background-color: var(--accent); }
+        .jb-dissent { background-color: var(--dissent); }
+        .jb-bench { background-color: var(--primary); opacity: 0.3; }
+
         .judge-count-col { width: 15%; padding-left: 15px; font-family: sans-serif; font-size: 0.8rem; color: var(--text-muted); }
 
         /* --- CARDS --- */
@@ -405,7 +413,7 @@
         <button id="btn-tracker" class="tab-btn active" onclick="switchTab('tracker')">TRACKER</button>
         <button id="btn-timeline" class="tab-btn" onclick="switchTab('timeline')">TIMELINE</button>
         <button id="btn-map" class="tab-btn" onclick="switchTab('map')">CHAIN OF CITATION</button>
-        <button id="btn-judges" class="tab-btn" onclick="switchTab('judges')">JUDGES</button>
+        <button id="btn-judges" class="tab-btn" onclick="switchTab('judges')">JURIST HEATMAP</button>
         <button id="btn-about" class="tab-btn" onclick="switchTab('about')">ABOUT</button>
     </nav>
 
@@ -475,9 +483,9 @@
         <p class="map-description">
             Frequency of participation in Article 21 cases.<br>
             <span style="font-size: 0.8rem; color: var(--text-muted);">
-                <span style="display:inline-block; width:10px; height:10px; background:var(--primary); opacity:0.3; margin-right:5px;"></span>Total Cases
-                <span style="display:inline-block; width:10px; height:10px; background:var(--accent); margin-left:15px; margin-right:5px;"></span>Authored Judgments
-                <span style="display:inline-block; width:10px; height:10px; background:var(--dissent); margin-left:15px; margin-right:5px;"></span>Dissenting Opinions
+                <span style="display:inline-block; width:10px; height:10px; background:var(--accent); margin-right:5px;"></span>Authored
+                <span style="display:inline-block; width:10px; height:10px; background:var(--dissent); margin-left:15px; margin-right:5px;"></span>Dissenting
+                <span style="display:inline-block; width:10px; height:10px; background:var(--primary); opacity:0.3; margin-left:15px; margin-right:5px;"></span>Concurring/Bench
             </span>
         </p>
         <div class="judge-stats-container" id="judge-stats-list">
@@ -792,6 +800,7 @@
             const totalPct = (j.total / maxTotal) * 100;
             const authPct = (j.authored / maxTotal) * 100; 
             const dissentPct = (j.dissenting / maxTotal) * 100;
+            const benchPct = ((j.total - j.authored - j.dissenting) / maxTotal) * 100;
 
             const row = document.createElement('div');
             row.className = 'judge-stat-row';
@@ -805,9 +814,9 @@
             row.innerHTML = `
                 <div class="judge-name-col">${j.name}</div>
                 <div class="judge-bar-col">
-                    <div class="judge-bar-total" style="width: ${totalPct}%"></div>
-                    <div class="judge-bar-auth" style="width: ${authPct}%"></div>
-                    <div class="judge-bar-dissent" style="width: ${dissentPct}%"></div>
+                    <div class="jb-segment jb-auth" style="width: ${authPct}%"></div>
+                    <div class="jb-segment jb-dissent" style="width: ${dissentPct}%"></div>
+                    <div class="jb-segment jb-bench" style="width: ${benchPct}%"></div>
                 </div>
                 <div class="judge-count-col">
                     ${j.total} Cases <br>
