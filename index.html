@@ -31,8 +31,11 @@
     }
     </script>
 
+    <!-- LIBRARIES -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <!-- ADDED FUSE.JS FOR ADVANCED SEARCH -->
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 
     <style>
         /* --- THEME VARIABLES --- */
@@ -584,7 +587,9 @@
         "education": ["school", "college", "university", "student"],
         "internet": ["digital", "web", "online", "connectivity"],
         "women": ["gender", "female", "maternity", "sexual harassment"],
-        "child": ["juvenile", "minor", "infant"]
+        "child": ["juvenile", "minor", "infant"],
+        "marriage": ["married", "matrimony", "wedlock", "spouse", "husband", "wife"],
+        "married": ["marriage", "matrimony", "wedlock", "spouse", "husband", "wife"]
     };
 
     let allCases = [];
@@ -928,31 +933,48 @@
         const judge = document.getElementById('judge-filter').value; 
         const sort = document.getElementById('sort-order').value;
 
-        let searchTerms = [rawQuery];
+        // 1. Text Search with Fuse.js
+        let textResults = allCases;
         if (rawQuery) {
+            // Expand query with synonyms
+            let expandedQuery = rawQuery;
             Object.keys(synonymMap).forEach(key => {
-                if (rawQuery.includes(key) || synonymMap[key].some(s => rawQuery.includes(s))) {
-                    searchTerms = [...searchTerms, key, ...synonymMap[key]];
+                if (rawQuery.includes(key)) {
+                    expandedQuery += " " + synonymMap[key].join(" ");
                 }
             });
-        }
-        searchTerms = [...new Set(searchTerms)];
 
-        let filtered = allCases.filter(c => {
-            const content = `${c.name} ${c.summary} ${c.rights.join(' ')}`.toLowerCase();
-            const matchesSearch = rawQuery === "" || searchTerms.some(term => content.includes(term));
+            const fuseOptions = {
+                includeScore: true,
+                threshold: 0.3, // Fuzziness threshold
+                keys: [
+                    { name: 'name', weight: 0.4 },
+                    { name: 'rights', weight: 0.3 },
+                    { name: 'summary', weight: 0.2 },
+                    { name: 'judges', weight: 0.1 }
+                ]
+            };
+            const fuse = new Fuse(allCases, fuseOptions);
+            const results = fuse.search(expandedQuery);
+            textResults = results.map(r => r.item);
+        }
+
+        // 2. Apply Dropdown Filters
+        let filtered = textResults.filter(c => {
             const matchesRight = right ? c.rights.includes(right) : true;
             const matchesState = state ? c.state === state : true; 
             const matchesCourt = court ? c.court === court : true; 
             const matchesJudge = judge ? c.judges.some(j => cleanJudgeName(j) === judge) : true;
-
-            return matchesSearch && matchesRight && matchesState && matchesCourt && matchesJudge;
+            return matchesRight && matchesState && matchesCourt && matchesJudge;
         });
         
-        filtered.sort((a, b) => {
-            const dA = parseDate(a.date); const dB = parseDate(b.date);
-            return sort === 'newest' ? dB - dA : dA - dB;
-        });
+        // 3. Sort (Only if no text query, otherwise keep relevance)
+        if (!rawQuery) {
+            filtered.sort((a, b) => {
+                const dA = parseDate(a.date); const dB = parseDate(b.date);
+                return sort === 'newest' ? dB - dA : dA - dB;
+            });
+        }
 
         filteredCases = filtered; 
         renderCases(filtered);
