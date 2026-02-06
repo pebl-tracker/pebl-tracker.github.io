@@ -950,8 +950,9 @@
             // 2. Configure Fuse
             const fuseOptions = {
                 includeScore: true,
-                threshold: 0.4, // Slightly loose to catch "marriage" vs "married"
-                ignoreLocation: true, // Search everywhere in the string
+                threshold: 0.2, // TIGHTER THRESHOLD (was 0.4)
+                minMatchCharLength: 3, // IGNORE SHORT MATCHES
+                ignoreLocation: true, 
                 keys: [
                     { name: 'name', weight: 0.4 },
                     { name: 'rights', weight: 0.3 },
@@ -972,9 +973,6 @@
                     if (!seenIndices.has(r.refIndex)) {
                         seenIndices.add(r.refIndex);
                         combinedResults.push(r);
-                    } else {
-                        // Optional: Boost score if matched multiple terms?
-                        // For now, simple union is enough.
                     }
                 });
             });
@@ -994,14 +992,7 @@
         });
         
         // --- SORTING ---
-        // Only apply date sort if user explicitly wants it OR if no text search was done.
-        // If text search was done, we prefer relevance (Fuse score).
         if (!rawQuery || sort !== 'newest') { 
-             // If user picked "Oldest", we force it. If "Newest" (default) and no query, we force it.
-             // If query exists, we usually want relevance, but let's respect the dropdown if the user *changed* it?
-             // For simplicity: If query exists, default to relevance. If user changes sort, re-sort.
-             // Current logic: The dropdown defaults to "Newest".
-             
              if(sort === 'newest') {
                  filtered.sort((a, b) => parseDate(b.date) - parseDate(a.date));
              } else {
