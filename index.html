@@ -424,6 +424,7 @@
             <select id="judge-filter" class="filter-select" onchange="handleSearch()"><option value="">All Judges</option></select>
             <select id="sort-order" class="filter-select" onchange="handleSearch()"><option value="newest">Newest First</option><option value="oldest">Oldest First</option></select>
             <button class="download-btn" onclick="downloadData()">Download Filtered Data (CSV)</button>
+            <div id="case-count-display" style="font-family:sans-serif; font-size:0.8rem; color:var(--text-muted); font-weight:bold; white-space:nowrap; align-self:center;"></div>
         </div>
         <div id="filter-display"></div>
         <div id="loading">
@@ -894,7 +895,7 @@
     }
 
     // --- UI LOGIC ---
-    function switchTab(t) {
+    function switchTab(t, pushState = true) {
         document.querySelectorAll('.tab-content, #details-view').forEach(el => el.style.display = 'none');
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
         document.getElementById('tab-' + t).style.display = 'block';
@@ -903,6 +904,13 @@
         if(t === 'map') setTimeout(initCitationMap, 100);
         if(t === 'timeline') setTimeout(initTimeline, 100);
         if(t === 'judges') setTimeout(initJudgeAnalytics, 100);
+
+        if(pushState) {
+            const url = new URL(window.location);
+            url.searchParams.set('tab', t);
+            url.searchParams.delete('case'); 
+            window.history.pushState({}, '', url);
+        }
     }
 
     function cleanJudgeName(name) {
@@ -949,6 +957,14 @@
 
     function renderCases(cases) {
         const list = document.getElementById('case-list');
+        const countDisplay = document.getElementById('case-count-display');
+        
+        if(allCases.length === cases.length) {
+            countDisplay.innerText = `Total Cases: ${allCases.length}`;
+        } else {
+            countDisplay.innerText = `Showing ${cases.length} of ${allCases.length}`;
+        }
+
         list.innerHTML = cases.length ? '' : '<p style="text-align:center; color:var(--text-muted); padding: 40px;">No judgments found.</p>';
         cases.forEach(c => {
             const tags = c.rights.map(r => `<span class="tag">${r}</span>`).join('');
@@ -1161,13 +1177,25 @@
     function checkUrlParams() {
         const params = new URLSearchParams(window.location.search);
         const caseParam = params.get('case');
-        if(caseParam) openDetails(caseParam); else handleSearch();
+        const tabParam = params.get('tab');
+
+        if(caseParam) {
+            openDetails(caseParam);
+        } else if (tabParam && ['tracker', 'timeline', 'map', 'judges', 'about'].includes(tabParam)) {
+            switchTab(tabParam, false); // Don't push state, we are already there
+        } else {
+            switchTab('tracker', false); // Default
+        }
     }
 
     window.onpopstate = () => { 
         const params = new URLSearchParams(window.location.search);
         const caseParam = params.get('case');
-        if(caseParam) openDetails(caseParam); else closeDetails();
+        const tabParam = params.get('tab');
+
+        if(caseParam) openDetails(caseParam);
+        else if(tabParam) switchTab(tabParam, false);
+        else switchTab('tracker', false);
     };
 </script>
 
