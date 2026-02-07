@@ -433,6 +433,11 @@
         <div class="controls-bar">
             <input type="text" id="search-input" placeholder="Search cases or keywords..." onkeyup="handleSearch()">
             <select id="right-filter" class="filter-select" onchange="handleSearch()"><option value="">All Rights</option></select>
+            <select id="nature-filter" class="filter-select" onchange="handleSearch()">
+                <option value="">All Declarations</option>
+                <option value="explicit">Explicit</option>
+                <option value="implicit">Implicit</option>
+            </select>
             <select id="state-filter" class="filter-select" onchange="handleSearch()"><option value="">All Jurisdictions</option></select>
             <select id="court-filter" class="filter-select" onchange="handleSearch()"><option value="">All Courts</option></select>
             <select id="judge-filter" class="filter-select" onchange="handleSearch()"><option value="">All Judges</option></select>
@@ -508,7 +513,7 @@
             <p>This tracker is created with the aim of monitoring the proliferation of unenumerated fundamental rights under Article 21 of the Constitution. The Curator believes that such proliferation is both jurisprudentially and practically flawed, and is strongly opposed to it. This tracker is driven by the realisation that one cannot effectively critique the expansion of Article 21 without being adequately informed about the exact contours of the expansion.</p>
 
             <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">About the Curator</h2>
-            <p>Abhinav Somani is 3rd Year B.A., LL.B. (Hons.) Student at the National Law School of India University, Bengaluru. He is deeply interested in Constitutional Interpretation, particularly vis-à-vis Rights Provisions.</p>
+            <p>Abhinav Somani is 3rd Year B.A., LL.B. (Hons.) Student at the National Law School of India University, Bengaluru. He is deeply interested in Constitutional Interpretation, particularly vis-à-vis Rights Provisions and the Separation of Powers.</p>
 
             <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">Data Source</h2>
             <p>The dataset for this project is open-source and hosted on Google Sheets. You can view the raw data here:<br>
@@ -949,6 +954,7 @@
     function handleSearch() {
         const rawQuery = document.getElementById('search-input').value.toLowerCase().trim();
         const right = document.getElementById('right-filter').value;
+        const nature = document.getElementById('nature-filter').value;
         const state = document.getElementById('state-filter').value; 
         const court = document.getElementById('court-filter').value; 
         const judge = document.getElementById('judge-filter').value; 
@@ -1005,10 +1011,11 @@
         // --- FILTERING ---
         let filtered = textResults.filter(c => {
             const matchesRight = right ? c.rights.includes(right) : true;
+            const matchesNature = nature ? c.nature.toLowerCase() === nature : true;
             const matchesState = state ? c.state === state : true; 
             const matchesCourt = court ? c.court === court : true; 
             const matchesJudge = judge ? c.judges.some(j => cleanJudgeName(j) === judge) : true;
-            return matchesRight && matchesState && matchesCourt && matchesJudge;
+            return matchesRight && matchesNature && matchesState && matchesCourt && matchesJudge;
         });
         
         // --- SORTING ---
@@ -1155,7 +1162,7 @@
         sel.innerHTML = '<option value="">All Jurisdictions</option>';
         const states = [
             "Andaman and Nicobar", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh",
-            "Dādra and Nagar Haveli and Damān and Diu", "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh",
+            "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh",
             "Jammu and Kashmir", "Jharkhand", "Karnataka", "Kerala", "Ladakh", "Lakshadweep", "Madhya Pradesh",
             "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Orissa", "Puducherry", "Punjab",
             "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttaranchal", "West Bengal"
