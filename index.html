@@ -876,63 +876,15 @@
             return;
         }
 
-        const maxTotal = sortedJudges[0].total;
-
-        sortedJudges.forEach(j => {
-            const totalPct = (j.total / maxTotal) * 100;
-            const authPct = (j.authored / maxTotal) * 100; 
-            const dissentPct = (j.dissenting / maxTotal) * 100;
-            const benchPct = ((j.total - j.authored - j.dissenting) / maxTotal) * 100;
-
-            const row = document.createElement('div');
-            row.className = 'jurist-card';
-            row.onclick = () => {
-                switchTab('tracker');
-                document.getElementById('judge-filter').value = j.name;
-                handleSearch();
-                document.getElementById('search-input').scrollIntoView({behavior: "smooth", block: "start"});
-            };
-
-            row.innerHTML = `
-                <div class="jurist-name">${j.name}</div>
-                <div class="jurist-total-label">Total Cases</div>
-                <div class="jurist-total-count">${j.total}</div>
-                
-                <div class="jurist-stats-row">
-                    <div class="stat-item">
-                        <span class="stat-val" style="color:var(--accent)">${j.authored}</span>
-                        <span class="stat-lbl">Authored</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-val" style="color:var(--dissent)">${j.dissenting}</span>
-                        <span class="stat-lbl">Dissent</span>
-                    </div>
-                </div>
-
-                <div class="jurist-bar-container">
-                    <div class="jb-segment jb-auth" style="width: ${authPct}%"></div>
-                    <div class="jb-segment jb-dissent" style="width: ${dissentPct}%"></div>
-                    <div class="jb-segment jb-bench" style="width: ${benchPct}%"></div>
-                </div>
-            `;
-            
-            // We need to append to the grid container, not the list container directly if we changed structure
-            // But wait, the HTML structure above defines .judge-stats-container
-            // Let's make sure we create the grid wrapper inside initJudgeAnalytics if it doesn't exist
-            // Actually, let's just clear container and append a grid wrapper
-        });
-        
-        // FIX: The loop above appends to 'row', but 'row' isn't appended to container yet.
-        // Also, we need a grid wrapper.
-        
+        // Create Grid Wrapper
         container.innerHTML = '<div class="jurist-grid"></div>';
         const grid = container.querySelector('.jurist-grid');
-        
+
         sortedJudges.forEach(j => {
-            const totalPct = (j.total / maxTotal) * 100;
-            const authPct = (j.authored / maxTotal) * 100; 
-            const dissentPct = (j.dissenting / maxTotal) * 100;
-            const benchPct = ((j.total - j.authored - j.dissenting) / maxTotal) * 100;
+            // Calculate percentages relative to THIS judge's total (Composition Scaling)
+            const authPct = (j.authored / j.total) * 100; 
+            const dissentPct = (j.dissenting / j.total) * 100;
+            const benchPct = ((j.total - j.authored - j.dissenting) / j.total) * 100;
 
             const card = document.createElement('div');
             card.className = 'jurist-card';
