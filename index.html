@@ -255,28 +255,94 @@
         .map-btn:hover { background: var(--tag-bg); }
         .map-hint { position: absolute; bottom: 15px; right: 15px; font-family: sans-serif; font-size: 0.7rem; color: var(--text); pointer-events: none; background: var(--map-hint-bg); padding: 6px 12px; border-radius: 4px; border: 1px solid var(--border); z-index: 10; }
 
-        /* --- JUDGE ANALYTICS TAB --- */
+        /* --- JUDGE ANALYTICS TAB (NEW GRID DESIGN) --- */
         #tab-judges { width: 100%; display: none; }
-        .judge-stats-container { max-width: 800px; margin: 0 auto; }
-        .judge-stat-row { display: flex; align-items: center; margin-bottom: 15px; cursor: pointer; padding: 10px; border-radius: 6px; transition: background 0.2s; }
-        .judge-stat-row:hover { background: var(--tag-bg); }
-        .judge-name-col { width: 30%; font-family: sans-serif; font-size: 0.9rem; color: var(--primary); font-weight: bold; padding-right: 15px; text-align: right; }
+        .judge-stats-container { max-width: 1000px; margin: 0 auto; }
         
-        /* UPDATED: Stacked Bar Chart CSS */
-        .judge-bar-col { 
-            flex-grow: 1; 
-            display: flex; 
-            height: 24px; 
-            background: rgba(0,0,0,0.05); /* Faint track */
-            border-radius: 4px; 
-            overflow: hidden; 
+        .jurist-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+            gap: 25px; 
+            padding-bottom: 40px;
         }
-        .jb-segment { height: 100%; transition: width 0.5s ease; }
+
+        .jurist-card { 
+            background: var(--card-bg); 
+            border: 1px solid var(--border); 
+            border-radius: 8px; 
+            padding: 20px; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .jurist-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08); 
+            border-color: var(--accent); 
+        }
+
+        .jurist-name { 
+            font-family: "Georgia", serif; 
+            font-size: 1.1rem; 
+            color: var(--primary); 
+            margin-bottom: 10px; 
+            font-weight: bold;
+            line-height: 1.3;
+        }
+
+        .jurist-total-label {
+            font-family: sans-serif;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .jurist-total-count {
+            font-family: sans-serif;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 15px;
+            line-height: 1;
+        }
+
+        .jurist-stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            font-family: sans-serif;
+            font-size: 0.8rem;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-val { font-weight: bold; }
+        .stat-lbl { font-size: 0.65rem; color: var(--text-muted); }
+
+        .jurist-bar-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .jb-segment { height: 100%; }
         .jb-auth { background-color: var(--accent); }
         .jb-dissent { background-color: var(--dissent); }
         .jb-bench { background-color: var(--primary); opacity: 0.3; }
-
-        .judge-count-col { width: 15%; padding-left: 15px; font-family: sans-serif; font-size: 0.8rem; color: var(--text-muted); }
 
         /* --- CARDS --- */
         .case-grid { display: grid; gap: 25px; }
@@ -819,7 +885,7 @@
             const benchPct = ((j.total - j.authored - j.dissenting) / maxTotal) * 100;
 
             const row = document.createElement('div');
-            row.className = 'judge-stat-row';
+            row.className = 'jurist-card';
             row.onclick = () => {
                 switchTab('tracker');
                 document.getElementById('judge-filter').value = j.name;
@@ -828,19 +894,78 @@
             };
 
             row.innerHTML = `
-                <div class="judge-name-col">${j.name}</div>
-                <div class="judge-bar-col">
+                <div class="jurist-name">${j.name}</div>
+                <div class="jurist-total-label">Total Cases</div>
+                <div class="jurist-total-count">${j.total}</div>
+                
+                <div class="jurist-stats-row">
+                    <div class="stat-item">
+                        <span class="stat-val" style="color:var(--accent)">${j.authored}</span>
+                        <span class="stat-lbl">Authored</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-val" style="color:var(--dissent)">${j.dissenting}</span>
+                        <span class="stat-lbl">Dissent</span>
+                    </div>
+                </div>
+
+                <div class="jurist-bar-container">
                     <div class="jb-segment jb-auth" style="width: ${authPct}%"></div>
                     <div class="jb-segment jb-dissent" style="width: ${dissentPct}%"></div>
                     <div class="jb-segment jb-bench" style="width: ${benchPct}%"></div>
                 </div>
-                <div class="judge-count-col">
-                    ${j.total} Cases <br>
-                    <span style="font-size:0.7rem; color:var(--accent);">(${j.authored} Auth.)</span>
-                    <span style="font-size:0.7rem; color:var(--dissent);">(${j.dissenting} Diss.)</span>
+            `;
+            
+            // We need to append to the grid container, not the list container directly if we changed structure
+            // But wait, the HTML structure above defines .judge-stats-container
+            // Let's make sure we create the grid wrapper inside initJudgeAnalytics if it doesn't exist
+            // Actually, let's just clear container and append a grid wrapper
+        });
+        
+        // FIX: The loop above appends to 'row', but 'row' isn't appended to container yet.
+        // Also, we need a grid wrapper.
+        
+        container.innerHTML = '<div class="jurist-grid"></div>';
+        const grid = container.querySelector('.jurist-grid');
+        
+        sortedJudges.forEach(j => {
+            const totalPct = (j.total / maxTotal) * 100;
+            const authPct = (j.authored / maxTotal) * 100; 
+            const dissentPct = (j.dissenting / maxTotal) * 100;
+            const benchPct = ((j.total - j.authored - j.dissenting) / maxTotal) * 100;
+
+            const card = document.createElement('div');
+            card.className = 'jurist-card';
+            card.onclick = () => {
+                switchTab('tracker');
+                document.getElementById('judge-filter').value = j.name;
+                handleSearch();
+                document.getElementById('search-input').scrollIntoView({behavior: "smooth", block: "start"});
+            };
+
+            card.innerHTML = `
+                <div class="jurist-name">${j.name}</div>
+                <div class="jurist-total-label">Total Cases</div>
+                <div class="jurist-total-count">${j.total}</div>
+                
+                <div class="jurist-stats-row">
+                    <div class="stat-item">
+                        <span class="stat-val" style="color:var(--accent)">${j.authored}</span>
+                        <span class="stat-lbl">Authored</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-val" style="color:var(--dissent)">${j.dissenting}</span>
+                        <span class="stat-lbl">Dissent</span>
+                    </div>
+                </div>
+
+                <div class="jurist-bar-container">
+                    <div class="jb-segment jb-auth" style="width: ${authPct}%"></div>
+                    <div class="jb-segment jb-dissent" style="width: ${dissentPct}%"></div>
+                    <div class="jb-segment jb-bench" style="width: ${benchPct}%"></div>
                 </div>
             `;
-            container.appendChild(row);
+            grid.appendChild(card);
         });
     }
 
