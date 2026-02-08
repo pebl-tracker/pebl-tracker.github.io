@@ -380,6 +380,29 @@
             border: 1px solid var(--text-muted);
         }
 
+        /* CONTEST BADGES */
+        .contest-badge {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin-left: 5px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            vertical-align: middle;
+            display: inline-block;
+        }
+        .contest-contested {
+            background-color: var(--dissent); /* Orange/Red for contested */
+            color: var(--bg);
+            border: 1px solid var(--dissent);
+        }
+        .contest-uncontested {
+            background-color: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--text-muted);
+        }
+
         .tag { background: var(--tag-bg); padding: 4px 10px; border-radius: 3px; font-size: 0.7rem; font-weight: bold; color: #666; display: inline-block; margin-right: 6px; margin-bottom: 6px; text-transform: uppercase; }
         .summary-preview { color: var(--text); line-height: 1.6; margin-bottom: 15px; font-size: 0.95rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
         .action-link { color: var(--primary); font-weight: bold; text-decoration: none; border-bottom: 2px solid var(--primary); cursor: pointer; font-size: 0.85rem; }
@@ -504,6 +527,11 @@
                 <option value="explicit">Explicit</option>
                 <option value="implicit">Implicit</option>
             </select>
+            <select id="contest-filter" class="filter-select" onchange="handleSearch()">
+                <option value="">All Contest Status</option>
+                <option value="contested">Contested</option>
+                <option value="uncontested">Uncontested</option>
+            </select>
             <select id="state-filter" class="filter-select" onchange="handleSearch()"><option value="">All Jurisdictions</option></select>
             <select id="court-filter" class="filter-select" onchange="handleSearch()"><option value="">All Courts</option></select>
             <select id="judge-filter" class="filter-select" onchange="handleSearch()"><option value="">All Judges</option></select>
@@ -612,6 +640,7 @@
             <div style="margin-top: 20px;">
                 <span class="tag" id="detail-court">Court</span>
                 <span id="detail-nature-container"></span>
+                <span id="detail-contest-container"></span>
                 <span id="detail-rights-container"></span>
                 <span class="tag" id="detail-date" style="background:var(--tag-bg);">Date</span>
             </div>
@@ -768,7 +797,8 @@
                 date: (row[7] || "").trim(),
                 cites: smartSplit(row[8]),
                 judges: smartSplit(row[9]),
-                nature: (row[10] || "").trim()
+                nature: (row[10] || "").trim(),
+                contest: (row[11] || "").trim() // Column L
             })).filter(c => c.name && c.name !== "Case Name");
 
             filteredCases = allCases; 
@@ -1032,6 +1062,7 @@
         const rawQuery = document.getElementById('search-input').value.toLowerCase().trim();
         const right = document.getElementById('right-filter').value;
         const nature = document.getElementById('nature-filter').value;
+        const contest = document.getElementById('contest-filter').value;
         const state = document.getElementById('state-filter').value; 
         const court = document.getElementById('court-filter').value; 
         const judge = document.getElementById('judge-filter').value; 
@@ -1089,10 +1120,11 @@
         let filtered = textResults.filter(c => {
             const matchesRight = right ? c.rights.includes(right) : true;
             const matchesNature = nature ? c.nature.toLowerCase() === nature : true;
+            const matchesContest = contest ? c.contest.toLowerCase() === contest : true;
             const matchesState = state ? c.state === state : true; 
             const matchesCourt = court ? c.court === court : true; 
             const matchesJudge = judge ? c.judges.some(j => cleanJudgeName(j) === judge) : true;
-            return matchesRight && matchesNature && matchesState && matchesCourt && matchesJudge;
+            return matchesRight && matchesNature && matchesContest && matchesState && matchesCourt && matchesJudge;
         });
         
         // --- SORTING ---
@@ -1142,6 +1174,13 @@
                 const typeClass = c.nature.toLowerCase() === 'implicit' ? 'nature-implicit' : 'nature-explicit';
                 natureBadge = `<span class="nature-badge ${typeClass}">${c.nature}</span>`;
             }
+
+            let contestBadge = '';
+            if(c.contest) {
+                const isContested = c.contest.toLowerCase() === 'contested';
+                const contestClass = isContested ? 'contest-contested' : 'contest-uncontested';
+                contestBadge = `<span class="contest-badge ${contestClass}">${c.contest}</span>`;
+            }
             
             let dDisp = c.date;
             try { 
@@ -1151,7 +1190,7 @@
 
             list.innerHTML += `
                 <div class="card">
-                    <div class="card-header"><h3>${c.name}</h3><span class="court-label">${c.court} ${natureBadge}</span></div>
+                    <div class="card-header"><h3>${c.name}</h3><span class="court-label">${c.court} ${natureBadge} ${contestBadge}</span></div>
                     <div class="card-date">${dDisp}</div>
                     <span class="citation">${c.citation}</span>
                     ${benchHTML}
@@ -1219,6 +1258,15 @@
         if(c.nature) {
             const typeClass = c.nature.toLowerCase() === 'implicit' ? 'nature-implicit' : 'nature-explicit';
             natureContainer.innerHTML = `<span class="nature-badge ${typeClass}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${c.nature}</span>`;
+        }
+
+        // Contest Logic
+        const contestContainer = document.getElementById('detail-contest-container');
+        contestContainer.innerHTML = ''; // Clear previous
+        if(c.contest) {
+            const isContested = c.contest.toLowerCase() === 'contested';
+            const contestClass = isContested ? 'contest-contested' : 'contest-uncontested';
+            contestContainer.innerHTML = `<span class="contest-badge ${contestClass}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${c.contest}</span>`;
         }
 
         document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
