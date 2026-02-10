@@ -734,10 +734,12 @@
             document.querySelectorAll('#map-container path').forEach(p => {
                 let name = p.getAttribute('name');
                 if(name) {
+                    // FIX: Remove diacritics specifically for Dadra...
                     if(name === "Dādra and Nagar Haveli and Damān and Diu") {
                         name = "Dadra and Nagar Haveli and Daman and Diu";
-                        p.setAttribute('name', name); 
+                        p.setAttribute('name', name); // Update DOM so CSS selectors/logic work if needed
                     }
+                    // FIX: Rename Uttaranchal to Uttarakhand
                     if(name === "Uttaranchal") {
                         name = "Uttarakhand";
                         p.setAttribute('name', name);
@@ -758,11 +760,11 @@
     // --- SLUG HELPER ---
     function createSlug(text) {
         return text.toString().toLowerCase()
-            .replace(/\s+/g, '-')           
-            .replace(/[^\w\-]+/g, '')       
-            .replace(/\-\-+/g, '-')         
-            .replace(/^-+/, '')             
-            .replace(/-+$/, '');            
+            .replace(/\s+/g, '-')           // Replace spaces with -
+            .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+            .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+            .replace(/^-+/, '')             // Trim - from start
+            .replace(/-+$/, '');            // Trim - from end
     }
 
     function smartSplit(str) {
@@ -779,26 +781,21 @@
             return r.text();
         }).then(csv => {
             const parsed = Papa.parse(csv, { header: false, skipEmptyLines: true });
-            allCases = parsed.data.slice(1).map(row => {
-                let state = (row[3] || "Pan-India").trim();
-                if(state === "Uttaranchal") state = "Uttarakhand";
-
-                return {
-                    name: (row[0] || "").trim(),
-                    slug: createSlug((row[0] || "").trim()), 
-                    citation: (row[1] || "").trim(),
-                    court: (row[2] || "").trim(),
-                    state: state,
-                    rights: smartSplit(row[4]),
-                    summary: (row[5] || "").trim(),
-                    links: smartSplit(row[6]),
-                    date: (row[7] || "").trim(),
-                    cites: smartSplit(row[8]).filter(c => c.toLowerCase() !== 'none' && c !== '-'),
-                    judges: smartSplit(row[9]),
-                    nature: (row[10] || "").trim(),
-                    contest: (row[11] || "").trim() 
-                };
-            }).filter(c => c.name && c.name !== "Case Name");
+            allCases = parsed.data.slice(1).map(row => ({
+                name: (row[0] || "").trim(),
+                slug: createSlug((row[0] || "").trim()), // Generate Slug
+                citation: (row[1] || "").trim(),
+                court: (row[2] || "").trim(),
+                state: (row[3] || "Pan-India").trim(),
+                rights: smartSplit(row[4]),
+                summary: (row[5] || "").trim(),
+                links: smartSplit(row[6]),
+                date: (row[7] || "").trim(),
+                cites: smartSplit(row[8]).filter(c => c.toLowerCase() !== 'none' && c !== '-'),
+                judges: smartSplit(row[9]),
+                nature: (row[10] || "").trim(),
+                contest: (row[11] || "").trim() // Column L
+            })).filter(c => c.name && c.name !== "Case Name");
 
             filteredCases = allCases; 
             document.getElementById('loading').style.display = 'none';
