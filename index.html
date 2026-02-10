@@ -905,7 +905,14 @@
 
         const sortedJudges = Object.keys(stats)
             .map(name => ({ name, ...stats[name] }))
-            .sort((a, b) => b.total - a.total);
+            .sort((a, b) => {
+                // 1. Sort by Total Cases (High to Low)
+                if (b.total !== a.total) return b.total - a.total;
+                // 2. If Total is same, sort by Authored (High to Low)
+                if (b.authored !== a.authored) return b.authored - a.authored;
+                // 3. If both are same, sort Alphabetically (A to Z)
+                return a.name.localeCompare(b.name);
+            });
 
         if(sortedJudges.length === 0) {
             container.innerHTML = '<p style="text-align:center; color:var(--text-muted);">No judge data available.</p>';
