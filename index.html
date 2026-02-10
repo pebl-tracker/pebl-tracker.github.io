@@ -437,6 +437,11 @@
 
         /* --- ABOUT TAB JUSTIFICATION --- */
         #tab-about p { text-align: justify; }
+        
+        /* --- ABOUT TAB STYLING --- */
+        #about-content h2 { color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px; }
+        #about-content p { margin-bottom: 20px; line-height: 1.8; }
+        #about-content a { color: var(--accent); text-decoration: none; font-weight: bold; }
 
         /* --- FOOTER --- */
         footer { background-color: var(--footer-bg); padding: 40px 20px; margin-top: 60px; border-top: 1px solid var(--border); text-align: center; font-size: 0.85rem; color: var(--text-muted); }
@@ -595,36 +600,11 @@
     <!-- TAB: ABOUT -->
     <div id="tab-about" class="tab-content" style="display: none;">
         <div style="max-width: 700px; margin: 0 auto;">
-            <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px;">About the Project</h2>
-            <p><strong>Procedure Established by Law (PEBL)</strong> is a digital tracker auditing the expansion of Article 21 of the Constitution of India. It tracks the judicial reading of unenumerated rights into the Right to Life and Personal Liberty.</p>
-            <p>This tracker draws inspiration from the following databases:</p>
-            <ul>
-                <li><a href="https://www.climatecasechart.com/" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: bold;">The Climate Litigation Database</a></li>
-                <li><a href="https://globalfreedomofexpression.columbia.edu/" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: bold;">Global Freedom of Expression, Columbia University</a></li>
-            </ul>
-
-            <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">A Statement of Objects and Reasons</h2>
-            <p>This tracker is created with the aim of monitoring the proliferation of unenumerated fundamental rights under Article 21 of the Constitution, and is driven by the realisation that one cannot effectively critique the same without being thoroughly informed about the exact contours of the expansion.</p>
-
-            <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">About the Curator</h2>
-            <p>Abhinav Somani is 3rd Year B.A., LL.B. (Hons.) Student at the National Law School of India University, Bengaluru. He is deeply interested in Constitutional Interpretation, particularly vis-à-vis the interplay between the Separation of Powers and Rights Provisions.</p>
-
-            <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">Data Source</h2>
-            <p>The dataset for this project is open-source and hosted on Google Sheets. You can view the raw data here:<br>
-            <a href="https://docs.google.com/spreadsheets/d/1k3O3nEbs24UXsoAsrNPmaZfBvpAJCmaEzypuQTD-yuY/edit?usp=sharing" target="_blank" style="color: var(--accent); font-weight: bold; text-decoration: none;">View Data Sheet →</a></p>
-
-            <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">Map Credit</h2>
-            <p>The SVG map of India is sourced from SimpleMaps:<br>
-            <a href="https://simplemaps.com/svg/country/in" target="_blank" style="color: var(--accent); font-weight: bold; text-decoration: none;">SimpleMaps India SVG →</a></p>
-
-            <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">Technical Architecture & Source Code</h2>
-            <p>This tracker is hosted entirely on <strong>GitHub Pages</strong>. The codebase was developed with the assistance of <strong>Gemini 3 Pro and Flash</strong>, available for free via Google AI Studio.<br>
-            The complete source code for this website is open-source and available on GitHub:<br>
-            <a href="https://github.com/pebl-tracker/pebl-tracker.github.io" target="_blank" style="color: var(--accent); font-weight: bold; text-decoration: none;">View Repository →</a></p>
-
-            <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">Contact</h2>
-            <p>Reach out at: <br>
-            <a href="mailto:pebl.tracker@gmail.com" style="color: var(--accent); font-weight: bold; text-decoration: none;">pebl.tracker@gmail.com</a></p>
+            <div id="about-loading" style="text-align:center; padding:40px;">
+                <div class="loader"></div>
+                Loading About Content...
+            </div>
+            <div id="about-content"></div>
         </div>
     </div>
 
@@ -682,6 +662,10 @@
     const SHEET_ID = '1k3O3nEbs24UXsoAsrNPmaZfBvpAJCmaEzypuQTD-yuY';
     // UPDATED: Using export?format=csv to avoid gviz type inference issues
     const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
+    
+    // *** REPLACE THIS WITH YOUR NEW SHEET GID ***
+    const ABOUT_SHEET_GID = '1656982748'; 
+    const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${ABOUT_SHEET_GID}`;
 
     // --- SMART SEARCH SYNONYMS ---
     const synonymMap = {
@@ -709,6 +693,7 @@
     window.addEventListener('DOMContentLoaded', () => {
         loadMap();
         fetchData();
+        fetchAboutData(); // Fetch dynamic about content
         
         // Scroll Listener for Back-to-Top
         window.addEventListener('scroll', () => {
@@ -749,10 +734,13 @@
             document.querySelectorAll('#map-container path').forEach(p => {
                 let name = p.getAttribute('name');
                 if(name) {
-                    // FIX: Remove diacritics specifically for Dadra...
                     if(name === "Dādra and Nagar Haveli and Damān and Diu") {
                         name = "Dadra and Nagar Haveli and Daman and Diu";
-                        p.setAttribute('name', name); // Update DOM so CSS selectors/logic work if needed
+                        p.setAttribute('name', name); 
+                    }
+                    if(name === "Uttaranchal") {
+                        name = "Uttarakhand";
+                        p.setAttribute('name', name);
                     }
 
                     p.setAttribute('role', 'button');
@@ -770,11 +758,11 @@
     // --- SLUG HELPER ---
     function createSlug(text) {
         return text.toString().toLowerCase()
-            .replace(/\s+/g, '-')           // Replace spaces with -
-            .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
-            .replace(/\-\-+/g, '-')         // Replace multiple - with single -
-            .replace(/^-+/, '')             // Trim - from start
-            .replace(/-+$/, '');            // Trim - from end
+            .replace(/\s+/g, '-')           
+            .replace(/[^\w\-]+/g, '')       
+            .replace(/\-\-+/g, '-')         
+            .replace(/^-+/, '')             
+            .replace(/-+$/, '');            
     }
 
     function smartSplit(str) {
@@ -791,21 +779,26 @@
             return r.text();
         }).then(csv => {
             const parsed = Papa.parse(csv, { header: false, skipEmptyLines: true });
-            allCases = parsed.data.slice(1).map(row => ({
-                name: (row[0] || "").trim(),
-                slug: createSlug((row[0] || "").trim()), // Generate Slug
-                citation: (row[1] || "").trim(),
-                court: (row[2] || "").trim(),
-                state: (row[3] || "Pan-India").trim(),
-                rights: smartSplit(row[4]),
-                summary: (row[5] || "").trim(),
-                links: smartSplit(row[6]),
-                date: (row[7] || "").trim(),
-                cites: smartSplit(row[8]).filter(c => c.toLowerCase() !== 'none' && c !== '-'),
-                judges: smartSplit(row[9]),
-                nature: (row[10] || "").trim(),
-                contest: (row[11] || "").trim() // Column L
-            })).filter(c => c.name && c.name !== "Case Name");
+            allCases = parsed.data.slice(1).map(row => {
+                let state = (row[3] || "Pan-India").trim();
+                if(state === "Uttaranchal") state = "Uttarakhand";
+
+                return {
+                    name: (row[0] || "").trim(),
+                    slug: createSlug((row[0] || "").trim()), 
+                    citation: (row[1] || "").trim(),
+                    court: (row[2] || "").trim(),
+                    state: state,
+                    rights: smartSplit(row[4]),
+                    summary: (row[5] || "").trim(),
+                    links: smartSplit(row[6]),
+                    date: (row[7] || "").trim(),
+                    cites: smartSplit(row[8]).filter(c => c.toLowerCase() !== 'none' && c !== '-'),
+                    judges: smartSplit(row[9]),
+                    nature: (row[10] || "").trim(),
+                    contest: (row[11] || "").trim() 
+                };
+            }).filter(c => c.name && c.name !== "Case Name");
 
             filteredCases = allCases; 
             document.getElementById('loading').style.display = 'none';
@@ -819,6 +812,42 @@
         }).catch(error => {
             document.getElementById('loading').innerHTML = `<p style="color:var(--accent); font-weight:bold;">Unable to load case data.<br>Please check your internet connection or try again later.</p>`;
             console.error("Data fetch failed:", error);
+        });
+    }
+
+    // --- FETCH DYNAMIC ABOUT CONTENT ---
+    function fetchAboutData() {
+        // If user hasn't set GID yet, show default or error
+        if(ABOUT_SHEET_GID === 'YOUR_NEW_GID_HERE') {
+            document.getElementById('about-loading').innerHTML = "Please configure the ABOUT_SHEET_GID in the code.";
+            return;
+        }
+
+        fetch(ABOUT_CSV_URL).then(r => {
+            if (!r.ok) throw new Error("About sheet fetch failed");
+            return r.text();
+        }).then(csv => {
+            const parsed = Papa.parse(csv, { header: false, skipEmptyLines: true });
+            const rows = parsed.data.slice(1); // Skip header
+            
+            const container = document.getElementById('about-content');
+            container.innerHTML = ''; // Clear loading
+
+            rows.forEach(row => {
+                const title = (row[0] || "").trim();
+                const content = (row[1] || "").trim();
+
+                if(title && content) {
+                    const section = document.createElement('div');
+                    section.innerHTML = `<h2>${title}</h2><p>${content}</p>`;
+                    container.appendChild(section);
+                }
+            });
+            
+            document.getElementById('about-loading').style.display = 'none';
+        }).catch(err => {
+            console.error(err);
+            document.getElementById('about-loading').innerHTML = "Failed to load content.";
         });
     }
 
