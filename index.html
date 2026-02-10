@@ -801,7 +801,7 @@
                 summary: (row[5] || "").trim(),
                 links: smartSplit(row[6]),
                 date: (row[7] || "").trim(),
-                cites: smartSplit(row[8]),
+                cites: smartSplit(row[8]).filter(c => c.toLowerCase() !== 'none' && c !== '-'),
                 judges: smartSplit(row[9]),
                 nature: (row[10] || "").trim(),
                 contest: (row[11] || "").trim() // Column L
