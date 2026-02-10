@@ -604,10 +604,10 @@
             </ul>
 
             <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">A Statement of Objects and Reasons</h2>
-            <p>This tracker is created with the aim of monitoring the proliferation of unenumerated fundamental rights under Article 21 of the Constitution. The Curator believes that such proliferation is both jurisprudentially and practically flawed, and is strongly opposed to it. This tracker is driven by the realisation that one cannot effectively critique the expansion of Article 21 without being adequately informed about the exact contours of the expansion.</p>
+            <p>This tracker is created with the aim of monitoring the proliferation of unenumerated fundamental rights under Article 21 of the Constitution, and is driven by the realisation that one cannot effectively critique the same without being thoroughly informed about the exact contours of the expansion.</p>
 
             <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">About the Curator</h2>
-            <p>Abhinav Somani is 3rd Year B.A., LL.B. (Hons.) Student at the National Law School of India University, Bengaluru. He is deeply interested in Constitutional Interpretation, particularly vis-à-vis Rights Provisions and the Separation of Powers.</p>
+            <p>Abhinav Somani is 3rd Year B.A., LL.B. (Hons.) Student at the National Law School of India University, Bengaluru. He is deeply interested in Constitutional Interpretation, particularly vis-à-vis the interplay between the Separation of Powers and Rights Provisions.</p>
 
             <h2 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px;">Data Source</h2>
             <p>The dataset for this project is open-source and hosted on Google Sheets. You can view the raw data here:<br>
@@ -747,8 +747,14 @@
             document.getElementById('map-container').innerHTML = svg;
             
             document.querySelectorAll('#map-container path').forEach(p => {
-                const name = p.getAttribute('name');
+                let name = p.getAttribute('name');
                 if(name) {
+                    // FIX: Remove diacritics specifically for Dadra...
+                    if(name === "Dādra and Nagar Haveli and Damān and Diu") {
+                        name = "Dadra and Nagar Haveli and Daman and Diu";
+                        p.setAttribute('name', name); // Update DOM so CSS selectors/logic work if needed
+                    }
+
                     p.setAttribute('role', 'button');
                     p.setAttribute('aria-label', `View cases for ${name}`);
                     attachTooltip(p, name);
