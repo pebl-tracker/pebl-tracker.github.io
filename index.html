@@ -781,21 +781,26 @@
             return r.text();
         }).then(csv => {
             const parsed = Papa.parse(csv, { header: false, skipEmptyLines: true });
-            allCases = parsed.data.slice(1).map(row => ({
-                name: (row[0] || "").trim(),
-                slug: createSlug((row[0] || "").trim()), // Generate Slug
-                citation: (row[1] || "").trim(),
-                court: (row[2] || "").trim(),
-                state: (row[3] || "Pan-India").trim(),
-                rights: smartSplit(row[4]),
-                summary: (row[5] || "").trim(),
-                links: smartSplit(row[6]),
-                date: (row[7] || "").trim(),
-                cites: smartSplit(row[8]).filter(c => c.toLowerCase() !== 'none' && c !== '-'),
-                judges: smartSplit(row[9]),
-                nature: (row[10] || "").trim(),
-                contest: (row[11] || "").trim() // Column L
-            })).filter(c => c.name && c.name !== "Case Name");
+            allCases = parsed.data.slice(1).map(row => {
+                let state = (row[3] || "Pan-India").trim();
+                if(state === "Uttaranchal") state = "Uttarakhand";
+
+                return {
+                    name: (row[0] || "").trim(),
+                    slug: createSlug((row[0] || "").trim()), // Generate Slug
+                    citation: (row[1] || "").trim(),
+                    court: (row[2] || "").trim(),
+                    state: state,
+                    rights: smartSplit(row[4]),
+                    summary: (row[5] || "").trim(),
+                    links: smartSplit(row[6]),
+                    date: (row[7] || "").trim(),
+                    cites: smartSplit(row[8]).filter(c => c.toLowerCase() !== 'none' && c !== '-'),
+                    judges: smartSplit(row[9]),
+                    nature: (row[10] || "").trim(),
+                    contest: (row[11] || "").trim() // Column L
+                };
+            }).filter(c => c.name && c.name !== "Case Name");
 
             filteredCases = allCases; 
             document.getElementById('loading').style.display = 'none';
