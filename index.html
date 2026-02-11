@@ -170,7 +170,7 @@
             border: 1px solid var(--border);
         }
 
-        /* --- APEX COURT BADGE (UPDATED) --- */
+        /* --- APEX COURT BADGE --- */
         .sc-btn { 
             position: absolute;
             top: 20px;
@@ -178,7 +178,7 @@
             z-index: 20;
             background: var(--card-bg);
             color: var(--text); 
-            padding: 15px 25px; /* Bigger padding */
+            padding: 15px 25px; 
             border-radius: 8px; 
             text-decoration: none; 
             font-family: sans-serif; 
@@ -190,7 +190,7 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            min-width: 220px; /* Bigger width */
+            min-width: 220px; 
         }
 
         .sc-btn:hover { 
@@ -201,15 +201,15 @@
 
         .sc-name { 
             font-family: "Georgia", serif;
-            font-size: 1.3rem; /* Bigger font */
+            font-size: 1.3rem; 
             font-weight: bold; 
-            color: var(--accent) !important; /* Force Red */
+            color: var(--accent) !important; 
             line-height: 1.2;
             margin-bottom: 4px;
         }
 
         .sc-jurisdiction { 
-            font-size: 0.85rem; /* Bigger font */
+            font-size: 0.85rem; 
             color: var(--text-muted); 
             font-style: italic;
         }
@@ -335,7 +335,7 @@
         .bench-info { font-size: 0.85rem; color: var(--text); margin-bottom: 15px; font-family: sans-serif; }
         
         /* BADGES */
-        .nature-badge, .contest-badge, .app-badge { font-size: 0.65rem; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; margin-left: 10px; font-weight: bold; letter-spacing: 0.5px; vertical-align: middle; display: inline-block; }
+        .nature-badge, .contest-badge, .app-badge { font-size: 0.65rem; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; margin-left: 10px; font-weight: bold; letter-spacing: 0.5px; vertical-align: middle; display: inline-block; margin-bottom: 4px; }
         .nature-explicit { background-color: var(--primary); color: var(--bg); border: 1px solid var(--primary); }
         .nature-implicit { background-color: transparent; color: var(--text-muted); border: 1px solid var(--text-muted); }
         .contest-contested { background-color: var(--dissent); color: var(--bg); border: 1px solid var(--dissent); margin-left: 5px; }
@@ -476,7 +476,6 @@
                 <option value="horizontal">Horizontal</option>
                 <option value="both">Both</option>
             </select>
-            <!-- STATE FILTER REMOVED -->
             <select id="court-filter" class="filter-select" onchange="handleSearch()"><option value="">All Courts</option></select>
             <select id="judge-filter" class="filter-select" onchange="handleSearch()"><option value="">All Judges</option></select>
             <select id="sort-order" class="filter-select" onchange="handleSearch()"><option value="newest">Newest First</option><option value="oldest">Oldest First</option></select>
@@ -783,9 +782,9 @@
                     date: (row[6] || "").trim(),
                     cites: smartSplit(row[7]).filter(c => c.toLowerCase() !== 'none' && c !== '-'),
                     judges: smartSplit(row[8]),
-                    nature: (row[9] || "").trim(),
-                    contest: (row[10] || "").trim(),
-                    application: (row[11] || "").trim() 
+                    nature: smartSplit(row[9]), // UPDATED: Parse as Array
+                    contest: smartSplit(row[10]), // UPDATED: Parse as Array
+                    application: smartSplit(row[11]) // UPDATED: Parse as Array
                 };
             }).filter(c => c.name && c.name !== "Case Name");
 
@@ -1127,9 +1126,11 @@
 
         let filtered = textResults.filter(c => {
             const matchesRight = right ? c.rights.includes(right) : true;
-            const matchesNature = nature ? c.nature.toLowerCase() === nature : true;
-            const matchesContest = contest ? c.contest.toLowerCase() === contest : true;
-            const matchesApp = app ? (c.application || "").toLowerCase() === app : true; 
+            // UPDATED: Array containment check
+            const matchesNature = nature ? c.nature.some(n => n.toLowerCase() === nature) : true;
+            const matchesContest = contest ? c.contest.some(n => n.toLowerCase() === contest) : true;
+            const matchesApp = app ? c.application.some(n => n.toLowerCase() === app) : true;
+            
             // STATE MATCH REMOVED
             const matchesCourt = court ? c.court === court : true; 
             const matchesJudge = judge ? c.judges.some(j => cleanJudgeName(j) === judge) : true;
@@ -1177,27 +1178,25 @@
                 benchHTML = `<div class="bench-info"><span style="color:var(--text-muted); font-weight:bold;">Justice(s):</span> ${formattedJudges}</div>`;
             }
             
-            let natureBadge = '';
-            if(c.nature) {
-                const typeClass = c.nature.toLowerCase() === 'implicit' ? 'nature-implicit' : 'nature-explicit';
-                natureBadge = `<span class="nature-badge ${typeClass}">${c.nature}</span>`;
-            }
+            // UPDATED: Loop through arrays to generate multiple badges
+            let natureBadges = c.nature.map(n => {
+                const typeClass = n.toLowerCase() === 'implicit' ? 'nature-implicit' : 'nature-explicit';
+                return `<span class="nature-badge ${typeClass}">${n}</span>`;
+            }).join('');
 
-            let contestBadge = '';
-            if(c.contest) {
-                const isContested = c.contest.toLowerCase() === 'contested';
+            let contestBadges = c.contest.map(n => {
+                const isContested = n.toLowerCase() === 'contested';
                 const contestClass = isContested ? 'contest-contested' : 'contest-uncontested';
-                contestBadge = `<span class="contest-badge ${contestClass}">${c.contest}</span>`;
-            }
+                return `<span class="contest-badge ${contestClass}">${n}</span>`;
+            }).join('');
 
-            let appBadge = '';
-            if(c.application) {
-                const lowerApp = c.application.toLowerCase();
+            let appBadges = c.application.map(n => {
+                const lowerApp = n.toLowerCase();
                 let appClass = 'app-vertical';
                 if(lowerApp === 'horizontal') appClass = 'app-horizontal';
                 if(lowerApp === 'both') appClass = 'app-both';
-                appBadge = `<span class="app-badge ${appClass}">${c.application}</span>`;
-            }
+                return `<span class="app-badge ${appClass}">${n}</span>`;
+            }).join('');
             
             let dDisp = c.date;
             try { 
@@ -1207,7 +1206,7 @@
 
             list.innerHTML += `
                 <div class="card">
-                    <div class="card-header"><h3>${c.name}</h3><span class="court-label">${c.court} ${natureBadge} ${contestBadge} ${appBadge}</span></div>
+                    <div class="card-header"><h3>${c.name}</h3><span class="court-label">${c.court} ${natureBadges} ${contestBadges} ${appBadges}</span></div>
                     <div class="card-date">${dDisp}</div>
                     <span class="citation">${c.citation}</span>
                     ${benchHTML}
@@ -1270,27 +1269,26 @@
         }
         
         const natureContainer = document.getElementById('detail-nature-container');
-        natureContainer.innerHTML = ''; 
-        if(c.nature) {
-            const typeClass = c.nature.toLowerCase() === 'implicit' ? 'nature-implicit' : 'nature-explicit';
-            natureContainer.innerHTML = `<span class="nature-badge ${typeClass}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${c.nature}</span>`;
-        }
+        natureContainer.innerHTML = c.nature.map(n => {
+            const typeClass = n.toLowerCase() === 'implicit' ? 'nature-implicit' : 'nature-explicit';
+            return `<span class="nature-badge ${typeClass}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${n}</span>`;
+        }).join('');
 
         const contestContainer = document.getElementById('detail-contest-container');
-        contestContainer.innerHTML = ''; 
-        if(c.contest) {
-            const isContested = c.contest.toLowerCase() === 'contested';
+        contestContainer.innerHTML = c.contest.map(n => {
+            const isContested = n.toLowerCase() === 'contested';
             const contestClass = isContested ? 'contest-contested' : 'contest-uncontested';
-            contestContainer.innerHTML = `<span class="contest-badge ${contestClass}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${c.contest}</span>`;
-        }
+            return `<span class="contest-badge ${contestClass}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${n}</span>`;
+        }).join('');
 
-        if(c.application) {
-            const lowerApp = c.application.toLowerCase();
+        // Append Application Badges to Contest Container for layout
+        contestContainer.innerHTML += c.application.map(n => {
+            const lowerApp = n.toLowerCase();
             let appClass = 'app-vertical';
             if(lowerApp === 'horizontal') appClass = 'app-horizontal';
             if(lowerApp === 'both') appClass = 'app-both';
-            contestContainer.innerHTML += `<span class="app-badge ${appClass}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${c.application}</span>`;
-        }
+            return `<span class="app-badge ${appClass}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${n}</span>`;
+        }).join('');
 
         document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
         document.getElementById('details-view').style.display = 'block';
