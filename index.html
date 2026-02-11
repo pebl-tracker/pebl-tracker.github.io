@@ -126,7 +126,7 @@
             position: relative; 
             width: 100%; 
             max-width: 850px; 
-            margin: 0 auto 20px auto; /* Added bottom margin */
+            margin: 0 auto 20px auto; 
         }
         
         svg { width: 100%; height: auto; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.05)); }
@@ -170,7 +170,7 @@
             border: 1px solid var(--border);
         }
 
-        /* --- APEX COURT BADGE (UPDATED SC BUTTON) --- */
+        /* --- APEX COURT BADGE --- */
         .sc-btn { 
             position: absolute;
             top: 20px;
@@ -185,7 +185,7 @@
             cursor: pointer; 
             box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
             border: 1px solid var(--border);
-            border-left: 5px solid var(--accent); /* Red highlight */
+            border-left: 5px solid var(--accent); 
             transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
@@ -342,11 +342,16 @@
         .bench-info { font-size: 0.85rem; color: var(--text); margin-bottom: 15px; font-family: sans-serif; }
         
         /* BADGES */
-        .nature-badge, .contest-badge { font-size: 0.65rem; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; margin-left: 10px; font-weight: bold; letter-spacing: 0.5px; vertical-align: middle; display: inline-block; }
+        .nature-badge, .contest-badge, .app-badge { font-size: 0.65rem; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; margin-left: 10px; font-weight: bold; letter-spacing: 0.5px; vertical-align: middle; display: inline-block; }
         .nature-explicit { background-color: var(--primary); color: var(--bg); border: 1px solid var(--primary); }
         .nature-implicit { background-color: transparent; color: var(--text-muted); border: 1px solid var(--text-muted); }
         .contest-contested { background-color: var(--dissent); color: var(--bg); border: 1px solid var(--dissent); margin-left: 5px; }
         .contest-uncontested { background-color: transparent; color: var(--text-muted); border: 1px solid var(--text-muted); margin-left: 5px; }
+        
+        /* APPLICATION BADGES (Vertical/Horizontal) */
+        .app-vertical { background-color: #8e44ad; color: white; border: 1px solid #8e44ad; margin-left: 5px; }
+        .app-horizontal { background-color: #16a085; color: white; border: 1px solid #16a085; margin-left: 5px; }
+        .app-both { background: linear-gradient(135deg, #8e44ad 50%, #16a085 50%); color: white; border: 1px solid #555; margin-left: 5px; }
 
         .tag { background: var(--tag-bg); padding: 4px 10px; border-radius: 3px; font-size: 0.7rem; font-weight: bold; color: #666; display: inline-block; margin-right: 6px; margin-bottom: 6px; text-transform: uppercase; }
         .summary-preview { color: var(--text); line-height: 1.6; margin-bottom: 15px; font-size: 0.95rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
@@ -473,7 +478,13 @@
                 <option value="contested">Contested</option>
                 <option value="uncontested">Uncontested</option>
             </select>
-            <select id="state-filter" class="filter-select" onchange="handleSearch()"><option value="">All Jurisdictions</option></select>
+            <select id="app-filter" class="filter-select" onchange="handleSearch()">
+                <option value="">All Applications</option>
+                <option value="vertical">Vertical</option>
+                <option value="horizontal">Horizontal</option>
+                <option value="both">Both</option>
+            </select>
+            <select id="state-filter" class="filter-select" onchange="handleSearch()"><option value="">All Territories</option></select>
             <select id="court-filter" class="filter-select" onchange="handleSearch()"><option value="">All Courts</option></select>
             <select id="judge-filter" class="filter-select" onchange="handleSearch()"><option value="">All Judges</option></select>
             <select id="sort-order" class="filter-select" onchange="handleSearch()"><option value="newest">Newest First</option><option value="oldest">Oldest First</option></select>
@@ -596,7 +607,6 @@
 
     // --- DATA LOGIC ---
     const SHEET_ID = '1k3O3nEbs24UXsoAsrNPmaZfBvpAJCmaEzypuQTD-yuY';
-    // RENAMED FOR CLARITY: Points to Sheet 1 (Case Data)
     const CASE_DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
     
     const ABOUT_SHEET_GID = '1656982748'; 
@@ -630,19 +640,16 @@
         fetchData();
         fetchAboutData(); 
         
-        // Scroll Listener for Back-to-Top
         window.addEventListener('scroll', () => {
             const btn = document.querySelector('.scroll-top-btn');
             if (window.scrollY > 300) btn.style.display = 'block';
             else btn.style.display = 'none';
         });
 
-        // Attach tooltip listener to the SC button
         const scBtn = document.querySelector('.sc-btn');
         if(scBtn) attachTooltip(scBtn, 'Supreme Court (Pan-India)');
     });
 
-    // Helper to attach tooltip logic to any element
     function attachTooltip(element, name) {
         const tooltip = document.getElementById('map-tooltip');
         element.addEventListener('mouseenter', () => {
@@ -667,24 +674,31 @@
             document.getElementById('map-container').innerHTML = svg;
             
             document.querySelectorAll('#map-container path').forEach(p => {
-                let name = p.getAttribute('name');
-                if(name) {
-                    if(name === "Dādra and Nagar Haveli and Damān and Diu") {
-                        name = "Dadra and Nagar Haveli and Daman and Diu";
-                        p.setAttribute('name', name); 
-                    }
-                    if(name === "Uttaranchal") {
-                        name = "Uttarakhand";
-                        p.setAttribute('name', name);
+                // Get ID or Name from SVG
+                let rawName = p.getAttribute('id') || p.getAttribute('name');
+                
+                if(rawName) {
+                    // NORMALIZE: Convert "Bombay_High_Court" -> "Bombay High Court"
+                    // Also handle "Punjab_and_Haryana" -> "Punjab & Haryana" if needed
+                    let cleanName = rawName.replace(/_/g, ' ');
+                    
+                    // Specific fix for ampersands if SVG uses "and" but CSV uses "&"
+                    if(cleanName.includes(" and ") && !cleanName.includes("Dadra")) {
+                         // Simple heuristic: if it's a court name, it might use &
+                         // But let's rely on the user naming SVG correctly or fuzzy matching
+                         // For now, we assume SVG IDs match CSV Court names (with underscores)
                     }
 
                     p.setAttribute('role', 'button');
-                    p.setAttribute('aria-label', `View cases for ${name}`);
-                    attachTooltip(p, name);
+                    p.setAttribute('aria-label', `View cases for ${cleanName}`);
+                    p.setAttribute('data-court', cleanName); // Store normalized name
+                    
+                    attachTooltip(p, cleanName);
+                    
+                    p.addEventListener('click', () => {
+                        handleMapClick(cleanName);
+                    });
                 }
-                p.addEventListener('click', () => {
-                    if(name) handleMapClick(name);
-                });
             });
             generateHeatmap();
         }).catch(err => console.error("Map load failed", err));
@@ -731,7 +745,8 @@
                     cites: smartSplit(row[8]).filter(c => c.toLowerCase() !== 'none' && c !== '-'),
                     judges: smartSplit(row[9]),
                     nature: (row[10] || "").trim(),
-                    contest: (row[11] || "").trim() 
+                    contest: (row[11] || "").trim(),
+                    application: (row[12] || "").trim() 
                 };
             }).filter(c => c.name && c.name !== "Case Name");
 
@@ -1023,6 +1038,7 @@
         const right = document.getElementById('right-filter').value;
         const nature = document.getElementById('nature-filter').value;
         const contest = document.getElementById('contest-filter').value;
+        const app = document.getElementById('app-filter').value; 
         const state = document.getElementById('state-filter').value; 
         const court = document.getElementById('court-filter').value; 
         const judge = document.getElementById('judge-filter').value; 
@@ -1074,10 +1090,11 @@
             const matchesRight = right ? c.rights.includes(right) : true;
             const matchesNature = nature ? c.nature.toLowerCase() === nature : true;
             const matchesContest = contest ? c.contest.toLowerCase() === contest : true;
+            const matchesApp = app ? (c.application || "").toLowerCase() === app : true; 
             const matchesState = state ? c.state === state : true; 
             const matchesCourt = court ? c.court === court : true; 
             const matchesJudge = judge ? c.judges.some(j => cleanJudgeName(j) === judge) : true;
-            return matchesRight && matchesNature && matchesContest && matchesState && matchesCourt && matchesJudge;
+            return matchesRight && matchesNature && matchesContest && matchesApp && matchesState && matchesCourt && matchesJudge;
         });
         
         if (!rawQuery || sort !== 'newest') { 
@@ -1133,6 +1150,15 @@
                 const contestClass = isContested ? 'contest-contested' : 'contest-uncontested';
                 contestBadge = `<span class="contest-badge ${contestClass}">${c.contest}</span>`;
             }
+
+            let appBadge = '';
+            if(c.application) {
+                const lowerApp = c.application.toLowerCase();
+                let appClass = 'app-vertical';
+                if(lowerApp === 'horizontal') appClass = 'app-horizontal';
+                if(lowerApp === 'both') appClass = 'app-both';
+                appBadge = `<span class="app-badge ${appClass}">${c.application}</span>`;
+            }
             
             let dDisp = c.date;
             try { 
@@ -1142,7 +1168,7 @@
 
             list.innerHTML += `
                 <div class="card">
-                    <div class="card-header"><h3>${c.name}</h3><span class="court-label">${c.court} ${natureBadge} ${contestBadge}</span></div>
+                    <div class="card-header"><h3>${c.name}</h3><span class="court-label">${c.court} ${natureBadge} ${contestBadge} ${appBadge}</span></div>
                     <div class="card-date">${dDisp}</div>
                     <span class="citation">${c.citation}</span>
                     ${benchHTML}
@@ -1159,17 +1185,22 @@
         return p.length === 3 ? new Date(p[2], p[1]-1, p[0]) : (p.length === 1 ? new Date(p[0],0,1) : new Date(s));
     }
 
-    function handleMapClick(n) {
+    function handleMapClick(courtName) {
         switchTab('tracker');
-        const dropdown = document.getElementById('state-filter');
-        let optionExists = Array.from(dropdown.options).some(o => o.value === n);
+        // UPDATED: Map click now sets the COURT filter, not the State filter
+        const dropdown = document.getElementById('court-filter');
+        
+        // Check if option exists (it should, if populated correctly)
+        let optionExists = Array.from(dropdown.options).some(o => o.value === courtName);
         if (!optionExists) {
+            // Fallback: Create it if missing
             const opt = document.createElement('option');
-            opt.value = n;
-            opt.innerText = n;
+            opt.value = courtName;
+            opt.innerText = courtName;
             dropdown.appendChild(opt);
         }
-        dropdown.value = n;
+        
+        dropdown.value = courtName;
         handleSearch();
         document.getElementById('search-input').scrollIntoView({behavior: "smooth", block: "start"});
     }
@@ -1217,6 +1248,14 @@
             contestContainer.innerHTML = `<span class="contest-badge ${contestClass}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${c.contest}</span>`;
         }
 
+        if(c.application) {
+            const lowerApp = c.application.toLowerCase();
+            let appClass = 'app-vertical';
+            if(lowerApp === 'horizontal') appClass = 'app-horizontal';
+            if(lowerApp === 'both') appClass = 'app-both';
+            contestContainer.innerHTML += `<span class="app-badge ${appClass}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${c.application}</span>`;
+        }
+
         document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
         document.getElementById('details-view').style.display = 'block';
         window.scrollTo(0,0);
@@ -1232,8 +1271,7 @@
 
     function populateStateDropdown() {
         const sel = document.getElementById('state-filter');
-        sel.innerHTML = '<option value="">All Jurisdictions</option>';
-        // UPDATED: Uttarakhand is now correct
+        sel.innerHTML = '<option value="">All Territories</option>';
         const states = [
             "Andaman and Nicobar", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh",
             "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh",
@@ -1291,13 +1329,13 @@
         allCases.forEach(c => { 
             if(c.state === "Pan-India") {
                 panIndiaCount++;
-            } else if(c.state) { 
-                counts[c.state] = (counts[c.state] || 0) + 1; 
-                if(counts[c.state] > max) max = counts[c.state]; 
+            } else if(c.court) { 
+                // UPDATED: Count by COURT, not State
+                counts[c.court] = (counts[c.court] || 0) + 1; 
+                if(counts[c.court] > max) max = counts[c.court]; 
             }
         });
         
-        // UPDATED: Correctly target the new complex structure
         const scBtn = document.querySelector('.sc-btn');
         if(scBtn) {
             scBtn.setAttribute('data-count', panIndiaCount);
@@ -1310,7 +1348,6 @@
             
             scBtn.style.backgroundColor = `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${opacity})`;
             
-            // Text color contrast adjustment
             if (opacity > 0.5) {
                 scBtn.querySelector('.sc-name').style.color = isDark ? '#000' : '#fff';
                 scBtn.querySelector('.sc-jurisdiction').style.color = isDark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)';
@@ -1324,7 +1361,8 @@
         const baseColor = isDark ? [236, 240, 241] : [44, 62, 80]; 
 
         document.querySelectorAll('#map-container path').forEach(p => {
-            const n = p.getAttribute('name'); 
+            // UPDATED: Use the normalized data-court attribute we set in loadMap
+            const n = p.getAttribute('data-court'); 
             const count = counts[n] || 0;
             p.setAttribute('data-count', count);
             if(count > 0) {
