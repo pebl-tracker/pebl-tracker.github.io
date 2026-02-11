@@ -170,7 +170,7 @@
             border: 1px solid var(--border);
         }
 
-        /* --- APEX COURT BADGE --- */
+        /* --- APEX COURT BADGE (UPDATED) --- */
         .sc-btn { 
             position: absolute;
             top: 20px;
@@ -178,19 +178,19 @@
             z-index: 20;
             background: var(--card-bg);
             color: var(--text); 
-            padding: 12px 20px; 
+            padding: 15px 25px; /* Bigger padding */
             border-radius: 8px; 
             text-decoration: none; 
             font-family: sans-serif; 
             cursor: pointer; 
             box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
             border: 1px solid var(--border);
-            border-left: 5px solid var(--accent); 
+            border-left: 6px solid var(--accent); 
             transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            min-width: 180px;
+            min-width: 220px; /* Bigger width */
         }
 
         .sc-btn:hover { 
@@ -199,24 +199,17 @@
             border-color: var(--accent);
         }
 
-        .sc-label { 
-            font-size: 0.65rem; 
-            text-transform: uppercase; 
-            letter-spacing: 1.5px; 
-            color: var(--accent); 
-            font-weight: bold; 
-            margin-bottom: 2px;
-        }
-
         .sc-name { 
             font-family: "Georgia", serif;
-            font-size: 1.05rem; 
+            font-size: 1.3rem; /* Bigger font */
             font-weight: bold; 
-            color: var(--primary);
+            color: var(--accent) !important; /* Force Red */
+            line-height: 1.2;
+            margin-bottom: 4px;
         }
 
         .sc-jurisdiction { 
-            font-size: 0.7rem; 
+            font-size: 0.85rem; /* Bigger font */
             color: var(--text-muted); 
             font-style: italic;
         }
@@ -452,7 +445,6 @@
             <div id="map-container"></div>
             <!-- PROMINENT APEX COURT BADGE -->
             <div class="sc-btn" onclick="handleMapClick('Pan-India')">
-                <span class="sc-label">Apex Court</span>
                 <span class="sc-name">Supreme Court of India</span>
                 <span class="sc-jurisdiction">Pan-India Jurisdiction</span>
             </div>
@@ -484,7 +476,7 @@
                 <option value="horizontal">Horizontal</option>
                 <option value="both">Both</option>
             </select>
-            <select id="state-filter" class="filter-select" onchange="handleSearch()"><option value="">All Territories</option></select>
+            <!-- STATE FILTER REMOVED -->
             <select id="court-filter" class="filter-select" onchange="handleSearch()"><option value="">All Courts</option></select>
             <select id="judge-filter" class="filter-select" onchange="handleSearch()"><option value="">All Judges</option></select>
             <select id="sort-order" class="filter-select" onchange="handleSearch()"><option value="newest">Newest First</option><option value="oldest">Oldest First</option></select>
@@ -775,31 +767,32 @@
         }).then(csv => {
             const parsed = Papa.parse(csv, { header: false, skipEmptyLines: true });
             allCases = parsed.data.slice(1).map(row => {
-                let state = (row[3] || "Pan-India").trim();
-                if(state === "Uttaranchal") state = "Uttarakhand";
+                // COLUMN D (State) IS DELETED. INDICES SHIFT LEFT BY 1 STARTING FROM INDEX 3.
+                // 0: Name, 1: Citation, 2: Court
+                // 3: Rights (was 4), 4: Summary (was 5), etc.
 
                 return {
                     name: (row[0] || "").trim(),
                     slug: createSlug((row[0] || "").trim()), 
                     citation: (row[1] || "").trim(),
                     court: (row[2] || "").trim(),
-                    state: state,
-                    rights: smartSplit(row[4]),
-                    summary: (row[5] || "").trim(),
-                    links: smartSplit(row[6]),
-                    date: (row[7] || "").trim(),
-                    cites: smartSplit(row[8]).filter(c => c.toLowerCase() !== 'none' && c !== '-'),
-                    judges: smartSplit(row[9]),
-                    nature: (row[10] || "").trim(),
-                    contest: (row[11] || "").trim(),
-                    application: (row[12] || "").trim() 
+                    // State is gone.
+                    rights: smartSplit(row[3]),
+                    summary: (row[4] || "").trim(),
+                    links: smartSplit(row[5]),
+                    date: (row[6] || "").trim(),
+                    cites: smartSplit(row[7]).filter(c => c.toLowerCase() !== 'none' && c !== '-'),
+                    judges: smartSplit(row[8]),
+                    nature: (row[9] || "").trim(),
+                    contest: (row[10] || "").trim(),
+                    application: (row[11] || "").trim() 
                 };
             }).filter(c => c.name && c.name !== "Case Name");
 
             filteredCases = allCases; 
             document.getElementById('loading').style.display = 'none';
             populateDropdown();
-            populateStateDropdown(); 
+            // populateStateDropdown REMOVED
             populateCourtDropdown(); 
             populateJudgeDropdown(); 
             generateHeatmap();
@@ -1085,7 +1078,7 @@
         const nature = document.getElementById('nature-filter').value;
         const contest = document.getElementById('contest-filter').value;
         const app = document.getElementById('app-filter').value; 
-        const state = document.getElementById('state-filter').value; 
+        // STATE FILTER REMOVED
         const court = document.getElementById('court-filter').value; 
         const judge = document.getElementById('judge-filter').value; 
         const sort = document.getElementById('sort-order').value;
@@ -1137,10 +1130,10 @@
             const matchesNature = nature ? c.nature.toLowerCase() === nature : true;
             const matchesContest = contest ? c.contest.toLowerCase() === contest : true;
             const matchesApp = app ? (c.application || "").toLowerCase() === app : true; 
-            const matchesState = state ? c.state === state : true; 
+            // STATE MATCH REMOVED
             const matchesCourt = court ? c.court === court : true; 
             const matchesJudge = judge ? c.judges.some(j => cleanJudgeName(j) === judge) : true;
-            return matchesRight && matchesNature && matchesContest && matchesApp && matchesState && matchesCourt && matchesJudge;
+            return matchesRight && matchesNature && matchesContest && matchesApp && matchesCourt && matchesJudge;
         });
         
         if (!rawQuery || sort !== 'newest') { 
@@ -1312,27 +1305,7 @@
         rts.forEach(r => { const o = document.createElement('option'); o.value = r; o.innerText = r; sel.appendChild(o); });
     }
 
-    function populateStateDropdown() {
-        const sel = document.getElementById('state-filter');
-        sel.innerHTML = '<option value="">All Territories</option>';
-        const states = [
-            "Andaman and Nicobar", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh",
-            "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh",
-            "Jammu and Kashmir", "Jharkhand", "Karnataka", "Kerala", "Ladakh", "Lakshadweep", "Madhya Pradesh",
-            "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Orissa", "Puducherry", "Punjab",
-            "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"
-        ];
-        const panOpt = document.createElement('option');
-        panOpt.value = "Pan-India";
-        panOpt.innerText = "Pan-India";
-        sel.appendChild(panOpt);
-        states.sort().forEach(s => {
-            const o = document.createElement('option');
-            o.value = s;
-            o.innerText = s;
-            sel.appendChild(o);
-        });
-    }
+    // populateStateDropdown REMOVED
 
     function populateCourtDropdown() {
         const sel = document.getElementById('court-filter');
@@ -1370,7 +1343,10 @@
         let panIndiaCount = 0;
         
         allCases.forEach(c => { 
-            if(c.state === "Pan-India") {
+            // State column is gone, so we check if court is "Supreme Court" manually or via a flag
+            // But wait, row[3] is now Rights.
+            // We rely on c.court.
+            if(c.court === "Supreme Court") {
                 panIndiaCount++;
             } else if(c.court) { 
                 counts[c.court] = (counts[c.court] || 0) + 1; 
@@ -1390,13 +1366,18 @@
             
             scBtn.style.backgroundColor = `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${opacity})`;
             
+            // Dynamic Contrast for Subtitle
             if (opacity > 0.5) {
-                scBtn.querySelector('.sc-name').style.color = isDark ? '#000' : '#fff';
-                scBtn.querySelector('.sc-jurisdiction').style.color = isDark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)';
+                if (!isDark) { // Light Mode, Dark Background
+                    scBtn.querySelector('.sc-jurisdiction').style.color = '#fff';
+                } else { // Dark Mode, Light Background
+                    scBtn.querySelector('.sc-jurisdiction').style.color = '#000';
+                }
             } else {
-                scBtn.querySelector('.sc-name').style.color = 'var(--primary)';
                 scBtn.querySelector('.sc-jurisdiction').style.color = 'var(--text-muted)';
             }
+            // Always keep name red
+            scBtn.querySelector('.sc-name').style.color = 'var(--accent)';
         }
 
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
