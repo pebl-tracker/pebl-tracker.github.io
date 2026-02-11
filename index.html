@@ -669,7 +669,60 @@
         });
     }
 
+    // --- MAP LOADING & TRANSLATION LAYER ---
     function loadMap() {
+        // DICTIONARY: Translates SVG IDs (Codes/States) -> High Court Names
+        const svgIdToCourt = {
+            // Fix the specific one seen in screenshot
+            "INTG": "Telangana High Court", 
+            "IN-TG": "Telangana High Court",
+            
+            // Standard States -> High Courts
+            "Andhra Pradesh": "Andhra Pradesh High Court",
+            "Chhattisgarh": "Chhattisgarh High Court",
+            "Delhi": "Delhi High Court",
+            "Gujarat": "Gujarat High Court",
+            "Himachal Pradesh": "Himachal Pradesh High Court",
+            "Jharkhand": "Jharkhand High Court",
+            "Karnataka": "Karnataka High Court",
+            "Kerala": "Kerala High Court",
+            "Madhya Pradesh": "Madhya Pradesh High Court",
+            "Manipur": "Manipur High Court",
+            "Meghalaya": "Meghalaya High Court",
+            "Odisha": "Orissa High Court",
+            "Orissa": "Orissa High Court",
+            "Bihar": "Patna High Court",
+            "Patna": "Patna High Court",
+            "Rajasthan": "Rajasthan High Court",
+            "Sikkim": "Sikkim High Court",
+            "Telangana": "Telangana High Court",
+            "Tripura": "Tripura High Court",
+            "Uttarakhand": "Uttarakhand High Court",
+            "Uttar Pradesh": "Allahabad High Court",
+            "West Bengal": "Calcutta High Court",
+            
+            // Common ISO Codes (Just in case)
+            "IN-AP": "Andhra Pradesh High Court",
+            "IN-CT": "Chhattisgarh High Court",
+            "IN-DL": "Delhi High Court",
+            "IN-GJ": "Gujarat High Court",
+            "IN-HP": "Himachal Pradesh High Court",
+            "IN-JH": "Jharkhand High Court",
+            "IN-KA": "Karnataka High Court",
+            "IN-KL": "Kerala High Court",
+            "IN-MP": "Madhya Pradesh High Court",
+            "IN-MN": "Manipur High Court",
+            "IN-ML": "Meghalaya High Court",
+            "IN-OR": "Orissa High Court",
+            "IN-BR": "Patna High Court",
+            "IN-RJ": "Rajasthan High Court",
+            "IN-SK": "Sikkim High Court",
+            "IN-TR": "Tripura High Court",
+            "IN-UT": "Uttarakhand High Court",
+            "IN-UP": "Allahabad High Court",
+            "IN-WB": "Calcutta High Court"
+        };
+
         fetch('india.svg').then(r => r.text()).then(svg => {
             document.getElementById('map-container').innerHTML = svg;
             
@@ -678,15 +731,18 @@
                 let rawName = p.getAttribute('id') || p.getAttribute('name');
                 
                 if(rawName) {
-                    // NORMALIZE: Convert "Bombay_High_Court" -> "Bombay High Court"
-                    // Also handle "Punjab_and_Haryana" -> "Punjab & Haryana" if needed
                     let cleanName = rawName.replace(/_/g, ' ');
                     
-                    // Specific fix for ampersands if SVG uses "and" but CSV uses "&"
-                    if(cleanName.includes(" and ") && !cleanName.includes("Dadra")) {
-                         // Simple heuristic: if it's a court name, it might use &
-                         // But let's rely on the user naming SVG correctly or fuzzy matching
-                         // For now, we assume SVG IDs match CSV Court names (with underscores)
+                    // 1. Check Dictionary First
+                    if(svgIdToCourt[rawName] || svgIdToCourt[cleanName]) {
+                        cleanName = svgIdToCourt[rawName] || svgIdToCourt[cleanName];
+                    } 
+                    // 2. Fallback: If it looks like a state name (e.g. "Rajasthan"), try appending " High Court"
+                    else if (!cleanName.toLowerCase().includes("court") && !cleanName.includes("-")) {
+                         // This is a heuristic for states you might have missed in the dictionary
+                         // We don't force it, but we use it as the data-court attribute
+                         // The heatmap logic will match it if it exists in the CSV
+                         cleanName = cleanName + " High Court";
                     }
 
                     p.setAttribute('role', 'button');
@@ -1187,13 +1243,10 @@
 
     function handleMapClick(courtName) {
         switchTab('tracker');
-        // UPDATED: Map click now sets the COURT filter, not the State filter
         const dropdown = document.getElementById('court-filter');
         
-        // Check if option exists (it should, if populated correctly)
         let optionExists = Array.from(dropdown.options).some(o => o.value === courtName);
         if (!optionExists) {
-            // Fallback: Create it if missing
             const opt = document.createElement('option');
             opt.value = courtName;
             opt.innerText = courtName;
@@ -1330,7 +1383,6 @@
             if(c.state === "Pan-India") {
                 panIndiaCount++;
             } else if(c.court) { 
-                // UPDATED: Count by COURT, not State
                 counts[c.court] = (counts[c.court] || 0) + 1; 
                 if(counts[c.court] > max) max = counts[c.court]; 
             }
@@ -1361,7 +1413,6 @@
         const baseColor = isDark ? [236, 240, 241] : [44, 62, 80]; 
 
         document.querySelectorAll('#map-container path').forEach(p => {
-            // UPDATED: Use the normalized data-court attribute we set in loadMap
             const n = p.getAttribute('data-court'); 
             const count = counts[n] || 0;
             p.setAttribute('data-count', count);
