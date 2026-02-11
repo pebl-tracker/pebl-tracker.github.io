@@ -671,56 +671,49 @@
 
     // --- MAP LOADING & TRANSLATION LAYER ---
     function loadMap() {
-        // DICTIONARY: Translates SVG IDs (Codes/States) -> High Court Names
+        // DICTIONARY: Translates SVG IDs (Codes) -> High Court Names
         const svgIdToCourt = {
-            // Fix the specific one seen in screenshot
-            "INTG": "Telangana High Court", 
-            "IN-TG": "Telangana High Court",
+            // MERGED HIGH COURTS
+            "IN-MH": "Bombay High Court",
+            "INMH": "Bombay High Court",
             
-            // Standard States -> High Courts
-            "Andhra Pradesh": "Andhra Pradesh High Court",
-            "Chhattisgarh": "Chhattisgarh High Court",
-            "Delhi": "Delhi High Court",
-            "Gujarat": "Gujarat High Court",
-            "Himachal Pradesh": "Himachal Pradesh High Court",
-            "Jharkhand": "Jharkhand High Court",
-            "Karnataka": "Karnataka High Court",
-            "Kerala": "Kerala High Court",
-            "Madhya Pradesh": "Madhya Pradesh High Court",
-            "Manipur": "Manipur High Court",
-            "Meghalaya": "Meghalaya High Court",
-            "Odisha": "Orissa High Court",
-            "Orissa": "Orissa High Court",
-            "Bihar": "Patna High Court",
-            "Patna": "Patna High Court",
-            "Rajasthan": "Rajasthan High Court",
-            "Sikkim": "Sikkim High Court",
-            "Telangana": "Telangana High Court",
-            "Tripura": "Tripura High Court",
-            "Uttarakhand": "Uttarakhand High Court",
-            "Uttar Pradesh": "Allahabad High Court",
-            "West Bengal": "Calcutta High Court",
+            "IN-WB": "Calcutta High Court",
+            "INWB": "Calcutta High Court",
             
-            // Common ISO Codes (Just in case)
-            "IN-AP": "Andhra Pradesh High Court",
-            "IN-CT": "Chhattisgarh High Court",
-            "IN-DL": "Delhi High Court",
-            "IN-GJ": "Gujarat High Court",
-            "IN-HP": "Himachal Pradesh High Court",
-            "IN-JH": "Jharkhand High Court",
-            "IN-KA": "Karnataka High Court",
+            "IN-AS": "Gauhati High Court",
+            "INAS": "Gauhati High Court",
+            
+            "IN-JK": "Jammu & Kashmir and Ladakh High Court",
+            "INJK": "Jammu & Kashmir and Ladakh High Court",
+            
             "IN-KL": "Kerala High Court",
-            "IN-MP": "Madhya Pradesh High Court",
-            "IN-MN": "Manipur High Court",
-            "IN-ML": "Meghalaya High Court",
-            "IN-OR": "Orissa High Court",
-            "IN-BR": "Patna High Court",
-            "IN-RJ": "Rajasthan High Court",
-            "IN-SK": "Sikkim High Court",
-            "IN-TR": "Tripura High Court",
-            "IN-UT": "Uttarakhand High Court",
-            "IN-UP": "Allahabad High Court",
-            "IN-WB": "Calcutta High Court"
+            "INKL": "Kerala High Court",
+            
+            "IN-TN": "Madras High Court",
+            "INTN": "Madras High Court",
+            
+            "IN-PH": "Punjab & Haryana High Court",
+            "INPH": "Punjab & Haryana High Court",
+
+            // SINGLE STATE HIGH COURTS
+            "IN-UP": "Allahabad High Court", "INUP": "Allahabad High Court",
+            "IN-AP": "Andhra Pradesh High Court", "INAP": "Andhra Pradesh High Court",
+            "IN-CT": "Chhattisgarh High Court", "INCT": "Chhattisgarh High Court",
+            "IN-DL": "Delhi High Court", "INDL": "Delhi High Court",
+            "IN-GJ": "Gujarat High Court", "INGJ": "Gujarat High Court",
+            "IN-HP": "Himachal Pradesh High Court", "INHP": "Himachal Pradesh High Court",
+            "IN-JH": "Jharkhand High Court", "INJH": "Jharkhand High Court",
+            "IN-KA": "Karnataka High Court", "INKA": "Karnataka High Court",
+            "IN-MP": "Madhya Pradesh High Court", "INMP": "Madhya Pradesh High Court",
+            "IN-MN": "Manipur High Court", "INMN": "Manipur High Court",
+            "IN-ML": "Meghalaya High Court", "INML": "Meghalaya High Court",
+            "IN-OR": "Orissa High Court", "INOR": "Orissa High Court",
+            "IN-BR": "Patna High Court", "INBR": "Patna High Court",
+            "IN-RJ": "Rajasthan High Court", "INRJ": "Rajasthan High Court",
+            "IN-SK": "Sikkim High Court", "INSK": "Sikkim High Court",
+            "IN-TG": "Telangana High Court", "INTG": "Telangana High Court",
+            "IN-TR": "Tripura High Court", "INTR": "Tripura High Court",
+            "IN-UT": "Uttarakhand High Court", "INUT": "Uttarakhand High Court"
         };
 
         fetch('india.svg').then(r => r.text()).then(svg => {
@@ -733,15 +726,12 @@
                 if(rawName) {
                     let cleanName = rawName.replace(/_/g, ' ');
                     
-                    // 1. Check Dictionary First
+                    // 1. Check Dictionary First (Handles IN-MP, INMP, IN-MH, etc.)
                     if(svgIdToCourt[rawName] || svgIdToCourt[cleanName]) {
                         cleanName = svgIdToCourt[rawName] || svgIdToCourt[cleanName];
                     } 
                     // 2. Fallback: If it looks like a state name (e.g. "Rajasthan"), try appending " High Court"
-                    else if (!cleanName.toLowerCase().includes("court") && !cleanName.includes("-")) {
-                         // This is a heuristic for states you might have missed in the dictionary
-                         // We don't force it, but we use it as the data-court attribute
-                         // The heatmap logic will match it if it exists in the CSV
+                    else if (!cleanName.toLowerCase().includes("court") && !cleanName.includes("-") && cleanName.length > 4) {
                          cleanName = cleanName + " High Court";
                     }
 
