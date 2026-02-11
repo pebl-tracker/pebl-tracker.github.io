@@ -73,7 +73,6 @@
             transition: background-color 0.6s ease, color 0.6s ease, border-color 0.6s ease; 
         }
         
-        /* FIX: Forces scrollbar track to always exist, preventing layout jumps */
         html { overflow-y: scroll; }
 
         body { 
@@ -83,14 +82,14 @@
             padding: 0; 
             color: var(--text); 
             line-height: 1.6; 
-            overflow-x: hidden; /* FIX: Prevents horizontal scrollbar shift */
+            overflow-x: hidden; 
             display: flex; 
             flex-direction: column; 
             min-height: 100vh; 
-            position: relative; /* FIX: Context for absolute positioning */
+            position: relative; 
         }
 
-        /* Theme Toggle: Decoupled from container to prevent shifting */
+        /* Theme Toggle */
         .theme-toggle { 
             position: absolute; 
             top: 20px; 
@@ -123,7 +122,13 @@
         .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
 
         /* --- TRACKER UI --- */
-        .map-wrapper { position: relative; width: 100%; max-width: 850px; margin: 0 auto 10px auto; }
+        .map-wrapper { 
+            position: relative; 
+            width: 100%; 
+            max-width: 850px; 
+            margin: 0 auto 20px auto; /* Added bottom margin */
+        }
+        
         svg { width: 100%; height: auto; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.05)); }
         path { cursor: pointer; fill: var(--tag-bg); stroke: var(--bg); stroke-width: 0.7; }
         path:hover { fill: var(--accent) !important; }
@@ -139,7 +144,7 @@
             font-family: sans-serif;
             font-size: 0.8rem;
             font-weight: bold;
-            pointer-events: none; /* Allows mouse to pass through to the map */
+            pointer-events: none;
             display: none;
             z-index: 1000;
             box-shadow: 0 4px 15px rgba(0,0,0,0.15);
@@ -165,26 +170,56 @@
             border: 1px solid var(--border);
         }
 
-        /* UPDATED SC BUTTON: Dynamic Background */
+        /* --- APEX COURT BADGE (UPDATED SC BUTTON) --- */
         .sc-btn { 
-            display: block; 
-            width: fit-content; 
-            margin: 0 auto 50px auto; 
-            background: var(--card-bg); /* Default, overridden by JS */
+            position: absolute;
+            top: 20px;
+            right: 0px;
+            z-index: 20;
+            background: var(--card-bg);
             color: var(--text); 
-            text-align: center; 
-            padding: 10px 25px; 
-            border-radius: 50px; 
+            padding: 12px 20px; 
+            border-radius: 8px; 
             text-decoration: none; 
             font-family: sans-serif; 
-            font-size: 0.85rem; 
-            font-weight: bold; 
             cursor: pointer; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
-            border: 2px solid var(--accent); /* Keeps the red identity */
-            transition: background-color 0.6s ease, color 0.6s ease;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            border: 1px solid var(--border);
+            border-left: 5px solid var(--accent); /* Red highlight */
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            min-width: 180px;
         }
-        .sc-btn:hover { transform: translateY(-2px); }
+
+        .sc-btn:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            border-color: var(--accent);
+        }
+
+        .sc-label { 
+            font-size: 0.65rem; 
+            text-transform: uppercase; 
+            letter-spacing: 1.5px; 
+            color: var(--accent); 
+            font-weight: bold; 
+            margin-bottom: 2px;
+        }
+
+        .sc-name { 
+            font-family: "Georgia", serif;
+            font-size: 1.05rem; 
+            font-weight: bold; 
+            color: var(--primary);
+        }
+
+        .sc-jurisdiction { 
+            font-size: 0.7rem; 
+            color: var(--text-muted); 
+            font-style: italic;
+        }
 
         .controls-bar { display: flex; gap: 12px; margin-bottom: 25px; background: var(--card-bg); padding: 15px; border: 1px solid var(--border); border-radius: 4px; font-family: sans-serif; flex-wrap: wrap; align-items: center; justify-content: center; }
         #search-input { flex-grow: 2; padding: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); color: var(--text); min-width: 200px; }
@@ -230,9 +265,8 @@
         #tab-map { width: 100%; display: none; }
         .map-description { text-align: center; font-style: italic; color: var(--text-muted); margin-bottom: 20px; font-size: 0.95rem; padding: 0 20px; }
         
-        /* FIX: Breakout layout to center wide map inside narrow container */
         #tab-map-container { 
-            width: 92vw; /* Reduced from 95vw to prevent horizontal scrollbar trigger */
+            width: 92vw; 
             max-width: 1600px; 
             height: 85vh; 
             margin: 0 auto 40px auto; 
@@ -242,8 +276,6 @@
             position: relative; 
             overflow: hidden; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            
-            /* Centering trick for wide elements */
             margin-left: 50%;
             transform: translateX(-50%);
         }
@@ -255,7 +287,7 @@
         .map-btn:hover { background: var(--tag-bg); }
         .map-hint { position: absolute; bottom: 15px; right: 15px; font-family: sans-serif; font-size: 0.7rem; color: var(--text); pointer-events: none; background: var(--map-hint-bg); padding: 6px 12px; border-radius: 4px; border: 1px solid var(--border); z-index: 10; }
 
-        /* --- JUDGE ANALYTICS TAB (NEW GRID DESIGN) --- */
+        /* --- JUDGE ANALYTICS TAB --- */
         #tab-judges { width: 100%; display: none; }
         .judge-stats-container { max-width: 1000px; margin: 0 auto; }
         
@@ -285,60 +317,14 @@
             border-color: var(--accent); 
         }
 
-        .jurist-name { 
-            font-family: "Georgia", serif; 
-            font-size: 1.1rem; 
-            color: var(--primary); 
-            margin-bottom: 10px; 
-            font-weight: bold;
-            line-height: 1.3;
-        }
-
-        .jurist-total-label {
-            font-family: sans-serif;
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
-        }
-
-        .jurist-total-count {
-            font-family: sans-serif;
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: var(--primary);
-            margin-bottom: 15px;
-            line-height: 1;
-        }
-
-        .jurist-stats-row {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 15px;
-            font-family: sans-serif;
-            font-size: 0.8rem;
-        }
-
-        .stat-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
+        .jurist-name { font-family: "Georgia", serif; font-size: 1.1rem; color: var(--primary); margin-bottom: 10px; font-weight: bold; line-height: 1.3; }
+        .jurist-total-label { font-family: sans-serif; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .jurist-total-count { font-family: sans-serif; font-size: 2.5rem; font-weight: bold; color: var(--primary); margin-bottom: 15px; line-height: 1; }
+        .jurist-stats-row { display: flex; justify-content: center; gap: 15px; margin-bottom: 15px; font-family: sans-serif; font-size: 0.8rem; }
+        .stat-item { display: flex; flex-direction: column; align-items: center; }
         .stat-val { font-weight: bold; }
         .stat-lbl { font-size: 0.65rem; color: var(--text-muted); }
-
-        .jurist-bar-container {
-            width: 100%;
-            height: 8px;
-            background: rgba(0,0,0,0.05);
-            border-radius: 4px;
-            overflow: hidden;
-            display: flex;
-        }
-
+        .jurist-bar-container { width: 100%; height: 8px; background: rgba(0,0,0,0.05); border-radius: 4px; overflow: hidden; display: flex; }
         .jb-segment { height: 100%; }
         .jb-auth { background-color: var(--accent); }
         .jb-dissent { background-color: var(--dissent); }
@@ -353,55 +339,14 @@
         .court-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: bold; margin-left: 15px; }
         .card-date { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px; font-weight: bold; }
         .citation { font-family: "Georgia", serif; color: var(--text-muted); font-style: italic; display: block; margin-bottom: 10px; font-size: 0.95rem; }
-        
-        /* UPDATED BENCH INFO STYLE */
         .bench-info { font-size: 0.85rem; color: var(--text); margin-bottom: 15px; font-family: sans-serif; }
         
-        /* NATURE BADGES (Explicit/Implicit) */
-        .nature-badge {
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            padding: 3px 8px;
-            border-radius: 4px;
-            margin-left: 10px;
-            font-weight: bold;
-            letter-spacing: 0.5px;
-            vertical-align: middle;
-            display: inline-block;
-        }
-        .nature-explicit {
-            background-color: var(--primary);
-            color: var(--bg);
-            border: 1px solid var(--primary);
-        }
-        .nature-implicit {
-            background-color: transparent;
-            color: var(--text-muted);
-            border: 1px solid var(--text-muted);
-        }
-
-        /* CONTEST BADGES */
-        .contest-badge {
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            padding: 3px 8px;
-            border-radius: 4px;
-            margin-left: 5px;
-            font-weight: bold;
-            letter-spacing: 0.5px;
-            vertical-align: middle;
-            display: inline-block;
-        }
-        .contest-contested {
-            background-color: var(--dissent); /* Orange/Red for contested */
-            color: var(--bg);
-            border: 1px solid var(--dissent);
-        }
-        .contest-uncontested {
-            background-color: transparent;
-            color: var(--text-muted);
-            border: 1px solid var(--text-muted);
-        }
+        /* BADGES */
+        .nature-badge, .contest-badge { font-size: 0.65rem; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; margin-left: 10px; font-weight: bold; letter-spacing: 0.5px; vertical-align: middle; display: inline-block; }
+        .nature-explicit { background-color: var(--primary); color: var(--bg); border: 1px solid var(--primary); }
+        .nature-implicit { background-color: transparent; color: var(--text-muted); border: 1px solid var(--text-muted); }
+        .contest-contested { background-color: var(--dissent); color: var(--bg); border: 1px solid var(--dissent); margin-left: 5px; }
+        .contest-uncontested { background-color: transparent; color: var(--text-muted); border: 1px solid var(--text-muted); margin-left: 5px; }
 
         .tag { background: var(--tag-bg); padding: 4px 10px; border-radius: 3px; font-size: 0.7rem; font-weight: bold; color: #666; display: inline-block; margin-right: 6px; margin-bottom: 6px; text-transform: uppercase; }
         .summary-preview { color: var(--text); line-height: 1.6; margin-bottom: 15px; font-size: 0.95rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
@@ -412,33 +357,13 @@
         .back-btn { display: inline-block; margin-bottom: 30px; cursor: pointer; color: var(--text-muted); font-family: sans-serif; font-size: 0.8rem; font-weight: bold; letter-spacing: 1px; }
         .details-meta { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 30px; }
         .details-body { font-size: 1.15rem; line-height: 1.8; white-space: pre-wrap; color: var(--text); text-align: justify; }
-        .external-btn { 
-            display: inline-block; 
-            background: var(--primary); 
-            color: var(--bg); 
-            padding: 12px 25px; 
-            text-decoration: none; 
-            border-radius: 4px; 
-            font-family: sans-serif; 
-            font-weight: bold; 
-            margin-bottom: 10px; 
-        }
+        .external-btn { display: inline-block; background: var(--primary); color: var(--bg); padding: 12px 25px; text-decoration: none; border-radius: 4px; font-family: sans-serif; font-weight: bold; margin-bottom: 10px; }
         .copy-btn { background: none; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; margin-left: 10px; vertical-align: middle; }
         .copy-btn:hover { background: var(--tag-bg); color: var(--primary); }
-        
-        .detail-footer-note {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
-            font-style: italic;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
+        .detail-footer-note { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); font-style: italic; color: var(--text-muted); font-size: 0.9rem; }
 
-        /* --- ABOUT TAB JUSTIFICATION --- */
+        /* --- ABOUT TAB --- */
         #tab-about p { text-align: justify; }
-        
-        /* --- ABOUT TAB STYLING --- */
         #about-content h2 { color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 40px; }
         #about-content p { margin-bottom: 20px; line-height: 1.8; }
         #about-content a { color: var(--accent); text-decoration: none; font-weight: bold; }
@@ -466,6 +391,17 @@
             .court-label { margin-left: 0; margin-top: 5px; }
             .theme-toggle { top: 10px; right: 10px; }
             #tab-map-container { width: 100vw; height: 70vh; border-radius: 0; border-left: none; border-right: none; margin-left: 0; transform: none; }
+            
+            /* SC BUTTON MOBILE STACKING */
+            .sc-btn {
+                position: relative;
+                top: 0;
+                right: 0;
+                margin-bottom: 20px;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
             .map-wrapper { max-width: 100%; }
             .timeline-container::after { left: 31px; }
             .timeline-item { width: 100%; padding-left: 70px; padding-right: 25px; }
@@ -473,18 +409,12 @@
             .timeline-dot { left: 21px !important; right: auto; }
             .controls-bar { flex-direction: column; gap: 10px; align-items: stretch; }
             #search-input, .filter-select, .download-btn { width: 100%; flex-grow: 1; }
-            
-            /* Judge Analytics Mobile */
-            .judge-name-col { width: 100%; text-align: left; margin-bottom: 5px; }
-            .judge-stat-row { flex-direction: column; align-items: stretch; }
-            .judge-bar-col { width: 100%; }
-            .judge-count-col { width: 100%; text-align: right; margin-top: 5px; }
         }
     </style>
 </head>
 <body>
 
-<!-- THEME TOGGLE (Decoupled from container) -->
+<!-- THEME TOGGLE -->
 <button class="theme-toggle" onclick="toggleTheme()">🌓 Theme</button>
 
 <!-- BANNER AREA -->
@@ -513,7 +443,15 @@
 
     <!-- TAB: TRACKER -->
     <div id="tab-tracker" class="tab-content">
-        <div class="map-wrapper" id="map-container"></div>
+        <div class="map-wrapper">
+            <div id="map-container"></div>
+            <!-- PROMINENT APEX COURT BADGE -->
+            <div class="sc-btn" onclick="handleMapClick('Pan-India')">
+                <span class="sc-label">Apex Court</span>
+                <span class="sc-name">Supreme Court of India</span>
+                <span class="sc-jurisdiction">Pan-India Jurisdiction</span>
+            </div>
+        </div>
         
         <!-- HEATMAP LEGEND -->
         <div class="heatmap-legend">
@@ -522,8 +460,6 @@
             <span>High Activity</span>
         </div>
 
-        <div class="sc-btn" onclick="handleMapClick('Pan-India')">★ Supreme Court (Pan-India)</div>
-        
         <div class="controls-bar">
             <input type="text" id="search-input" placeholder="Search cases or keywords..." onkeyup="handleSearch()">
             <select id="right-filter" class="filter-select" onchange="handleSearch()"><option value="">All Rights</option></select>
@@ -659,13 +595,12 @@
     document.documentElement.setAttribute('data-theme', savedTheme);
 
     // --- DATA LOGIC ---
-const SHEET_ID = '1k3O3nEbs24UXsoAsrNPmaZfBvpAJCmaEzypuQTD-yuY';
-
-// Renamed from CSV_URL to CASE_DATA_URL for clarity
-const CASE_DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
-
-const ABOUT_SHEET_GID = '1656982748'; 
-const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${ABOUT_SHEET_GID}`;
+    const SHEET_ID = '1k3O3nEbs24UXsoAsrNPmaZfBvpAJCmaEzypuQTD-yuY';
+    // RENAMED FOR CLARITY: Points to Sheet 1 (Case Data)
+    const CASE_DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
+    
+    const ABOUT_SHEET_GID = '1656982748'; 
+    const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${ABOUT_SHEET_GID}`;
 
     // --- SMART SEARCH SYNONYMS ---
     const synonymMap = {
@@ -693,7 +628,7 @@ const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export
     window.addEventListener('DOMContentLoaded', () => {
         loadMap();
         fetchData();
-        fetchAboutData(); // Fetch dynamic about content
+        fetchAboutData(); 
         
         // Scroll Listener for Back-to-Top
         window.addEventListener('scroll', () => {
@@ -702,7 +637,7 @@ const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export
             else btn.style.display = 'none';
         });
 
-        // Attach tooltip listener to the static SC button
+        // Attach tooltip listener to the SC button
         const scBtn = document.querySelector('.sc-btn');
         if(scBtn) attachTooltip(scBtn, 'Supreme Court (Pan-India)');
     });
@@ -734,12 +669,10 @@ const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export
             document.querySelectorAll('#map-container path').forEach(p => {
                 let name = p.getAttribute('name');
                 if(name) {
-                    // FIX: Remove diacritics specifically for Dadra...
                     if(name === "Dādra and Nagar Haveli and Damān and Diu") {
                         name = "Dadra and Nagar Haveli and Daman and Diu";
-                        p.setAttribute('name', name); // Update DOM so CSS selectors/logic work if needed
+                        p.setAttribute('name', name); 
                     }
-                    // FIX: Rename Uttaranchal to Uttarakhand
                     if(name === "Uttaranchal") {
                         name = "Uttarakhand";
                         p.setAttribute('name', name);
@@ -760,11 +693,11 @@ const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export
     // --- SLUG HELPER ---
     function createSlug(text) {
         return text.toString().toLowerCase()
-            .replace(/\s+/g, '-')           // Replace spaces with -
-            .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
-            .replace(/\-\-+/g, '-')         // Replace multiple - with single -
-            .replace(/^-+/, '')             // Trim - from start
-            .replace(/-+$/, '');            // Trim - from end
+            .replace(/\s+/g, '-')           
+            .replace(/[^\w\-]+/g, '')       
+            .replace(/\-\-+/g, '-')         
+            .replace(/^-+/, '')             
+            .replace(/-+$/, '');            
     }
 
     function smartSplit(str) {
@@ -775,12 +708,11 @@ const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export
         return str.split(',').map(s => s.trim()).filter(s => s);
     }
 
-   function fetchData() {
-    fetch(CASE_DATA_URL).then(r => { // Updated variable name here
-        if (!r.ok) throw new Error("Network response was not ok");
-        return r.text();
-    }).then(csv => {
-        // ... rest of the function remains the same
+    function fetchData() {
+        fetch(CASE_DATA_URL).then(r => {
+            if (!r.ok) throw new Error("Network response was not ok");
+            return r.text();
+        }).then(csv => {
             const parsed = Papa.parse(csv, { header: false, skipEmptyLines: true });
             allCases = parsed.data.slice(1).map(row => {
                 let state = (row[3] || "Pan-India").trim();
@@ -788,7 +720,7 @@ const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export
 
                 return {
                     name: (row[0] || "").trim(),
-                    slug: createSlug((row[0] || "").trim()), // Generate Slug
+                    slug: createSlug((row[0] || "").trim()), 
                     citation: (row[1] || "").trim(),
                     court: (row[2] || "").trim(),
                     state: state,
@@ -799,7 +731,7 @@ const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export
                     cites: smartSplit(row[8]).filter(c => c.toLowerCase() !== 'none' && c !== '-'),
                     judges: smartSplit(row[9]),
                     nature: (row[10] || "").trim(),
-                    contest: (row[11] || "").trim() // Column L
+                    contest: (row[11] || "").trim() 
                 };
             }).filter(c => c.name && c.name !== "Case Name");
 
@@ -818,23 +750,16 @@ const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export
         });
     }
 
-    // --- FETCH DYNAMIC ABOUT CONTENT ---
     function fetchAboutData() {
-        // If user hasn't set GID yet, show default or error
-        if(ABOUT_SHEET_GID === 'YOUR_NEW_GID_HERE') {
-            document.getElementById('about-loading').innerHTML = "Please configure the ABOUT_SHEET_GID in the code.";
-            return;
-        }
-
         fetch(ABOUT_CSV_URL).then(r => {
             if (!r.ok) throw new Error("About sheet fetch failed");
             return r.text();
         }).then(csv => {
             const parsed = Papa.parse(csv, { header: false, skipEmptyLines: true });
-            const rows = parsed.data.slice(1); // Skip header
+            const rows = parsed.data.slice(1); 
             
             const container = document.getElementById('about-content');
-            container.innerHTML = ''; // Clear loading
+            container.innerHTML = ''; 
 
             rows.forEach(row => {
                 const title = (row[0] || "").trim();
@@ -938,11 +863,8 @@ const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export
         const sortedJudges = Object.keys(stats)
             .map(name => ({ name, ...stats[name] }))
             .sort((a, b) => {
-                // 1. Sort by Total Cases (High to Low)
                 if (b.total !== a.total) return b.total - a.total;
-                // 2. If Total is same, sort by Authored (High to Low)
                 if (b.authored !== a.authored) return b.authored - a.authored;
-                // 3. If both are same, sort Alphabetically (A to Z)
                 return a.name.localeCompare(b.name);
             });
 
@@ -951,12 +873,10 @@ const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export
             return;
         }
 
-        // Create Grid Wrapper
         container.innerHTML = '<div class="jurist-grid"></div>';
         const grid = container.querySelector('.jurist-grid');
 
         sortedJudges.forEach(j => {
-            // Calculate percentages relative to THIS judge's total (Composition Scaling)
             const authPct = (j.authored / j.total) * 100; 
             const dissentPct = (j.dissenting / j.total) * 100;
             const benchPct = ((j.total - j.authored - j.dissenting) / j.total) * 100;
@@ -998,19 +918,14 @@ const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export
 
     // --- CHAIN OF CITATION LOGIC ---
     function initCitationMap() {
-        // Safety Check: Ensure Vis.js is loaded
         if (typeof vis === 'undefined') {
-            console.error("Vis.js library not loaded.");
             document.getElementById('network-viz').innerHTML = '<p style="text-align:center; padding-top:50px; color:var(--text-muted);">Visualization library failed to load. Please refresh.</p>';
             return;
         }
-
-        // Safety Check: Ensure data exists
         if (allCases.length === 0) return;
 
         const container = document.getElementById('network-viz');
         
-        // Cleanup existing network to prevent memory leaks or double rendering
         if (network !== null) {
             network.destroy();
             network = null;
@@ -1113,24 +1028,20 @@ const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export
         const judge = document.getElementById('judge-filter').value; 
         const sort = document.getElementById('sort-order').value;
 
-        // --- MULTI-PASS FUZZY SEARCH ---
         let textResults = allCases;
         if (rawQuery) {
-            // 1. Generate Search Terms (Original + Synonyms)
             let searchTerms = [rawQuery];
             Object.keys(synonymMap).forEach(key => {
                 if (rawQuery.includes(key)) {
                     searchTerms = [...searchTerms, ...synonymMap[key]];
                 }
             });
-            // Deduplicate terms
             searchTerms = [...new Set(searchTerms)];
 
-            // 2. Configure Fuse
             const fuseOptions = {
                 includeScore: true,
-                threshold: 0.2, // TIGHTER THRESHOLD (was 0.4)
-                minMatchCharLength: 3, // IGNORE SHORT MATCHES
+                threshold: 0.2, 
+                minMatchCharLength: 3, 
                 ignoreLocation: true, 
                 keys: [
                     { name: 'name', weight: 0.4 },
@@ -1142,7 +1053,6 @@ const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export
             };
             const fuse = new Fuse(allCases, fuseOptions);
 
-            // 3. Run Search for EACH term independently
             let combinedResults = [];
             const seenIndices = new Set();
 
@@ -1156,12 +1066,10 @@ const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export
                 });
             });
 
-            // 4. Sort by Score (lower is better in Fuse)
             combinedResults.sort((a, b) => a.score - b.score);
             textResults = combinedResults.map(r => r.item);
         }
 
-        // --- FILTERING ---
         let filtered = textResults.filter(c => {
             const matchesRight = right ? c.rights.includes(right) : true;
             const matchesNature = nature ? c.nature.toLowerCase() === nature : true;
@@ -1172,7 +1080,6 @@ const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export
             return matchesRight && matchesNature && matchesContest && matchesState && matchesCourt && matchesJudge;
         });
         
-        // --- SORTING ---
         if (!rawQuery || sort !== 'newest') { 
              if(sort === 'newest') {
                  filtered.sort((a, b) => parseDate(b.date) - parseDate(a.date));
@@ -1268,8 +1175,6 @@ const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export
     }
 
     function openDetails(identifier) {
-        // identifier could be "Maneka Gandhi..." (Old) or "maneka-gandhi..." (New)
-        // We decode it just in case it's an old link with %20
         const decoded = decodeURIComponent(identifier);
         const c = allCases.find(x => x.slug === identifier || x.name === decoded);
         
@@ -1297,17 +1202,15 @@ const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export
             });
         }
         
-        // Nature Logic
         const natureContainer = document.getElementById('detail-nature-container');
-        natureContainer.innerHTML = ''; // Clear previous
+        natureContainer.innerHTML = ''; 
         if(c.nature) {
             const typeClass = c.nature.toLowerCase() === 'implicit' ? 'nature-implicit' : 'nature-explicit';
             natureContainer.innerHTML = `<span class="nature-badge ${typeClass}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${c.nature}</span>`;
         }
 
-        // Contest Logic
         const contestContainer = document.getElementById('detail-contest-container');
-        contestContainer.innerHTML = ''; // Clear previous
+        contestContainer.innerHTML = ''; 
         if(c.contest) {
             const isContested = c.contest.toLowerCase() === 'contested';
             const contestClass = isContested ? 'contest-contested' : 'contest-uncontested';
@@ -1330,6 +1233,7 @@ const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export
     function populateStateDropdown() {
         const sel = document.getElementById('state-filter');
         sel.innerHTML = '<option value="">All Jurisdictions</option>';
+        // UPDATED: Uttarakhand is now correct
         const states = [
             "Andaman and Nicobar", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh",
             "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh",
@@ -1393,19 +1297,26 @@ const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export
             }
         });
         
+        // UPDATED: Correctly target the new complex structure
         const scBtn = document.querySelector('.sc-btn');
         if(scBtn) {
             scBtn.setAttribute('data-count', panIndiaCount);
             let globalMax = max;
             if (panIndiaCount > globalMax) globalMax = panIndiaCount;
-            const opacity = globalMax === 0 ? 0 : 0.15 + (0.85 * (panIndiaCount / globalMax));
+            
+            const opacity = globalMax === 0 ? 0 : 0.10 + (0.90 * (panIndiaCount / globalMax));
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
             const baseColor = isDark ? [236, 240, 241] : [44, 62, 80]; 
+            
             scBtn.style.backgroundColor = `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${opacity})`;
+            
+            // Text color contrast adjustment
             if (opacity > 0.5) {
-                scBtn.style.color = isDark ? '#000' : '#fff';
+                scBtn.querySelector('.sc-name').style.color = isDark ? '#000' : '#fff';
+                scBtn.querySelector('.sc-jurisdiction').style.color = isDark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)';
             } else {
-                scBtn.style.color = 'var(--text)';
+                scBtn.querySelector('.sc-name').style.color = 'var(--primary)';
+                scBtn.querySelector('.sc-jurisdiction').style.color = 'var(--text-muted)';
             }
         }
 
@@ -1433,9 +1344,9 @@ const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export
         if(caseParam) {
             openDetails(caseParam);
         } else if (tabParam && ['tracker', 'timeline', 'map', 'judges', 'about'].includes(tabParam)) {
-            switchTab(tabParam, false); // Don't push state, we are already there
+            switchTab(tabParam, false);
         } else {
-            switchTab('tracker', false); // Default
+            switchTab('tracker', false);
         }
     }
 
