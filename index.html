@@ -659,13 +659,13 @@
     document.documentElement.setAttribute('data-theme', savedTheme);
 
     // --- DATA LOGIC ---
-    const SHEET_ID = '1k3O3nEbs24UXsoAsrNPmaZfBvpAJCmaEzypuQTD-yuY';
-    // UPDATED: Using export?format=csv to avoid gviz type inference issues
-    const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
-    
-    // *** REPLACE THIS WITH YOUR NEW SHEET GID ***
-    const ABOUT_SHEET_GID = '1656982748'; 
-    const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${ABOUT_SHEET_GID}`;
+const SHEET_ID = '1k3O3nEbs24UXsoAsrNPmaZfBvpAJCmaEzypuQTD-yuY';
+
+// Renamed from CSV_URL to CASE_DATA_URL for clarity
+const CASE_DATA_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
+
+const ABOUT_SHEET_GID = '1656982748'; 
+const ABOUT_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${ABOUT_SHEET_GID}`;
 
     // --- SMART SEARCH SYNONYMS ---
     const synonymMap = {
@@ -775,11 +775,12 @@
         return str.split(',').map(s => s.trim()).filter(s => s);
     }
 
-    function fetchData() {
-        fetch(CSV_URL).then(r => {
-            if (!r.ok) throw new Error("Network response was not ok");
-            return r.text();
-        }).then(csv => {
+   function fetchData() {
+    fetch(CASE_DATA_URL).then(r => { // Updated variable name here
+        if (!r.ok) throw new Error("Network response was not ok");
+        return r.text();
+    }).then(csv => {
+        // ... rest of the function remains the same
             const parsed = Papa.parse(csv, { header: false, skipEmptyLines: true });
             allCases = parsed.data.slice(1).map(row => {
                 let state = (row[3] || "Pan-India").trim();
