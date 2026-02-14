@@ -369,8 +369,6 @@
         /* --- FOOTER --- */
         footer { background-color: var(--footer-bg); padding: 40px 20px; margin-top: 60px; border-top: 1px solid var(--border); text-align: center; font-size: 0.85rem; color: var(--text-muted); }
         .footer-content { max-width: 800px; margin: 0 auto; }
-        .cite-btn { background: var(--card-bg); border: 1px solid var(--border); padding: 8px 15px; border-radius: 20px; cursor: pointer; font-family: sans-serif; font-weight: bold; color: var(--primary); margin-top: 15px; display: inline-block; }
-        .cite-btn:hover { background: var(--primary); color: var(--bg); }
 
         /* --- LOADING & SCROLL --- */
         #loading { text-align: center; color: var(--text-muted); padding: 60px; font-style: italic; }
@@ -575,7 +573,6 @@
 <footer>
     <div class="footer-content">
         <p><strong>Disclaimer:</strong> The content on this tracker is for academic and informational purposes only. It does not constitute legal advice. Summaries are the curator's interpretation and should not be cited as legal authority. Please refer to the official judgment text.</p>
-        <button class="cite-btn" onclick="copyArchiveCitation()">Cite This Tracker</button>
     </div>
 </footer>
 
@@ -782,9 +779,9 @@
                     date: (row[6] || "").trim(),
                     cites: smartSplit(row[7]).filter(c => c.toLowerCase() !== 'none' && c !== '-'),
                     judges: smartSplit(row[8]),
-                    nature: smartSplit(row[9]), // UPDATED: Parse as Array
-                    contest: smartSplit(row[10]), // UPDATED: Parse as Array
-                    application: smartSplit(row[11]) // UPDATED: Parse as Array
+                    nature: smartSplit(row[9]), 
+                    contest: smartSplit(row[10]), 
+                    application: smartSplit(row[11]) 
                 };
             }).filter(c => c.name && c.name !== "Case Name");
 
@@ -838,13 +835,7 @@
         navigator.clipboard.writeText(text).then(() => alert('Citation copied to clipboard!'));
     }
 
-    function copyArchiveCitation() {
-        const d = new Date();
-        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        const dateStr = `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
-        const citation = `Abhinav Somani, 'Procedure Established by Law' (PEBL, 2026) <https://pebl-tracker.github.io> accessed ${dateStr}.`;
-        navigator.clipboard.writeText(citation).then(() => alert('Tracker citation copied to clipboard!'));
-    }
+    // copyArchiveCitation REMOVED
 
     function downloadData() {
         const csv = Papa.unparse(filteredCases);
