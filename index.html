@@ -334,14 +334,20 @@
         .citation { font-family: "Georgia", serif; color: var(--text-muted); font-style: italic; display: block; margin-bottom: 10px; font-size: 0.95rem; }
         .bench-info { font-size: 0.85rem; color: var(--text); margin-bottom: 15px; font-family: sans-serif; }
         
-        /* BADGES */
+        /* BADGES (Now optimized for Single Badges including 'Both' states) */
         .nature-badge, .contest-badge, .app-badge { font-size: 0.65rem; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; margin-left: 10px; font-weight: bold; letter-spacing: 0.5px; vertical-align: middle; display: inline-block; margin-bottom: 4px; }
+        
+        /* Nature */
         .nature-explicit { background-color: var(--primary); color: var(--bg); border: 1px solid var(--primary); }
         .nature-implicit { background-color: transparent; color: var(--text-muted); border: 1px solid var(--text-muted); }
+        .nature-both { background: linear-gradient(135deg, var(--primary) 50%, var(--text-muted) 50%); color: white; border: 1px solid var(--text-muted); }
+
+        /* Contest */
         .contest-contested { background-color: var(--dissent); color: var(--bg); border: 1px solid var(--dissent); margin-left: 5px; }
         .contest-uncontested { background-color: transparent; color: var(--text-muted); border: 1px solid var(--text-muted); margin-left: 5px; }
+        .contest-both { background: linear-gradient(135deg, var(--dissent) 50%, var(--text-muted) 50%); color: white; border: 1px solid var(--text-muted); margin-left: 5px; }
         
-        /* APPLICATION BADGES (Vertical/Horizontal) */
+        /* Application */
         .app-vertical { background-color: #8e44ad; color: white; border: 1px solid #8e44ad; margin-left: 5px; }
         .app-horizontal { background-color: #16a085; color: white; border: 1px solid #16a085; margin-left: 5px; }
         .app-both { background: linear-gradient(135deg, #8e44ad 50%, #16a085 50%); color: white; border: 1px solid #555; margin-left: 5px; }
@@ -472,7 +478,6 @@
                 <option value="">All Applications</option>
                 <option value="vertical">Vertical</option>
                 <option value="horizontal">Horizontal</option>
-                <option value="both">Both</option>
             </select>
             <select id="court-filter" class="filter-select" onchange="handleSearch()"><option value="">All Courts</option></select>
             <select id="judge-filter" class="filter-select" onchange="handleSearch()"><option value="">All Judges</option></select>
@@ -635,7 +640,7 @@
         });
 
         const scBtn = document.querySelector('.sc-btn');
-        if(scBtn) attachTooltip(scBtn, 'Supreme Court (Pan-India)');
+        if(scBtn) attachTooltip(scBtn, 'Supreme Court'); // Name changed to match CSV data filter
     });
 
     function attachTooltip(element, name) {
@@ -659,31 +664,14 @@
 
     // --- MAP LOADING & TRANSLATION LAYER ---
     function loadMap() {
-        // DICTIONARY: Translates SVG IDs (Codes) -> High Court Names
         const svgIdToCourt = {
-            // MERGED HIGH COURTS
-            "IN-MH": "Bombay High Court",
-            "INMH": "Bombay High Court",
-            
-            "IN-WB": "Calcutta High Court",
-            "INWB": "Calcutta High Court",
-            
-            "IN-AS": "Gauhati High Court",
-            "INAS": "Gauhati High Court",
-            
-            "IN-JK": "Jammu & Kashmir and Ladakh High Court",
-            "INJK": "Jammu & Kashmir and Ladakh High Court",
-            
-            "IN-KL": "Kerala High Court",
-            "INKL": "Kerala High Court",
-            
-            "IN-TN": "Madras High Court",
-            "INTN": "Madras High Court",
-            
-            "IN-PH": "Punjab & Haryana High Court",
-            "INPH": "Punjab & Haryana High Court",
-
-            // SINGLE STATE HIGH COURTS
+            "IN-MH": "Bombay High Court", "INMH": "Bombay High Court",
+            "IN-WB": "Calcutta High Court", "INWB": "Calcutta High Court",
+            "IN-AS": "Gauhati High Court", "INAS": "Gauhati High Court",
+            "IN-JK": "Jammu & Kashmir and Ladakh High Court", "INJK": "Jammu & Kashmir and Ladakh High Court",
+            "IN-KL": "Kerala High Court", "INKL": "Kerala High Court",
+            "IN-TN": "Madras High Court", "INTN": "Madras High Court",
+            "IN-PH": "Punjab & Haryana High Court", "INPH": "Punjab & Haryana High Court",
             "IN-UP": "Allahabad High Court", "INUP": "Allahabad High Court",
             "IN-AP": "Andhra Pradesh High Court", "INAP": "Andhra Pradesh High Court",
             "IN-CT": "Chhattisgarh High Court", "INCT": "Chhattisgarh High Court",
@@ -708,37 +696,25 @@
             document.getElementById('map-container').innerHTML = svg;
             
             document.querySelectorAll('#map-container path').forEach(p => {
-                // Get ID or Name from SVG
                 let rawName = p.getAttribute('id') || p.getAttribute('name');
-                
                 if(rawName) {
                     let cleanName = rawName.replace(/_/g, ' ');
-                    
-                    // 1. Check Dictionary First (Handles IN-MP, INMP, IN-MH, etc.)
                     if(svgIdToCourt[rawName] || svgIdToCourt[cleanName]) {
                         cleanName = svgIdToCourt[rawName] || svgIdToCourt[cleanName];
-                    } 
-                    // 2. Fallback: If it looks like a state name (e.g. "Rajasthan"), try appending " High Court"
-                    else if (!cleanName.toLowerCase().includes("court") && !cleanName.includes("-") && cleanName.length > 4) {
+                    } else if (!cleanName.toLowerCase().includes("court") && !cleanName.includes("-") && cleanName.length > 4) {
                          cleanName = cleanName + " High Court";
                     }
-
                     p.setAttribute('role', 'button');
                     p.setAttribute('aria-label', `View cases for ${cleanName}`);
-                    p.setAttribute('data-court', cleanName); // Store normalized name
-                    
+                    p.setAttribute('data-court', cleanName);
                     attachTooltip(p, cleanName);
-                    
-                    p.addEventListener('click', () => {
-                        handleMapClick(cleanName);
-                    });
+                    p.addEventListener('click', () => handleMapClick(cleanName));
                 }
             });
             generateHeatmap();
         }).catch(err => console.error("Map load failed", err));
     }
 
-    // --- SLUG HELPER ---
     function createSlug(text) {
         return text.toString().toLowerCase()
             .replace(/\s+/g, '-')           
@@ -750,9 +726,7 @@
 
     function smartSplit(str) {
         if (!str) return [];
-        if (str.includes(';')) {
-            return str.split(';').map(s => s.trim()).filter(s => s);
-        }
+        if (str.includes(';')) return str.split(';').map(s => s.trim()).filter(s => s);
         return str.split(',').map(s => s.trim()).filter(s => s);
     }
 
@@ -763,32 +737,27 @@
         }).then(csv => {
             const parsed = Papa.parse(csv, { header: false, skipEmptyLines: true });
             allCases = parsed.data.slice(1).map(row => {
-                // COLUMN D (State) IS DELETED. INDICES SHIFT LEFT BY 1 STARTING FROM INDEX 3.
-                // 0: Name, 1: Citation, 2: Court
-                // 3: Rights (was 4), 4: Summary (was 5), etc.
-
                 return {
                     name: (row[0] || "").trim(),
                     slug: createSlug((row[0] || "").trim()), 
                     citation: (row[1] || "").trim(),
                     court: (row[2] || "").trim(),
-                    // State is gone.
                     rights: smartSplit(row[3]),
                     summary: (row[4] || "").trim(),
                     links: smartSplit(row[5]),
                     date: (row[6] || "").trim(),
                     cites: smartSplit(row[7]).filter(c => c.toLowerCase() !== 'none' && c !== '-'),
                     judges: smartSplit(row[8]),
-                    nature: smartSplit(row[9]), 
-                    contest: smartSplit(row[10]), 
-                    application: smartSplit(row[11]) 
+                    // UPDATED: Stored exactly as written in Sheet (e.g. "Explicit and Implicit")
+                    nature: (row[9] || "").trim(),
+                    contest: (row[10] || "").trim(),
+                    application: (row[11] || "").trim() 
                 };
             }).filter(c => c.name && c.name !== "Case Name");
 
             filteredCases = allCases; 
             document.getElementById('loading').style.display = 'none';
             populateDropdown();
-            // populateStateDropdown REMOVED
             populateCourtDropdown(); 
             populateJudgeDropdown(); 
             generateHeatmap();
@@ -807,21 +776,17 @@
         }).then(csv => {
             const parsed = Papa.parse(csv, { header: false, skipEmptyLines: true });
             const rows = parsed.data.slice(1); 
-            
             const container = document.getElementById('about-content');
             container.innerHTML = ''; 
-
             rows.forEach(row => {
                 const title = (row[0] || "").trim();
                 const content = (row[1] || "").trim();
-
                 if(title && content) {
                     const section = document.createElement('div');
                     section.innerHTML = `<h2>${title}</h2><p>${content}</p>`;
                     container.appendChild(section);
                 }
             });
-            
             document.getElementById('about-loading').style.display = 'none';
         }).catch(err => {
             console.error(err);
@@ -829,13 +794,10 @@
         });
     }
 
-    // --- CITATION & EXPORT LOGIC ---
     function copyCaseCitation() {
         const text = document.getElementById('raw-citation').innerText.trim();
         navigator.clipboard.writeText(text).then(() => alert('Citation copied to clipboard!'));
     }
-
-    // copyArchiveCitation REMOVED
 
     function downloadData() {
         const csv = Papa.unparse(filteredCases);
@@ -850,26 +812,19 @@
         document.body.removeChild(link);
     }
 
-    // --- VERTICAL TIMELINE LOGIC ---
     function initTimeline() {
         const container = document.getElementById('timeline-container');
         container.innerHTML = '';
-        
-        const validCases = allCases.filter(c => {
-            const d = parseDate(c.date);
-            return d.getTime() > 0;
-        }).sort((a, b) => parseDate(a.date) - parseDate(b.date));
+        const validCases = allCases.filter(c => parseDate(c.date).getTime() > 0)
+            .sort((a, b) => parseDate(a.date) - parseDate(b.date));
 
         if(validCases.length === 0) return;
 
         validCases.forEach((c, index) => {
-            const d = parseDate(c.date);
-            const dateStr = d.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+            const dateStr = parseDate(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
             const side = index % 2 === 0 ? 'left' : 'right';
-            
             const item = document.createElement('div');
             item.className = `timeline-item ${side}`;
-            
             item.innerHTML = `
                 <div class="timeline-dot"></div>
                 <div class="timeline-content" onclick="openDetails('${c.slug}')">
@@ -882,30 +837,20 @@
         });
     }
 
-    // --- JUDGE ANALYTICS LOGIC ---
     function initJudgeAnalytics() {
         const container = document.getElementById('judge-stats-list');
-        container.innerHTML = '';
-
         const stats = {};
-        
         allCases.forEach(c => {
             c.judges.forEach(rawName => {
                 const cleanName = cleanJudgeName(rawName);
                 if(!stats[cleanName]) stats[cleanName] = { total: 0, authored: 0, dissenting: 0 };
-                
                 stats[cleanName].total++;
-                if(rawName.toLowerCase().includes('(author)') || rawName.toLowerCase().includes('(auth.)') || rawName.includes('*')) {
-                    stats[cleanName].authored++;
-                }
-                if(rawName.toLowerCase().includes('(dissent)')) {
-                    stats[cleanName].dissenting++;
-                }
+                if(rawName.toLowerCase().includes('(author)') || rawName.toLowerCase().includes('(auth.)') || rawName.includes('*')) stats[cleanName].authored++;
+                if(rawName.toLowerCase().includes('(dissent)')) stats[cleanName].dissenting++;
             });
         });
 
-        const sortedJudges = Object.keys(stats)
-            .map(name => ({ name, ...stats[name] }))
+        const sortedJudges = Object.keys(stats).map(name => ({ name, ...stats[name] }))
             .sort((a, b) => {
                 if (b.total !== a.total) return b.total - a.total;
                 if (b.authored !== a.authored) return b.authored - a.authored;
@@ -938,18 +883,10 @@
                 <div class="jurist-name">${j.name}</div>
                 <div class="jurist-total-label">Total Cases</div>
                 <div class="jurist-total-count">${j.total}</div>
-                
                 <div class="jurist-stats-row">
-                    <div class="stat-item">
-                        <span class="stat-val" style="color:var(--accent)">${j.authored}</span>
-                        <span class="stat-lbl">Authored</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-val" style="color:var(--dissent)">${j.dissenting}</span>
-                        <span class="stat-lbl">Dissent</span>
-                    </div>
+                    <div class="stat-item"><span class="stat-val" style="color:var(--accent)">${j.authored}</span><span class="stat-lbl">Authored</span></div>
+                    <div class="stat-item"><span class="stat-val" style="color:var(--dissent)">${j.dissenting}</span><span class="stat-lbl">Dissent</span></div>
                 </div>
-
                 <div class="jurist-bar-container">
                     <div class="jb-segment jb-auth" style="width: ${authPct}%"></div>
                     <div class="jb-segment jb-dissent" style="width: ${dissentPct}%"></div>
@@ -960,49 +897,28 @@
         });
     }
 
-    // --- CHAIN OF CITATION LOGIC ---
     function initCitationMap() {
-        if (typeof vis === 'undefined') {
-            document.getElementById('network-viz').innerHTML = '<p style="text-align:center; padding-top:50px; color:var(--text-muted);">Visualization library failed to load. Please refresh.</p>';
-            return;
-        }
+        if (typeof vis === 'undefined') return;
         if (allCases.length === 0) return;
 
         const container = document.getElementById('network-viz');
-        
-        if (network !== null) {
-            network.destroy();
-            network = null;
-        }
+        if (network !== null) { network.destroy(); network = null; }
 
-        const nodes = [];
-        const edges = [];
+        const nodes = []; const edges = [];
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
 
         allCases.forEach((c) => {
             const year = parseDate(c.date).getFullYear();
             nodes.push({
-                id: c.name,
-                label: c.name.split(' v. ')[0],
-                title: `${c.name}\nCourt: ${c.court}\nYear: ${year}`,
-                value: 15,
-                color: {
-                    background: isDark ? '#2c3e50' : '#ffffff',
-                    border: isDark ? '#ecf0f1' : '#2c3e50',
-                    highlight: { background: '#c0392b', border: '#c0392b' }
-                },
+                id: c.name, label: c.name.split(' v. ')[0], title: `${c.name}\nCourt: ${c.court}\nYear: ${year}`, value: 15,
+                color: { background: isDark ? '#2c3e50' : '#ffffff', border: isDark ? '#ecf0f1' : '#2c3e50', highlight: { background: '#c0392b', border: '#c0392b' } },
                 font: { color: isDark ? '#e0e0e0' : '#2c2c2c', size: 14, face: 'Georgia' }
             });
-
             c.cites.forEach(citedCaseName => {
                 if (allCases.some(x => x.name === citedCaseName)) {
                     edges.push({
-                        from: c.name,
-                        to: citedCaseName,
-                        arrows: { to: { enabled: true, scaleFactor: 0.5 } },
-                        color: { color: isDark ? '#555' : '#bbb', opacity: 0.8 },
-                        width: 2,
-                        smooth: { type: 'curvedCW', roundness: 0.2 }
+                        from: c.name, to: citedCaseName, arrows: { to: { enabled: true, scaleFactor: 0.5 } },
+                        color: { color: isDark ? '#555' : '#bbb', opacity: 0.8 }, width: 2, smooth: { type: 'curvedCW', roundness: 0.2 }
                     });
                 }
             });
@@ -1011,23 +927,13 @@
         const data = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
         const options = {
             nodes: { shape: 'dot', scaling: { min: 10, max: 30 } },
-            physics: {
-                enabled: physicsEnabled,
-                forceAtlas2Based: { gravitationalConstant: -250, centralGravity: 0.01, springLength: 300, springConstant: 0.05 },
-                solver: 'forceAtlas2Based',
-                stabilization: { iterations: 150 }
-            },
+            physics: { enabled: physicsEnabled, forceAtlas2Based: { gravitationalConstant: -250, centralGravity: 0.01, springLength: 300, springConstant: 0.05 }, solver: 'forceAtlas2Based', stabilization: { iterations: 150 } },
             interaction: { dragNodes: true, dragView: true, zoomView: true, hover: true, tooltipDelay: 200 }
         };
-
         try {
             network = new vis.Network(container, data, options);
-            network.on("click", (params) => {
-                if (params.nodes.length > 0) openDetails(encodeURIComponent(params.nodes[0]));
-            });
-        } catch (e) {
-            console.error("Vis.js initialization error:", e);
-        }
+            network.on("click", (params) => { if (params.nodes.length > 0) openDetails(encodeURIComponent(params.nodes[0])); });
+        } catch (e) { console.error("Vis.js error:", e); }
     }
 
     function zoomMap(scale) { if(network) network.moveTo({ scale: network.getScale() * scale }); }
@@ -1039,7 +945,6 @@
         document.getElementById('physics-btn').innerText = physicsEnabled ? "Freeze" : "Unfreeze";
     }
 
-    // --- UI LOGIC ---
     function switchTab(t, pushState = true) {
         document.querySelectorAll('.tab-content, #details-view').forEach(el => el.style.display = 'none');
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -1068,7 +973,6 @@
         const nature = document.getElementById('nature-filter').value;
         const contest = document.getElementById('contest-filter').value;
         const app = document.getElementById('app-filter').value; 
-        // STATE FILTER REMOVED
         const court = document.getElementById('court-filter').value; 
         const judge = document.getElementById('judge-filter').value; 
         const sort = document.getElementById('sort-order').value;
@@ -1077,63 +981,42 @@
         if (rawQuery) {
             let searchTerms = [rawQuery];
             Object.keys(synonymMap).forEach(key => {
-                if (rawQuery.includes(key)) {
-                    searchTerms = [...searchTerms, ...synonymMap[key]];
-                }
+                if (rawQuery.includes(key)) searchTerms = [...searchTerms, ...synonymMap[key]];
             });
             searchTerms = [...new Set(searchTerms)];
 
             const fuseOptions = {
-                includeScore: true,
-                threshold: 0.2, 
-                minMatchCharLength: 3, 
-                ignoreLocation: true, 
-                keys: [
-                    { name: 'name', weight: 0.4 },
-                    { name: 'rights', weight: 0.3 },
-                    { name: 'summary', weight: 0.2 },
-                    { name: 'judges', weight: 0.1 },
-                    { name: 'court', weight: 0.1 }
-                ]
+                includeScore: true, threshold: 0.2, minMatchCharLength: 3, ignoreLocation: true, 
+                keys: [{ name: 'name', weight: 0.4 }, { name: 'rights', weight: 0.3 }, { name: 'summary', weight: 0.2 }, { name: 'judges', weight: 0.1 }, { name: 'court', weight: 0.1 }]
             };
             const fuse = new Fuse(allCases, fuseOptions);
 
-            let combinedResults = [];
-            const seenIndices = new Set();
-
+            let combinedResults = []; const seenIndices = new Set();
             searchTerms.forEach(term => {
-                const results = fuse.search(term);
-                results.forEach(r => {
-                    if (!seenIndices.has(r.refIndex)) {
-                        seenIndices.add(r.refIndex);
-                        combinedResults.push(r);
-                    }
+                fuse.search(term).forEach(r => {
+                    if (!seenIndices.has(r.refIndex)) { seenIndices.add(r.refIndex); combinedResults.push(r); }
                 });
             });
-
             combinedResults.sort((a, b) => a.score - b.score);
             textResults = combinedResults.map(r => r.item);
         }
 
         let filtered = textResults.filter(c => {
             const matchesRight = right ? c.rights.includes(right) : true;
-            // UPDATED: Array containment check
-            const matchesNature = nature ? c.nature.some(n => n.toLowerCase() === nature) : true;
-            const matchesContest = contest ? c.contest.some(n => n.toLowerCase() === contest) : true;
-            const matchesApp = app ? c.application.some(n => n.toLowerCase() === app) : true;
             
-            // STATE MATCH REMOVED
+            // UPDATED: Logic specifically splits by " and " to prevent "uncontested" matching "contested"
+            const matchesNature = nature ? c.nature.toLowerCase().split(/\s+and\s+/i).includes(nature) : true;
+            const matchesContest = contest ? c.contest.toLowerCase().split(/\s+and\s+/i).includes(contest) : true;
+            const matchesApp = app ? c.application.toLowerCase().split(/\s+and\s+/i).includes(app) : true;
+            
             const matchesCourt = court ? c.court === court : true; 
             const matchesJudge = judge ? c.judges.some(j => cleanJudgeName(j) === judge) : true;
             return matchesRight && matchesNature && matchesContest && matchesApp && matchesCourt && matchesJudge;
         });
         
         if (!rawQuery || sort !== 'newest') { 
-             if(sort === 'newest') {
-                 filtered.sort((a, b) => parseDate(b.date) - parseDate(a.date));
-             } else {
-                 filtered.sort((a, b) => parseDate(a.date) - parseDate(b.date));
-             }
+             if(sort === 'newest') filtered.sort((a, b) => parseDate(b.date) - parseDate(a.date));
+             else filtered.sort((a, b) => parseDate(a.date) - parseDate(b.date));
         }
 
         filteredCases = filtered; 
@@ -1144,13 +1027,11 @@
         const list = document.getElementById('case-list');
         const countDisplay = document.getElementById('case-count-display');
         
-        if(allCases.length === cases.length) {
-            countDisplay.innerText = `Total Cases: ${allCases.length}`;
-        } else {
-            countDisplay.innerText = `Showing ${cases.length} of ${allCases.length}`;
-        }
+        if(allCases.length === cases.length) countDisplay.innerText = `Total Cases: ${allCases.length}`;
+        else countDisplay.innerText = `Showing ${cases.length} of ${allCases.length}`;
 
         list.innerHTML = cases.length ? '' : '<p style="text-align:center; color:var(--text-muted); padding: 40px;">No judgments found.</p>';
+        
         cases.forEach(c => {
             const tags = c.rights.map(r => `<span class="tag">${r}</span>`).join('');
             
@@ -1158,36 +1039,40 @@
             if (c.judges.length > 0) {
                 const formattedJudges = c.judges.map(j => {
                     let display = cleanJudgeName(j);
-                    if (j.toLowerCase().includes('(author)') || j.toLowerCase().includes('(auth.)') || j.includes('*')) {
-                        display += ' (Auth.)';
-                    }
-                    if (j.toLowerCase().includes('(dissent)')) {
-                        display = `<span style="color:var(--dissent)">${display} (Dissent)</span>`;
-                    }
+                    if (j.toLowerCase().includes('(author)') || j.toLowerCase().includes('(auth.)') || j.includes('*')) display += ' (Auth.)';
+                    if (j.toLowerCase().includes('(dissent)')) display = `<span style="color:var(--dissent)">${display} (Dissent)</span>`;
                     return display;
                 }).join(', ');
                 benchHTML = `<div class="bench-info"><span style="color:var(--text-muted); font-weight:bold;">Justice(s):</span> ${formattedJudges}</div>`;
             }
             
-            // UPDATED: Loop through arrays to generate multiple badges
-            let natureBadges = c.nature.map(n => {
-                const typeClass = n.toLowerCase() === 'implicit' ? 'nature-implicit' : 'nature-explicit';
-                return `<span class="nature-badge ${typeClass}">${n}</span>`;
-            }).join('');
+            // UPDATED: Single Badges resolving "and" strings
+            let natureBadge = '';
+            if(c.nature) {
+                let lower = c.nature.toLowerCase();
+                let cls = 'nature-explicit';
+                if(lower === 'implicit') cls = 'nature-implicit';
+                else if(lower.includes('and')) cls = 'nature-both';
+                natureBadge = `<span class="nature-badge ${cls}">${c.nature}</span>`;
+            }
 
-            let contestBadges = c.contest.map(n => {
-                const isContested = n.toLowerCase() === 'contested';
-                const contestClass = isContested ? 'contest-contested' : 'contest-uncontested';
-                return `<span class="contest-badge ${contestClass}">${n}</span>`;
-            }).join('');
+            let contestBadge = '';
+            if(c.contest) {
+                let lower = c.contest.toLowerCase();
+                let cls = 'contest-contested';
+                if(lower === 'uncontested') cls = 'contest-uncontested';
+                else if(lower.includes('and')) cls = 'contest-both';
+                contestBadge = `<span class="contest-badge ${cls}">${c.contest}</span>`;
+            }
 
-            let appBadges = c.application.map(n => {
-                const lowerApp = n.toLowerCase();
-                let appClass = 'app-vertical';
-                if(lowerApp === 'horizontal') appClass = 'app-horizontal';
-                if(lowerApp === 'both') appClass = 'app-both';
-                return `<span class="app-badge ${appClass}">${n}</span>`;
-            }).join('');
+            let appBadge = '';
+            if(c.application) {
+                let lower = c.application.toLowerCase();
+                let cls = 'app-vertical';
+                if(lower === 'horizontal') cls = 'app-horizontal';
+                else if(lower.includes('and')) cls = 'app-both';
+                appBadge = `<span class="app-badge ${cls}">${c.application}</span>`;
+            }
             
             let dDisp = c.date;
             try { 
@@ -1197,7 +1082,7 @@
 
             list.innerHTML += `
                 <div class="card">
-                    <div class="card-header"><h3>${c.name}</h3><span class="court-label">${c.court} ${natureBadges} ${contestBadges} ${appBadges}</span></div>
+                    <div class="card-header"><h3>${c.name}</h3><span class="court-label">${c.court} ${natureBadge} ${contestBadge} ${appBadge}</span></div>
                     <div class="card-date">${dDisp}</div>
                     <span class="citation">${c.citation}</span>
                     ${benchHTML}
@@ -1259,27 +1144,32 @@
             });
         }
         
+        // Single Badges for Details View
         const natureContainer = document.getElementById('detail-nature-container');
-        natureContainer.innerHTML = c.nature.map(n => {
-            const typeClass = n.toLowerCase() === 'implicit' ? 'nature-implicit' : 'nature-explicit';
-            return `<span class="nature-badge ${typeClass}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${n}</span>`;
-        }).join('');
+        if(c.nature) {
+            let lower = c.nature.toLowerCase();
+            let cls = 'nature-explicit';
+            if(lower === 'implicit') cls = 'nature-implicit';
+            else if(lower.includes('and')) cls = 'nature-both';
+            natureContainer.innerHTML = `<span class="nature-badge ${cls}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${c.nature}</span>`;
+        } else { natureContainer.innerHTML = ''; }
 
         const contestContainer = document.getElementById('detail-contest-container');
-        contestContainer.innerHTML = c.contest.map(n => {
-            const isContested = n.toLowerCase() === 'contested';
-            const contestClass = isContested ? 'contest-contested' : 'contest-uncontested';
-            return `<span class="contest-badge ${contestClass}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${n}</span>`;
-        }).join('');
+        if(c.contest) {
+            let lower = c.contest.toLowerCase();
+            let cls = 'contest-contested';
+            if(lower === 'uncontested') cls = 'contest-uncontested';
+            else if(lower.includes('and')) cls = 'contest-both';
+            contestContainer.innerHTML = `<span class="contest-badge ${cls}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${c.contest}</span>`;
+        } else { contestContainer.innerHTML = ''; }
 
-        // Append Application Badges to Contest Container for layout
-        contestContainer.innerHTML += c.application.map(n => {
-            const lowerApp = n.toLowerCase();
-            let appClass = 'app-vertical';
-            if(lowerApp === 'horizontal') appClass = 'app-horizontal';
-            if(lowerApp === 'both') appClass = 'app-both';
-            return `<span class="app-badge ${appClass}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${n}</span>`;
-        }).join('');
+        if(c.application) {
+            let lower = c.application.toLowerCase();
+            let cls = 'app-vertical';
+            if(lower === 'horizontal') cls = 'app-horizontal';
+            else if(lower.includes('and')) cls = 'app-both';
+            contestContainer.innerHTML += `<span class="app-badge ${cls}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${c.application}</span>`;
+        }
 
         document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
         document.getElementById('details-view').style.display = 'block';
@@ -1293,8 +1183,6 @@
         const sel = document.getElementById('right-filter');
         rts.forEach(r => { const o = document.createElement('option'); o.value = r; o.innerText = r; sel.appendChild(o); });
     }
-
-    // populateStateDropdown REMOVED
 
     function populateCourtDropdown() {
         const sel = document.getElementById('court-filter');
@@ -1332,9 +1220,6 @@
         let panIndiaCount = 0;
         
         allCases.forEach(c => { 
-            // State column is gone, so we check if court is "Supreme Court" manually or via a flag
-            // But wait, row[3] is now Rights.
-            // We rely on c.court.
             if(c.court === "Supreme Court") {
                 panIndiaCount++;
             } else if(c.court) { 
@@ -1355,17 +1240,12 @@
             
             scBtn.style.backgroundColor = `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${opacity})`;
             
-            // Dynamic Contrast for Subtitle
             if (opacity > 0.5) {
-                if (!isDark) { // Light Mode, Dark Background
-                    scBtn.querySelector('.sc-jurisdiction').style.color = '#fff';
-                } else { // Dark Mode, Light Background
-                    scBtn.querySelector('.sc-jurisdiction').style.color = '#000';
-                }
+                if (!isDark) scBtn.querySelector('.sc-jurisdiction').style.color = '#fff';
+                else scBtn.querySelector('.sc-jurisdiction').style.color = '#000';
             } else {
                 scBtn.querySelector('.sc-jurisdiction').style.color = 'var(--text-muted)';
             }
-            // Always keep name red
             scBtn.querySelector('.sc-name').style.color = 'var(--accent)';
         }
 
@@ -1390,13 +1270,9 @@
         const caseParam = params.get('case');
         const tabParam = params.get('tab');
 
-        if(caseParam) {
-            openDetails(caseParam);
-        } else if (tabParam && ['tracker', 'timeline', 'map', 'judges', 'about'].includes(tabParam)) {
-            switchTab(tabParam, false);
-        } else {
-            switchTab('tracker', false);
-        }
+        if(caseParam) openDetails(caseParam);
+        else if (tabParam && ['tracker', 'timeline', 'map', 'judges', 'about'].includes(tabParam)) switchTab(tabParam, false);
+        else switchTab('tracker', false);
     }
 
     window.onpopstate = () => { 
