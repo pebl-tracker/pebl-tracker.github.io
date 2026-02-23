@@ -334,7 +334,7 @@
         .citation { font-family: "Georgia", serif; color: var(--text-muted); font-style: italic; display: block; margin-bottom: 10px; font-size: 0.95rem; }
         .bench-info { font-size: 0.85rem; color: var(--text); margin-bottom: 15px; font-family: sans-serif; }
         
-        /* BADGES (Now optimized for Single Badges including 'Both' states) */
+        /* BADGES */
         .nature-badge, .contest-badge, .app-badge { font-size: 0.65rem; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; margin-left: 10px; font-weight: bold; letter-spacing: 0.5px; vertical-align: middle; display: inline-block; margin-bottom: 4px; }
         
         /* Nature */
@@ -464,21 +464,27 @@
         <div class="controls-bar">
             <input type="text" id="search-input" placeholder="Search cases or keywords..." onkeyup="handleSearch()">
             <select id="right-filter" class="filter-select" onchange="handleSearch()"><option value="">All Rights</option></select>
+            
+            <!-- UPDATED: Added "Both" options back to dropdowns -->
             <select id="nature-filter" class="filter-select" onchange="handleSearch()">
                 <option value="">All Declarations</option>
                 <option value="explicit">Explicit</option>
                 <option value="implicit">Implicit</option>
+                <option value="explicit and implicit">Explicit & Implicit</option>
             </select>
             <select id="contest-filter" class="filter-select" onchange="handleSearch()">
                 <option value="">All Contest Status</option>
                 <option value="contested">Contested</option>
                 <option value="uncontested">Uncontested</option>
+                <option value="contested and uncontested">Contested & Uncontested</option>
             </select>
             <select id="app-filter" class="filter-select" onchange="handleSearch()">
                 <option value="">All Applications</option>
                 <option value="vertical">Vertical</option>
                 <option value="horizontal">Horizontal</option>
+                <option value="vertical and horizontal">Vertical & Horizontal</option>
             </select>
+            
             <select id="court-filter" class="filter-select" onchange="handleSearch()"><option value="">All Courts</option></select>
             <select id="judge-filter" class="filter-select" onchange="handleSearch()"><option value="">All Judges</option></select>
             <select id="sort-order" class="filter-select" onchange="handleSearch()"><option value="newest">Newest First</option><option value="oldest">Oldest First</option></select>
@@ -640,7 +646,7 @@
         });
 
         const scBtn = document.querySelector('.sc-btn');
-        if(scBtn) attachTooltip(scBtn, 'Supreme Court'); // Name changed to match CSV data filter
+        if(scBtn) attachTooltip(scBtn, 'Supreme Court'); 
     });
 
     function attachTooltip(element, name) {
@@ -748,7 +754,6 @@
                     date: (row[6] || "").trim(),
                     cites: smartSplit(row[7]).filter(c => c.toLowerCase() !== 'none' && c !== '-'),
                     judges: smartSplit(row[8]),
-                    // UPDATED: Stored exactly as written in Sheet (e.g. "Explicit and Implicit")
                     nature: (row[9] || "").trim(),
                     contest: (row[10] || "").trim(),
                     application: (row[11] || "").trim() 
@@ -1004,13 +1009,22 @@
         let filtered = textResults.filter(c => {
             const matchesRight = right ? c.rights.includes(right) : true;
             
-            // UPDATED: Logic specifically splits by " and " to prevent "uncontested" matching "contested"
-            const matchesNature = nature ? c.nature.toLowerCase().split(/\s+and\s+/i).includes(nature) : true;
-            const matchesContest = contest ? c.contest.toLowerCase().split(/\s+and\s+/i).includes(contest) : true;
-            const matchesApp = app ? c.application.toLowerCase().split(/\s+and\s+/i).includes(app) : true;
+            // UPDATED: Logic to handle "Both" selections correctly
+            const matchesNature = nature ? 
+                (nature.includes('and') ? c.nature.toLowerCase().includes('and') : c.nature.toLowerCase().split(/\s+and\s+/i).includes(nature)) 
+                : true;
+                
+            const matchesContest = contest ? 
+                (contest.includes('and') ? c.contest.toLowerCase().includes('and') : c.contest.toLowerCase().split(/\s+and\s+/i).includes(contest)) 
+                : true;
+                
+            const matchesApp = app ? 
+                (app.includes('and') ? c.application.toLowerCase().includes('and') : c.application.toLowerCase().split(/\s+and\s+/i).includes(app)) 
+                : true;
             
             const matchesCourt = court ? c.court === court : true; 
             const matchesJudge = judge ? c.judges.some(j => cleanJudgeName(j) === judge) : true;
+            
             return matchesRight && matchesNature && matchesContest && matchesApp && matchesCourt && matchesJudge;
         });
         
@@ -1046,7 +1060,6 @@
                 benchHTML = `<div class="bench-info"><span style="color:var(--text-muted); font-weight:bold;">Justice(s):</span> ${formattedJudges}</div>`;
             }
             
-            // UPDATED: Single Badges resolving "and" strings
             let natureBadge = '';
             if(c.nature) {
                 let lower = c.nature.toLowerCase();
@@ -1144,7 +1157,6 @@
             });
         }
         
-        // Single Badges for Details View
         const natureContainer = document.getElementById('detail-nature-container');
         if(c.nature) {
             let lower = c.nature.toLowerCase();
