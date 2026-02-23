@@ -736,6 +736,24 @@
         return str.split(',').map(s => s.trim()).filter(s => s);
     }
 
+    // --- NORMALIZATION HELPER ---
+    function normalizeAttribute(raw, type) {
+        const lower = raw.toLowerCase().trim();
+        if (type === 'nature') {
+            if (lower === 'both') return ['Explicit', 'Implicit'];
+            return smartSplit(raw);
+        }
+        if (type === 'contest') {
+            if (lower === 'both') return ['Contested', 'Uncontested'];
+            return smartSplit(raw);
+        }
+        if (type === 'application') {
+            if (lower === 'both') return ['Vertical', 'Horizontal'];
+            return smartSplit(raw);
+        }
+        return [];
+    }
+
     function fetchData() {
         fetch(CASE_DATA_URL).then(r => {
             if (!r.ok) throw new Error("Network response was not ok");
@@ -743,20 +761,30 @@
         }).then(csv => {
             const parsed = Papa.parse(csv, { header: false, skipEmptyLines: true });
             allCases = parsed.data.slice(1).map(row => {
+                // COLUMN D (State) IS DELETED. INDICES SHIFT LEFT BY 1 STARTING FROM INDEX 3.
+                // 0: Name, 1: Citation, 2: Court
+                // 3: Rights (was 4), 4: Summary (was 5), etc.
+
+                // Normalize attributes using helper + deduplicate with Set
+                const natureArr = normalizeAttribute((row[9] || ""), 'nature');
+                const contestArr = normalizeAttribute((row[10] || ""), 'contest');
+                const appArr = normalizeAttribute((row[11] || ""), 'application');
+
                 return {
                     name: (row[0] || "").trim(),
                     slug: createSlug((row[0] || "").trim()), 
                     citation: (row[1] || "").trim(),
                     court: (row[2] || "").trim(),
+                    // State is gone.
                     rights: smartSplit(row[3]),
                     summary: (row[4] || "").trim(),
                     links: smartSplit(row[5]),
                     date: (row[6] || "").trim(),
                     cites: smartSplit(row[7]).filter(c => c.toLowerCase() !== 'none' && c !== '-'),
                     judges: smartSplit(row[8]),
-                    nature: (row[9] || "").trim(),
-                    contest: (row[10] || "").trim(),
-                    application: (row[11] || "").trim() 
+                    nature: [...new Set(natureArr)], // Deduplicate
+                    contest: [...new Set(contestArr)], // Deduplicate
+                    application: [...new Set(appArr)] // Deduplicate
                 };
             }).filter(c => c.name && c.name !== "Case Name");
 
@@ -805,20 +833,6 @@
     }
 
     function downloadData() {
-        const csv = Papa.unparse(filteredCases);
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", "pebl_data.csv");
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
-    function downloadData() {
-        // Create a clean, formatted copy of the data specifically for the CSV export
         const exportData = filteredCases.map(c => {
             return {
                 "Case Name": c.name,
@@ -846,6 +860,31 @@
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    }
+
+    function initTimeline() {
+        const container = document.getElementById('timeline-container');
+        container.innerHTML = '';
+        const validCases = allCases.filter(c => parseDate(c.date).getTime() > 0)
+            .sort((a, b) => parseDate(a.date) - parseDate(b.date));
+
+        if(validCases.length === 0) return;
+
+        validCases.forEach((c, index) => {
+            const dateStr = parseDate(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+            const side = index % 2 === 0 ? 'left' : 'right';
+            const item = document.createElement('div');
+            item.className = `timeline-item ${side}`;
+            item.innerHTML = `
+                <div class="timeline-dot"></div>
+                <div class="timeline-content" onclick="openDetails('${c.slug}')">
+                    <span class="t-date">${dateStr} • ${c.court.toUpperCase()}</span>
+                    <h3 class="t-title">${c.name}</h3>
+                    <p class="t-summary">${c.summary}</p>
+                </div>
+            `;
+            container.appendChild(item);
+        });
     }
 
     function initJudgeAnalytics() {
@@ -1017,15 +1056,15 @@
             
             // UPDATED: Logic to handle "Both" selections correctly
             const matchesNature = nature ? 
-                (nature.includes('and') ? c.nature.toLowerCase().includes('and') : c.nature.toLowerCase().split(/\s+and\s+/i).includes(nature)) 
+                (nature.includes('and') ? c.nature.length > 1 : c.nature.some(n => n.toLowerCase() === nature)) 
                 : true;
                 
             const matchesContest = contest ? 
-                (contest.includes('and') ? c.contest.toLowerCase().includes('and') : c.contest.toLowerCase().split(/\s+and\s+/i).includes(contest)) 
+                (contest.includes('and') ? c.contest.length > 1 : c.contest.some(n => n.toLowerCase() === contest)) 
                 : true;
                 
             const matchesApp = app ? 
-                (app.includes('and') ? c.application.toLowerCase().includes('and') : c.application.toLowerCase().split(/\s+and\s+/i).includes(app)) 
+                (app.includes('and') ? c.application.length > 1 : c.application.some(n => n.toLowerCase() === app)) 
                 : true;
             
             const matchesCourt = court ? c.court === court : true; 
@@ -1066,31 +1105,32 @@
                 benchHTML = `<div class="bench-info"><span style="color:var(--text-muted); font-weight:bold;">Justice(s):</span> ${formattedJudges}</div>`;
             }
             
+            // UPDATED: Single Badges resolving "and" strings
             let natureBadge = '';
-            if(c.nature) {
-                let lower = c.nature.toLowerCase();
+            if(c.nature && c.nature.length > 0) {
+                let displayStr = c.nature.join(' and ');
                 let cls = 'nature-explicit';
-                if(lower === 'implicit') cls = 'nature-implicit';
-                else if(lower.includes('and')) cls = 'nature-both';
-                natureBadge = `<span class="nature-badge ${cls}">${c.nature}</span>`;
+                if(c.nature.length > 1) cls = 'nature-both';
+                else if(c.nature[0].toLowerCase() === 'implicit') cls = 'nature-implicit';
+                natureBadge = `<span class="nature-badge ${cls}">${displayStr}</span>`;
             }
 
             let contestBadge = '';
-            if(c.contest) {
-                let lower = c.contest.toLowerCase();
+            if(c.contest && c.contest.length > 0) {
+                let displayStr = c.contest.join(' and ');
                 let cls = 'contest-contested';
-                if(lower === 'uncontested') cls = 'contest-uncontested';
-                else if(lower.includes('and')) cls = 'contest-both';
-                contestBadge = `<span class="contest-badge ${cls}">${c.contest}</span>`;
+                if(c.contest.length > 1) cls = 'contest-both';
+                else if(c.contest[0].toLowerCase() === 'uncontested') cls = 'contest-uncontested';
+                contestBadge = `<span class="contest-badge ${cls}">${displayStr}</span>`;
             }
 
             let appBadge = '';
-            if(c.application) {
-                let lower = c.application.toLowerCase();
+            if(c.application && c.application.length > 0) {
+                let displayStr = c.application.join(' and ');
                 let cls = 'app-vertical';
-                if(lower === 'horizontal') cls = 'app-horizontal';
-                else if(lower.includes('and')) cls = 'app-both';
-                appBadge = `<span class="app-badge ${cls}">${c.application}</span>`;
+                if(c.application.length > 1) cls = 'app-both';
+                else if(c.application[0].toLowerCase() === 'horizontal') cls = 'app-horizontal';
+                appBadge = `<span class="app-badge ${cls}">${displayStr}</span>`;
             }
             
             let dDisp = c.date;
@@ -1164,29 +1204,29 @@
         }
         
         const natureContainer = document.getElementById('detail-nature-container');
-        if(c.nature) {
-            let lower = c.nature.toLowerCase();
+        if(c.nature && c.nature.length > 0) {
+            let displayStr = c.nature.join(' and ');
             let cls = 'nature-explicit';
-            if(lower === 'implicit') cls = 'nature-implicit';
-            else if(lower.includes('and')) cls = 'nature-both';
-            natureContainer.innerHTML = `<span class="nature-badge ${cls}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${c.nature}</span>`;
+            if(c.nature.length > 1) cls = 'nature-both';
+            else if(c.nature[0].toLowerCase() === 'implicit') cls = 'nature-implicit';
+            natureContainer.innerHTML = `<span class="nature-badge ${cls}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${displayStr}</span>`;
         } else { natureContainer.innerHTML = ''; }
 
         const contestContainer = document.getElementById('detail-contest-container');
-        if(c.contest) {
-            let lower = c.contest.toLowerCase();
+        if(c.contest && c.contest.length > 0) {
+            let displayStr = c.contest.join(' and ');
             let cls = 'contest-contested';
-            if(lower === 'uncontested') cls = 'contest-uncontested';
-            else if(lower.includes('and')) cls = 'contest-both';
-            contestContainer.innerHTML = `<span class="contest-badge ${cls}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${c.contest}</span>`;
+            if(c.contest.length > 1) cls = 'contest-both';
+            else if(c.contest[0].toLowerCase() === 'uncontested') cls = 'contest-uncontested';
+            contestContainer.innerHTML = `<span class="contest-badge ${cls}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${displayStr}</span>`;
         } else { contestContainer.innerHTML = ''; }
 
-        if(c.application) {
-            let lower = c.application.toLowerCase();
+        if(c.application && c.application.length > 0) {
+            let displayStr = c.application.join(' and ');
             let cls = 'app-vertical';
-            if(lower === 'horizontal') cls = 'app-horizontal';
-            else if(lower.includes('and')) cls = 'app-both';
-            contestContainer.innerHTML += `<span class="app-badge ${cls}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${c.application}</span>`;
+            if(c.application.length > 1) cls = 'app-both';
+            else if(c.application[0].toLowerCase() === 'horizontal') cls = 'app-horizontal';
+            contestContainer.innerHTML += `<span class="app-badge ${cls}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${displayStr}</span>`;
         }
 
         document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
