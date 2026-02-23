@@ -817,29 +817,35 @@
         document.body.removeChild(link);
     }
 
-    function initTimeline() {
-        const container = document.getElementById('timeline-container');
-        container.innerHTML = '';
-        const validCases = allCases.filter(c => parseDate(c.date).getTime() > 0)
-            .sort((a, b) => parseDate(a.date) - parseDate(b.date));
-
-        if(validCases.length === 0) return;
-
-        validCases.forEach((c, index) => {
-            const dateStr = parseDate(c.date).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
-            const side = index % 2 === 0 ? 'left' : 'right';
-            const item = document.createElement('div');
-            item.className = `timeline-item ${side}`;
-            item.innerHTML = `
-                <div class="timeline-dot"></div>
-                <div class="timeline-content" onclick="openDetails('${c.slug}')">
-                    <span class="t-date">${dateStr} • ${c.court.toUpperCase()}</span>
-                    <h3 class="t-title">${c.name}</h3>
-                    <p class="t-summary">${c.summary}</p>
-                </div>
-            `;
-            container.appendChild(item);
+    function downloadData() {
+        // Create a clean, formatted copy of the data specifically for the CSV export
+        const exportData = filteredCases.map(c => {
+            return {
+                "Case Name": c.name,
+                "Citation": c.citation,
+                "Court": c.court,
+                "Rights": c.rights.join('; '),
+                "Summary": c.summary,
+                "Links": c.links.join('; '),
+                "Date": c.date,
+                "Cites": c.cites.join('; '),
+                "Judges": c.judges.join('; '),
+                "Nature": c.nature.join(' and '),
+                "Contest": c.contest.join(' and '),
+                "Application": c.application.join(' and ')
+            };
         });
+
+        const csv = Papa.unparse(exportData);
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", "pebl_data.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
     function initJudgeAnalytics() {
