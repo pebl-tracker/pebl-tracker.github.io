@@ -361,6 +361,11 @@
         .back-btn { display: inline-block; margin-bottom: 30px; cursor: pointer; color: var(--text-muted); font-family: sans-serif; font-size: 0.8rem; font-weight: bold; letter-spacing: 1px; }
         .details-meta { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 30px; }
         .details-body { font-size: 1.15rem; line-height: 1.8; white-space: pre-wrap; color: var(--text); text-align: justify; }
+        
+        /* Fix for lists inside details body */
+        .details-body ul, .details-body ol { margin-top: 10px; margin-bottom: 10px; padding-left: 25px; }
+        .details-body li { margin-bottom: 8px; }
+
         .external-btn { display: inline-block; background: var(--primary); color: var(--bg); padding: 12px 25px; text-decoration: none; border-radius: 4px; font-family: sans-serif; font-weight: bold; margin-bottom: 10px; }
         .copy-btn { background: none; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; margin-left: 10px; vertical-align: middle; }
         .copy-btn:hover { background: var(--tag-bg); color: var(--primary); }
@@ -465,7 +470,6 @@
             <input type="text" id="search-input" placeholder="Search cases or keywords..." onkeyup="handleSearch()">
             <select id="right-filter" class="filter-select" onchange="handleSearch()"><option value="">All Rights</option></select>
             
-            <!-- UPDATED: Added "Both" options back to dropdowns -->
             <select id="nature-filter" class="filter-select" onchange="handleSearch()">
                 <option value="">All Declarations</option>
                 <option value="explicit">Explicit</option>
@@ -613,24 +617,24 @@
 
     // --- SMART SEARCH SYNONYMS ---
     const synonymMap = {
-        "road": ["street", "highway", "traffic", "pothole", "infrastructure"],
+        "road":["street", "highway", "traffic", "pothole", "infrastructure"],
         "street": ["road", "highway"],
-        "health": ["medical", "treatment", "hospital", "doctor", "healthcare"],
-        "environment": ["pollution", "climate", "ecology", "clean air", "water", "forest"],
-        "housing": ["shelter", "residence", "home", "eviction", "slum"],
-        "privacy": ["surveillance", "data", "aadhaar", "personal liberty"],
-        "jail": ["prison", "custody", "incarceration", "bail", "undertrial"],
-        "education": ["school", "college", "university", "student"],
+        "health":["medical", "treatment", "hospital", "doctor", "healthcare"],
+        "environment":["pollution", "climate", "ecology", "clean air", "water", "forest"],
+        "housing":["shelter", "residence", "home", "eviction", "slum"],
+        "privacy":["surveillance", "data", "aadhaar", "personal liberty"],
+        "jail":["prison", "custody", "incarceration", "bail", "undertrial"],
+        "education":["school", "college", "university", "student"],
         "internet": ["digital", "web", "online", "connectivity"],
         "women": ["gender", "female", "maternity", "sexual harassment"],
-        "child": ["juvenile", "minor", "infant"],
-        "marriage": ["married", "matrimony", "wedlock", "spouse", "husband", "wife", "marry"],
-        "married": ["marriage", "matrimony", "wedlock", "spouse", "husband", "wife", "marry"],
+        "child":["juvenile", "minor", "infant"],
+        "marriage":["married", "matrimony", "wedlock", "spouse", "husband", "wife", "marry"],
+        "married":["marriage", "matrimony", "wedlock", "spouse", "husband", "wife", "marry"],
         "marry": ["marriage", "married", "matrimony", "wedlock", "spouse"]
     };
 
     let allCases = [];
-    let filteredCases = []; 
+    let filteredCases =[]; 
     let network = null;
     let physicsEnabled = true;
 
@@ -731,7 +735,7 @@
     }
 
     function smartSplit(str) {
-        if (!str) return [];
+        if (!str) return[];
         if (str.includes(';')) return str.split(';').map(s => s.trim()).filter(s => s);
         return str.split(',').map(s => s.trim()).filter(s => s);
     }
@@ -748,10 +752,10 @@
             return smartSplit(raw);
         }
         if (type === 'application') {
-            if (lower === 'both') return ['Vertical', 'Horizontal'];
+            if (lower === 'both') return['Vertical', 'Horizontal'];
             return smartSplit(raw);
         }
-        return [];
+        return[];
     }
 
     function fetchData() {
@@ -762,9 +766,6 @@
             const parsed = Papa.parse(csv, { header: false, skipEmptyLines: true });
             allCases = parsed.data.slice(1).map(row => {
                 // COLUMN D (State) IS DELETED. INDICES SHIFT LEFT BY 1 STARTING FROM INDEX 3.
-                // 0: Name, 1: Citation, 2: Court
-                // 3: Rights (was 4), 4: Summary (was 5), etc.
-
                 // Normalize attributes using helper + deduplicate with Set
                 const natureArr = normalizeAttribute((row[9] || ""), 'nature');
                 const contestArr = normalizeAttribute((row[10] || ""), 'contest');
@@ -775,16 +776,15 @@
                     slug: createSlug((row[0] || "").trim()), 
                     citation: (row[1] || "").trim(),
                     court: (row[2] || "").trim(),
-                    // State is gone.
                     rights: smartSplit(row[3]),
                     summary: (row[4] || "").trim(),
                     links: smartSplit(row[5]),
                     date: (row[6] || "").trim(),
                     cites: smartSplit(row[7]).filter(c => c.toLowerCase() !== 'none' && c !== '-'),
                     judges: smartSplit(row[8]),
-                    nature: [...new Set(natureArr)], // Deduplicate
-                    contest: [...new Set(contestArr)], // Deduplicate
-                    application: [...new Set(appArr)] // Deduplicate
+                    nature:[...new Set(natureArr)], 
+                    contest: [...new Set(contestArr)], 
+                    application:[...new Set(appArr)] 
                 };
             }).filter(c => c.name && c.name !== "Case Name");
 
@@ -954,7 +954,7 @@
         const container = document.getElementById('network-viz');
         if (network !== null) { network.destroy(); network = null; }
 
-        const nodes = []; const edges = [];
+        const nodes = []; const edges =[];
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
 
         allCases.forEach((c) => {
@@ -1031,17 +1031,17 @@
         if (rawQuery) {
             let searchTerms = [rawQuery];
             Object.keys(synonymMap).forEach(key => {
-                if (rawQuery.includes(key)) searchTerms = [...searchTerms, ...synonymMap[key]];
+                if (rawQuery.includes(key)) searchTerms =[...searchTerms, ...synonymMap[key]];
             });
             searchTerms = [...new Set(searchTerms)];
 
             const fuseOptions = {
                 includeScore: true, threshold: 0.2, minMatchCharLength: 3, ignoreLocation: true, 
-                keys: [{ name: 'name', weight: 0.4 }, { name: 'rights', weight: 0.3 }, { name: 'summary', weight: 0.2 }, { name: 'judges', weight: 0.1 }, { name: 'court', weight: 0.1 }]
+                keys:[{ name: 'name', weight: 0.4 }, { name: 'rights', weight: 0.3 }, { name: 'summary', weight: 0.2 }, { name: 'judges', weight: 0.1 }, { name: 'court', weight: 0.1 }]
             };
             const fuse = new Fuse(allCases, fuseOptions);
 
-            let combinedResults = []; const seenIndices = new Set();
+            let combinedResults =[]; const seenIndices = new Set();
             searchTerms.forEach(term => {
                 fuse.search(term).forEach(r => {
                     if (!seenIndices.has(r.refIndex)) { seenIndices.add(r.refIndex); combinedResults.push(r); }
@@ -1054,7 +1054,6 @@
         let filtered = textResults.filter(c => {
             const matchesRight = right ? c.rights.includes(right) : true;
             
-            // UPDATED: Logic to handle "Both" selections correctly
             const matchesNature = nature ? 
                 (nature.includes('and') ? c.nature.length > 1 : c.nature.some(n => n.toLowerCase() === nature)) 
                 : true;
@@ -1105,7 +1104,6 @@
                 benchHTML = `<div class="bench-info"><span style="color:var(--text-muted); font-weight:bold;">Justice(s):</span> ${formattedJudges}</div>`;
             }
             
-            // UPDATED: Single Badges resolving "and" strings
             let natureBadge = '';
             if(c.nature && c.nature.length > 0) {
                 let displayStr = c.nature.join(' and ');
@@ -1186,7 +1184,10 @@
         document.getElementById('detail-citation').innerHTML = `<span id="raw-citation">${c.citation}</span> <button class="copy-btn" onclick="copyCaseCitation()">Copy</button>`;
         document.getElementById('detail-court').innerText = c.court;
         document.getElementById('detail-date').innerText = c.date;
-        document.getElementById('detail-summary').innerText = c.summary;
+        
+        // FIX: Use innerHTML instead of innerText to render HTML tags from Google Sheets
+        document.getElementById('detail-summary').innerHTML = c.summary;
+        
         document.getElementById('detail-rights-container').innerHTML = c.rights.map(r => `<span class="tag" style="background:var(--primary); color:var(--bg);">${r}</span>`).join('');
         
         const linkContainer = document.getElementById('detail-links-container');
@@ -1245,7 +1246,7 @@
     function populateCourtDropdown() {
         const sel = document.getElementById('court-filter');
         sel.innerHTML = '<option value="">All Courts</option>';
-        const courts = [
+        const courts =[
             "Supreme Court", "Allahabad High Court", "Andhra Pradesh High Court", "Bombay High Court", "Calcutta High Court",
             "Chhattisgarh High Court", "Delhi High Court", "Gauhati High Court", "Gujarat High Court", "Himachal Pradesh High Court",
             "Jammu & Kashmir and Ladakh High Court", "Jharkhand High Court", "Karnataka High Court", "Kerala High Court",
@@ -1262,7 +1263,7 @@
     }
 
     function populateJudgeDropdown() {
-        const judges = [...new Set(allCases.flatMap(c => c.judges.map(cleanJudgeName)))].sort();
+        const judges =[...new Set(allCases.flatMap(c => c.judges.map(cleanJudgeName)))].sort();
         const sel = document.getElementById('judge-filter');
         judges.forEach(j => {
             if(!j) return;
@@ -1308,7 +1309,7 @@
         }
 
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        const baseColor = isDark ? [236, 240, 241] : [44, 62, 80]; 
+        const baseColor = isDark ?[236, 240, 241] :[44, 62, 80]; 
 
         document.querySelectorAll('#map-container path').forEach(p => {
             const n = p.getAttribute('data-court'); 
@@ -1329,7 +1330,7 @@
         const tabParam = params.get('tab');
 
         if(caseParam) openDetails(caseParam);
-        else if (tabParam && ['tracker', 'timeline', 'map', 'judges', 'about'].includes(tabParam)) switchTab(tabParam, false);
+        else if (tabParam &&['tracker', 'timeline', 'map', 'judges', 'about'].includes(tabParam)) switchTab(tabParam, false);
         else switchTab('tracker', false);
     }
 
