@@ -591,7 +591,7 @@
 <!-- FOOTER -->
 <footer>
     <div class="footer-content">
-        <p><strong>Disclaimer:</strong> The content on this tracker is for academic and informational purposes only. It does not constitute legal advice. Summaries are the curator's interpretation and should not be cited as legal authority. Please refer to the official judgment text.</p>
+        <p><strong>Disclaimer:</strong> The content on this tracker is for academic and informational purposes only. It does not constitute legal advice.</p>
     </div>
 </footer>
 
@@ -750,7 +750,7 @@
     function normalizeAttribute(raw, type) {
         const lower = raw.toLowerCase().trim();
         if (type === 'nature') {
-            if (lower === 'both') return ['Explicit', 'Implicit'];
+            if (lower === 'both') return['Explicit', 'Implicit'];
             return smartSplit(raw);
         }
         if (type === 'contest') {
@@ -1037,7 +1037,7 @@
             Object.keys(synonymMap).forEach(key => {
                 if (rawQuery.includes(key)) searchTerms =[...searchTerms, ...synonymMap[key]];
             });
-            searchTerms = [...new Set(searchTerms)];
+            searchTerms =[...new Set(searchTerms)];
 
             const fuseOptions = {
                 includeScore: true, threshold: 0.2, minMatchCharLength: 3, ignoreLocation: true, 
@@ -1312,7 +1312,7 @@
         }
 
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        const baseColor = isDark ?[236, 240, 241] : [44, 62, 80]; 
+        const baseColor = isDark ?[236, 240, 241] :[44, 62, 80]; 
 
         document.querySelectorAll('#map-container path').forEach(p => {
             const n = p.getAttribute('data-court'); 
