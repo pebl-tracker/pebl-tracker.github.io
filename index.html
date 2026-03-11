@@ -54,9 +54,7 @@
             
             /* RGB values for map gradient generation */
             --map-base-rgb: 44, 62, 80; 
-        }
-
-        [data-theme="dark"] {
+        }[data-theme="dark"] {
             --primary: #ecf0f1; --accent: #e74c3c; --dissent: #d35400; --bg: #121212;
             --card-bg: #1e1e1e; --text: #e0e0e0; --text-muted: #aaaaaa;
             --border: #333333; --tag-bg: #2c3e50; --tag-text: #bdc3c7;
@@ -111,21 +109,19 @@
         }
 
         /* --- RESPONSIVE BANNER FIX --- */
+        /* Removed fixed heights so the image dictates its own perfect proportions */
         .full-width-banner { 
             width: 100%; 
             background-color: var(--parchment); 
             border-bottom: 1px solid var(--border); 
-            overflow: hidden;
+            display: flex;
         }
         .banner-img { 
             width: 100%; 
             height: auto; 
-            max-height: 220px; 
-            object-fit: cover; 
-            object-position: center;
+            display: block;
             opacity: var(--banner-opacity); 
             filter: var(--banner-filter); 
-            display: block;
         }
 
         .container { max-width: 950px; margin: 0 auto; padding: 0 20px 60px 20px; position: relative; flex: 1; }
@@ -765,7 +761,7 @@
     function normalizeAttribute(raw, type) {
         const lower = raw.toLowerCase().trim();
         if (type === 'nature') {
-            if (lower === 'both') return ['Explicit', 'Implicit'];
+            if (lower === 'both') return['Explicit', 'Implicit'];
             return smartSplit(raw);
         }
         if (type === 'contest') {
@@ -801,7 +797,7 @@
                     date: (row[6] || "").trim(),
                     cites: smartSplit(row[7]).filter(c => c.toLowerCase() !== 'none' && c !== '-'),
                     judges: smartSplit(row[8]),
-                    nature:[...new Set(natureArr)], 
+                    nature: [...new Set(natureArr)], 
                     contest:[...new Set(contestArr)], 
                     application: [...new Set(appArr)] 
                 };
