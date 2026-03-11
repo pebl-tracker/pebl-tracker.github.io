@@ -110,8 +110,23 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        .full-width-banner { width: 100%; height: 180px; overflow: hidden; background-color: var(--parchment); border-bottom: 1px solid var(--border); display: flex; justify-content: center; align-items: center; }
-        .banner-img { max-width: 100%; height: 100%; object-fit: contain; opacity: var(--banner-opacity); filter: var(--banner-filter); }
+        /* --- RESPONSIVE BANNER FIX --- */
+        .full-width-banner { 
+            width: 100%; 
+            background-color: var(--parchment); 
+            border-bottom: 1px solid var(--border); 
+            overflow: hidden;
+        }
+        .banner-img { 
+            width: 100%; 
+            height: auto; 
+            max-height: 220px; 
+            object-fit: cover; 
+            object-position: center;
+            opacity: var(--banner-opacity); 
+            filter: var(--banner-filter); 
+            display: block;
+        }
 
         .container { max-width: 950px; margin: 0 auto; padding: 0 20px 60px 20px; position: relative; flex: 1; }
         
@@ -750,7 +765,7 @@
     function normalizeAttribute(raw, type) {
         const lower = raw.toLowerCase().trim();
         if (type === 'nature') {
-            if (lower === 'both') return['Explicit', 'Implicit'];
+            if (lower === 'both') return ['Explicit', 'Implicit'];
             return smartSplit(raw);
         }
         if (type === 'contest') {
@@ -786,7 +801,7 @@
                     date: (row[6] || "").trim(),
                     cites: smartSplit(row[7]).filter(c => c.toLowerCase() !== 'none' && c !== '-'),
                     judges: smartSplit(row[8]),
-                    nature: [...new Set(natureArr)], 
+                    nature:[...new Set(natureArr)], 
                     contest:[...new Set(contestArr)], 
                     application: [...new Set(appArr)] 
                 };
@@ -1037,7 +1052,7 @@
             Object.keys(synonymMap).forEach(key => {
                 if (rawQuery.includes(key)) searchTerms =[...searchTerms, ...synonymMap[key]];
             });
-            searchTerms =[...new Set(searchTerms)];
+            searchTerms = [...new Set(searchTerms)];
 
             const fuseOptions = {
                 includeScore: true, threshold: 0.2, minMatchCharLength: 3, ignoreLocation: true, 
@@ -1298,7 +1313,7 @@
             
             const opacity = globalMax === 0 ? 0 : 0.10 + (0.90 * (panIndiaCount / globalMax));
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            const baseColor = isDark ? [236, 240, 241] :[44, 62, 80]; 
+            const baseColor = isDark ?[236, 240, 241] :[44, 62, 80]; 
             
             scBtn.style.backgroundColor = `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${opacity})`;
             
