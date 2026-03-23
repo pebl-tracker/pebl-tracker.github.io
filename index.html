@@ -365,6 +365,7 @@
         .app-vertical { background-color: #8e44ad; color: white; border: 1px solid #8e44ad; margin-left: 5px; }
         .app-horizontal { background-color: #16a085; color: white; border: 1px solid #16a085; margin-left: 5px; }
         .app-both { background: linear-gradient(135deg, #8e44ad 50%, #16a085 50%); color: white; border: 1px solid #555; margin-left: 5px; }
+        .app-not-applied { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-left: 5px; }
 
         .tag { background: var(--tag-bg); padding: 4px 10px; border-radius: 3px; font-size: 0.7rem; font-weight: bold; color: #666; display: inline-block; margin-right: 6px; margin-bottom: 6px; text-transform: uppercase; }
         .summary-preview { color: var(--text); line-height: 1.6; margin-bottom: 15px; font-size: 0.95rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
@@ -502,6 +503,7 @@
                 <option value="vertical">Vertical</option>
                 <option value="horizontal">Horizontal</option>
                 <option value="vertical and horizontal">Vertical & Horizontal</option>
+                <option value="not applied">Not Applied</option>
             </select>
             
             <select id="court-filter" class="filter-select" onchange="handleSearch()"><option value="">All Courts</option></select>
@@ -797,9 +799,9 @@
                     date: (row[6] || "").trim(),
                     cites: smartSplit(row[7]).filter(c => c.toLowerCase() !== 'none' && c !== '-'),
                     judges: smartSplit(row[8]),
-                    nature: [...new Set(natureArr)], 
+                    nature:[...new Set(natureArr)], 
                     contest:[...new Set(contestArr)], 
-                    application: [...new Set(appArr)] 
+                    application:[...new Set(appArr)] 
                 };
             }).filter(c => c.name && c.name !== "Case Name");
 
@@ -1143,6 +1145,7 @@
                 let cls = 'app-vertical';
                 if(c.application.length > 1) cls = 'app-both';
                 else if(c.application[0].toLowerCase() === 'horizontal') cls = 'app-horizontal';
+                else if(c.application[0].toLowerCase() === 'not applied') cls = 'app-not-applied';
                 appBadge = `<span class="app-badge ${cls}">${displayStr}</span>`;
             }
             
@@ -1241,6 +1244,7 @@
             let cls = 'app-vertical';
             if(c.application.length > 1) cls = 'app-both';
             else if(c.application[0].toLowerCase() === 'horizontal') cls = 'app-horizontal';
+            else if(c.application[0].toLowerCase() === 'not applied') cls = 'app-not-applied';
             contestContainer.innerHTML += `<span class="app-badge ${cls}" style="font-size:0.7rem; margin-right:6px; padding:4px 10px;">${displayStr}</span>`;
         }
 
